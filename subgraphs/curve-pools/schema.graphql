@@ -1,0 +1,63 @@
+type Deposit @entity {
+  id: ID!
+  user: Bytes! # address
+  poolid: BigInt! # uint256
+  amount: BigInt! # uint256
+  timestamp: BigInt!
+}
+
+type Withdrawal @entity {
+  id: ID!
+  user: Bytes! # address
+  poolid: BigInt! # uint256
+  amount: BigInt! # uint256
+  timestamp: BigInt!
+}
+
+
+type User @entity {
+  id: ID!
+  address: Bytes!
+  withdrawals: [Withdrawal!] @derivedfrom(field: user)
+  deposits: [Deposit!] @derivedfrom(field: user)
+}
+
+type Pool @entity {
+  id: ID!
+  name: String!
+  lpToken: Bytes! #address
+  lpTokenBalance: BigInt!
+  token: Bytes! #address
+  gauge: Bytes! #address
+  crvRewardsPool: Bytes! #address
+  stash: Bytes! #address
+  stashVersion: BigInt!
+  active: Boolean!
+  creationDate: BigInt!
+  tvl: BigDecimal!
+  apr: BigDecimal!
+  deposits: [Deposit!] @derivedfrom(field: poolid)
+  withdrawals: [Withdrawal!] @derivedfrom(field: poolid)
+  " Curve swap pool "
+  swap: Bytes! #address
+  " Underlying asset type (USD, BTC...) "
+  assetType: BigInt!
+  snapshots: [DailyPoolSnapshot!] @derivedfrom(field: poolid)
+}
+
+type DailyPoolSnapshot @entity {
+  id: ID!
+  poolid: BigInt!
+  poolName: String!
+  withdrawalCount: BigInt!
+  depositCount: BigInt!
+  withdrawalVolume: BigInt!
+  depositVolume: BigInt!
+  withdrawalValue: BigDecimal!
+  depositValue: BigDecimal!
+  lpTokenBalance: BigInt!
+  tvl: BigDecimal!
+  apr: BigDecimal!
+  timestamp: BigInt!
+}
+

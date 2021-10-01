@@ -1,0 +1,43 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Booster
+    network: mainnet
+    source:
+      address: "0xf403c135812408bfbe8713b5a23a04b3d48aae31"
+      abi: Booster
+      startBlock: 12450992
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Deposited
+        - Withdrawn
+      abis:
+        - name: Booster
+          file: ./abis/Booster.json
+        - name: CurveRegistry
+          file: ../../abis/CurveRegistry.json
+        - name: ERC20
+          file: ../../abis/ERC20.json
+        - name: BaseRewardPool
+          file: ./abis/BaseRewardPool.json
+        - name: Factory
+          file: ../../abis/UniswapV2Factory.json
+        - name: Pair
+          file: ../../abis/UniswapV2Pair.json
+      eventHandlers:
+        - event: Deposited(indexed address,indexed uint256,uint256)
+          handler: handleDeposited
+        - event: Withdrawn(indexed address,indexed uint256,uint256)
+          handler: handleWithdrawn
+      callHandlers:
+        - function: addPool(address,address,uint256)
+          handler: handleAddPool
+        - function: shutdownPool(uint256)
+          handler: handleShutdownPool
+      file: ./src/mapping.ts
