@@ -1,0 +1,93 @@
+type Token @entity {
+  id: ID!
+  address: Bytes!
+  decimals: BigInt!
+  name: String
+  symbol: String
+}
+
+type User @entity {
+  id: ID!
+  address: Bytes!
+  rewards: [Reward!] @derivedfrom(field: user)
+  locks: [Lock!] @derivedfrom(field: user)
+  withdrawals: [Withdrawal!] @derivedfrom(field: user)
+  totalLocked: BigInt!
+  totalLockedUSD: BigDecimal!
+}
+
+type Lock @entity {
+  id: ID!
+  user: User!
+  lockAmount: BigInt!
+  boostedAmount: BigInt!
+  amountUSD: BigDecimal!
+  time: BigInt!
+}
+
+type Withdrawal @entity {
+  id: ID!
+  user: User!
+  amount: BigInt!
+  amountUSD: BigDecimal!
+  time: BigInt!
+}
+
+type Reward @entity {
+  id: ID!
+  user: User!
+  token: Token!
+  amount: BigInt!
+  amountUSD: BigDecimal!
+  time: BigInt!
+}
+
+type DailyReward @entity {
+  id: ID!
+  token: Token!
+  count: BigInt!
+  amount: BigInt!
+  amountUSD: BigDecimal!
+  time: BigInt!
+}
+
+type WeeklyReward @entity {
+  id: ID!
+  token: Token!
+  count: BigInt!
+  amount: BigInt!
+  amountUSD: BigDecimal!
+  time: BigInt!
+}
+
+type DailyLock @entity {
+  id: ID!
+  count: BigInt!
+  amount: BigInt!
+  amountUSD: BigDecimal!
+  time: BigInt!
+}
+
+type WeeklyLock @entity {
+  id: ID!
+  count: BigInt!
+  amount: BigInt!
+  amountUSD: BigDecimal!
+  time: BigInt!
+}
+
+type DailyWithdrawal @entity {
+  id: ID!
+  count: BigInt!
+  amount: BigInt!
+  amountUSD: BigDecimal!
+  time: BigInt!
+}
+
+type WeeklyWithdrawal @entity {
+  id: ID!
+  count: BigInt!
+  amount: BigInt!
+  amountUSD: BigDecimal!
+  time: BigInt!
+}

@@ -1,0 +1,45 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: CvxLocker
+    network: mainnet
+    source:
+      address: "0xD18140b4B819b895A3dba5442F959fA44994AF50"
+      abi: CvxLocker
+      startBlock: 13153663
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - KickReward
+        - RewardPaid
+        - Staked
+        - Withdrawn
+        - DailyLock
+        - WeeklyLock
+        - DailyWithdrawal
+        - WeeklyWithdrawal
+        - DailyReward
+        - WeeklyReward
+      abis:
+        - name: CvxLocker
+          file: ./abis/CvxLocker.json
+        - name: ERC20
+          file: ../../abis/ERC20.json
+        - name: Factory
+          file: ../../abis/UniswapV2Factory.json
+        - name: Pair
+          file: ../../abis/UniswapV2Pair.json
+      eventHandlers:
+        - event: KickReward(indexed address,indexed address,uint256)
+          handler: handleKickReward
+        - event: RewardPaid(indexed address,indexed address,uint256)
+          handler: handleRewardPaid
+        - event: Staked(indexed address,uint256,uint256,uint256)
+          handler: handleStaked
+        - event: Withdrawn(indexed address,uint256,bool)
+          handler: handleWithdrawn
+      file: ./src/mapping.ts
