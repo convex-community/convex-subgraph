@@ -18,14 +18,16 @@ import {
   BIG_DECIMAL_1E8,
   V2_POOL_ADDRESSES,
   BIG_DECIMAL_ONE,
-  USDT_ADDRESS
+  USDT_ADDRESS,
 } from 'const'
 
 import { ERC20 } from '../../generated/Booster/ERC20'
-import { getEthRate, getUSDRate } from '../../../../packages/utils/pricing'
+import { getBTCRate, getEthRate, getTokenAValueInTokenB, getUSDRate } from '../../../../packages/utils/pricing'
 import { ChainlinkAggregator } from '../../generated/Booster/ChainlinkAggregator'
 import { Pool } from '../../generated/schema'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
+import { getDailyPoolSnapshot } from './pools'
+import { DAY } from '../../../../packages/utils/time'
 
 export function getV2LpTokenPrice(pool: Pool): BigDecimal {
   const lpToken = bytesToAddress(pool.lpToken)
@@ -43,14 +45,15 @@ export function getV2LpTokenPrice(pool: Pool): BigDecimal {
     balance = balance.div(exponentToBigDecimal(decimals))
     let price = BIG_DECIMAL_ONE
     switch (pool.assetType) {
-      // TODO: add generic handler (get price token 0 in token 1)
-      // with decimal handling
-      case 0:
+      default:
         price = getUSDRate(currentCoin)
-        break;
+        break
       case 1:
         price = getEthRate(currentCoin)
-        break;
+        break
+      case 2:
+        price = getBTCRate(currentCoin)
+        break
     }
     total = total.plus(price.times(balance))
   }
@@ -68,21 +71,19 @@ export function getForexUsdRate(lpToken: Bytes): BigDecimal {
   return conversionRate
 }
 
-export function quoteInSpecifiedToken(quoteToken: Address, lpToken: Bytes): BigDecimal {
-  const lpTokenAddress = bytesToAddress(lpToken)
-  if (lpTokenAddress == LINK_LP_TOKEN_ADDRESS) {
-    let ethQuoteRate = getEthRate(quoteToken);
-    return ethQuoteRate != BIG_DECIMAL_ZERO ? getEthRate(LINK_ADDRESS).div(getEthRate(quoteToken)) : getEthRate(LINK_ADDRESS)
+export function getTokenValueInLpUnderlyingToken(token: Address, lpToken: Address): BigDecimal {
+  if (lpToken == LINK_LP_TOKEN_ADDRESS) {
+    return getTokenAValueInTokenB(token, LINK_ADDRESS)
   }
   return BIG_DECIMAL_ONE
 }
 
-export function getLpTokenVirtualPrice(pool: Pool): BigDecimal {
-  const lpTokenAddress = bytesToAddress(pool.lpToken)
-  // TODO : check how to determine v1/v2 pool on-chain
-  if (V2_POOL_ADDRESSES.includes(lpTokenAddress)) {
-    return getV2LpTokenPrice(pool)
-  }
+export function getLpUnderlyingTokenValueInOtherToken(lpToken: Address, token: Address): BigDecimal {
+  return BIG_DECIMAL_ONE.div(getTokenValueInLpUnderlyingToken(token, lpToken))
+}
+
+export function getLpTokenVirtualPrice(lpToken: Bytes): BigDecimal {
+  const lpTokenAddress = bytesToAddress(lpToken)
   const curveRegistry = CurveRegistry.bind(CURVE_REGISTRY)
   const vPriceCallResult = curveRegistry.try_get_virtual_price_from_lp_token(lpTokenAddress)
   const vPrice = vPriceCallResult.reverted
@@ -91,25 +92,36 @@ export function getLpTokenVirtualPrice(pool: Pool): BigDecimal {
   return vPrice
 }
 
+export function getPoolBaseApr(pool: Pool, currentVirtualPrice: BigDecimal, timestamp: BigInt): BigDecimal {
+  const previousDaySnapshot = getDailyPoolSnapshot(BigInt.fromString(pool.id), pool.name, timestamp.minus(DAY))
+  const previousDayVPrice = previousDaySnapshot.lpTokenVirtualPrice
+  const baseApr =
+    previousDayVPrice == BIG_DECIMAL_ZERO
+      ? BIG_DECIMAL_ZERO
+      : currentVirtualPrice.minus(previousDayVPrice).div(previousDayVPrice).times(BigDecimal.fromString('365'))
+  return baseApr
+}
 
 export function getLpTokenPriceUSD(pool: Pool): BigDecimal {
   const lpTokenAddress = bytesToAddress(pool.lpToken)
-  const vPrice = getLpTokenVirtualPrice(pool)
+  const vPrice = getLpTokenVirtualPrice(pool.lpToken)
+  // TODO : check how to determine v1/v2 pool on-chain
   if (V2_POOL_ADDRESSES.includes(lpTokenAddress)) {
-    return vPrice
+    return getV2LpTokenPrice(pool)
   }
   if (FOREX_ORACLES.has(pool.lpToken.toHexString())) {
     return vPrice.times(getForexUsdRate(pool.lpToken))
   }
   switch (pool.assetType) {
-    default: // USD
+    default:
+      // USD
       return vPrice
     case 1: // ETH
       return vPrice.times(getUSDRate(WETH_ADDRESS))
     case 2: // BTC
-      return vPrice.times(getUSDRate(WBTC_ADDRESS)).div(exponentToBigDecimal(BigInt.fromI32(10)))
+      return vPrice.times(getUSDRate(WBTC_ADDRESS))
     case 3:
-      return vPrice.times(quoteInSpecifiedToken(USDT_ADDRESS, pool.lpToken).times(exponentToBigDecimal(BigInt.fromI32(12))))
+      return vPrice.times(getLpUnderlyingTokenValueInOtherToken(lpTokenAddress, USDT_ADDRESS)) //quoteInSpecifiedToken(USDT_ADDRESS, pool.lpToken).times(exponentToBigDecimal(BigInt.fromI32(12))))
   }
 }
 

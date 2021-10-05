@@ -7,20 +7,11 @@ import {
 } from '../generated/Booster/Booster'
 import { Deposit, Withdrawal } from '../generated/schema'
 import { getDailyPoolSnapshot, getPool, getPoolApr, getPoolCoins } from './services/pools'
-import {
-  ASSET_TYPES,
-  BIG_DECIMAL_1E18, BIG_DECIMAL_1E8,
-  BIG_INT_ONE,
-  BOOSTER_ADDRESS,
-  CURVE_REGISTRY,
-  FOREX_ORACLES
-} from 'const'
+import { ASSET_TYPES, BIG_DECIMAL_1E18, BIG_INT_ONE, BOOSTER_ADDRESS, CURVE_REGISTRY, FOREX_ORACLES } from 'const'
 import { CurveRegistry } from '../generated/Booster/CurveRegistry'
 import { ERC20 } from '../generated/Booster/ERC20'
-import { getLpTokenPriceUSD } from './services/apr'
-import { BigInt, log } from '@graphprotocol/graph-ts'
-import { exponentToBigDecimal } from '../../../packages/utils/maths'
-
+import { getLpTokenPriceUSD, getLpTokenVirtualPrice, getPoolBaseApr } from './services/apr'
+import { log } from '@graphprotocol/graph-ts'
 
 export function handleAddPool(call: AddPoolCall): void {
   const booster = Booster.bind(BOOSTER_ADDRESS)
@@ -46,9 +37,7 @@ export function handleAddPool(call: AddPoolCall): void {
     pool.name = curveRegistry.get_pool_name(swap)
   }
   getPoolCoins(pool)
-  //log.warning("POOL NAME: {}, POOL SWAP: {}, INDEX: {}", [pool.name, pool.swap.toHexString()])
-  //log.error("ASSET TYPES {}", [ASSET_TYPES.keys()[0]])
-  //pool.assetType = MAP_SWAPS.indexOf(swap.toString()) != -1 ? MAP_ASSET_TYPES[MAP_SWAPS.indexOf(swap.toString())] : 0
+  log.info('New pool added {} at block {}', [pool.name, call.block.number.toString()])
   pool.assetType = ASSET_TYPES.has(swap.toHexString()) ? ASSET_TYPES.get(swap.toHexString()) : 0
   pool.gauge = call.inputs._gauge
   pool.stashVersion = call.inputs._stashVersion
@@ -76,15 +65,20 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
   const lpPrice = getLpTokenPriceUSD(pool)
   pool.tvl = pool.lpTokenBalance.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice)
   pool.apr = getPoolApr(pool)
-  pool.save()
 
   const snapshot = getDailyPoolSnapshot(withdrawal.poolid, pool.name, event.block.timestamp)
   snapshot.withdrawalCount = snapshot.withdrawalCount.plus(BIG_INT_ONE)
   snapshot.withdrawalVolume = snapshot.withdrawalVolume.plus(event.params.amount)
   snapshot.withdrawalValue = snapshot.withdrawalValue.plus(event.params.amount.toBigDecimal().times(lpPrice))
+  snapshot.lpTokenVirtualPrice = getLpTokenVirtualPrice(pool.lpToken)
   snapshot.tvl = pool.tvl
   snapshot.lpTokenBalance = pool.lpTokenBalance
   snapshot.apr = pool.apr
+
+  pool.baseApr = getPoolBaseApr(pool, snapshot.lpTokenVirtualPrice, event.block.timestamp)
+  snapshot.baseApr = pool.baseApr
+
+  pool.save()
   snapshot.save()
 }
 
@@ -98,18 +92,23 @@ export function handleDeposited(event: DepositedEvent): void {
 
   const pool = getPool(deposit.poolid)
   pool.lpTokenBalance = pool.lpTokenBalance.plus(deposit.amount)
-  let lpPrice = getLpTokenPriceUSD(pool)
-  log.debug("LP Token price USD for pool {}: {}", [pool.name, lpPrice.toString()])
+  const lpPrice = getLpTokenPriceUSD(pool)
+  log.debug('LP Token price USD for pool {}: {}', [pool.name, lpPrice.toString()])
   pool.tvl = pool.lpTokenBalance.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice)
   pool.apr = getPoolApr(pool)
-  pool.save()
 
   const snapshot = getDailyPoolSnapshot(deposit.poolid, pool.name, event.block.timestamp)
   snapshot.depositCount = snapshot.depositCount.plus(BIG_INT_ONE)
   snapshot.depositVolume = snapshot.depositVolume.plus(event.params.amount)
   snapshot.depositValue = snapshot.depositValue.plus(event.params.amount.toBigDecimal().times(lpPrice))
+  snapshot.lpTokenVirtualPrice = getLpTokenVirtualPrice(pool.lpToken)
   snapshot.tvl = pool.tvl
   snapshot.apr = pool.apr
   snapshot.lpTokenBalance = pool.lpTokenBalance
+
+  pool.baseApr = getPoolBaseApr(pool, snapshot.lpTokenVirtualPrice, event.block.timestamp)
+  snapshot.baseApr = pool.baseApr
+
+  pool.save()
   snapshot.save()
 }

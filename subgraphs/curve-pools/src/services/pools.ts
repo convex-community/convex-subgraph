@@ -4,23 +4,16 @@ import { BaseRewardPool } from '../../generated/Booster/BaseRewardPool'
 import { bytesToAddress } from 'utils'
 import {
   BIG_DECIMAL_1E18,
-  BIG_DECIMAL_1E8,
-  BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
   CRV_ADDRESS,
-  CVX_ADDRESS, FOREX_ORACLES,
-  WBTC_ADDRESS
+  CVX_ADDRESS,
+  FOREX_ORACLES,
+  WBTC_ADDRESS,
 } from 'const'
-import { getEthRate, getUSDRate } from 'utils/pricing'
+import { getEthRate, getTokenAValueInTokenB, getUSDRate } from 'utils/pricing'
 import { DAY, getIntervalFromTimestamp } from 'utils/time'
 import { CurvePool } from '../../generated/Booster/CurvePool'
-import {
-  getCvxMintAmount,
-  getForexUsdRate,
-  getLpTokenVirtualPrice,
-  quoteInSpecifiedToken
-} from './apr'
-import { exponentToBigDecimal } from '../../../../packages/utils/maths'
+import { getCvxMintAmount, getForexUsdRate, getLpTokenVirtualPrice, getTokenValueInLpUnderlyingToken } from './apr'
 
 export function getPool(pid: BigInt): Pool {
   let pool = Pool.load(pid.toString())
@@ -58,7 +51,7 @@ export function getDailyPoolSnapshot(poolid: BigInt, name: string, timestamp: Bi
 }
 
 export function getPoolApr(pool: Pool): BigDecimal {
-  const vPrice = getLpTokenVirtualPrice(pool)
+  const vPrice = getLpTokenVirtualPrice(pool.lpToken)
   const rewardContract = BaseRewardPool.bind(bytesToAddress(pool.crvRewardsPool))
   // TODO: getSupply function also to be used in CVXMint to DRY
   const supplyResult = rewardContract.try_totalSupply()
@@ -74,33 +67,33 @@ export function getPoolApr(pool: Pool): BigDecimal {
 
   const crvPerYear = crvPerUnderlying.times(BigDecimal.fromString('31536000'))
   const cvxPerYear = getCvxMintAmount(crvPerYear)
-  // TODO: Merge logic with getLpTokenPriceUSD
+
   let cvxPrice: BigDecimal, crvPrice: BigDecimal
   if (FOREX_ORACLES.has(pool.lpToken.toHexString())) {
-    let exchangeRate = getForexUsdRate(pool.lpToken)
+    const exchangeRate = getForexUsdRate(pool.lpToken)
     cvxPrice = exchangeRate != BIG_DECIMAL_ZERO ? getUSDRate(CVX_ADDRESS).div(exchangeRate) : getUSDRate(CVX_ADDRESS)
     crvPrice = exchangeRate != BIG_DECIMAL_ZERO ? getUSDRate(CRV_ADDRESS).div(exchangeRate) : getUSDRate(CVX_ADDRESS)
-    log.debug("CRV {} Price {}", [pool.name, crvPrice.toString()])
-  }
-  if ((pool.assetType == 0)) { // USD
+    log.debug('Forex CRV {} Price {}', [pool.name, crvPrice.toString()])
+  } else if (pool.assetType == 0) {
+    // USD
     cvxPrice = getUSDRate(CVX_ADDRESS)
     crvPrice = getUSDRate(CRV_ADDRESS)
-  }
-  else if (pool.assetType == 1) { // ETH
+  } else if (pool.assetType == 1) {
+    // ETH
     cvxPrice = getEthRate(CVX_ADDRESS)
     crvPrice = getEthRate(CRV_ADDRESS)
-    log.debug("{}: CRV ETH Price {}", [pool.name, crvPrice.toString()])
-  }
-  else if (pool.assetType == 2) { // BTC
-    // TODO : getTokenAinTokenB with handling of A & B's decimals
-    cvxPrice = getEthRate(CVX_ADDRESS).div(getEthRate(WBTC_ADDRESS)).times(exponentToBigDecimal(BigInt.fromI32(10)))
-    crvPrice = getEthRate(CRV_ADDRESS).div(getEthRate(WBTC_ADDRESS)).times(exponentToBigDecimal(BigInt.fromI32(10)))
-    log.debug("{}: CRV BTC Price {}", [pool.name, crvPrice.toString()])
-  }
-  else { // Other
-      cvxPrice = BIG_DECIMAL_ONE.div(quoteInSpecifiedToken(CVX_ADDRESS, pool.lpToken))
-      crvPrice = BIG_DECIMAL_ONE.div(quoteInSpecifiedToken(CRV_ADDRESS, pool.lpToken))
-      log.debug("CRV {} Price {}", [pool.name, crvPrice.toString()])
+    log.debug('{}: CRV ETH Price {}', [pool.name, crvPrice.toString()])
+  } else if (pool.assetType == 2) {
+    // BTC
+    cvxPrice = getTokenAValueInTokenB(CVX_ADDRESS, WBTC_ADDRESS)
+    crvPrice = getTokenAValueInTokenB(CRV_ADDRESS, WBTC_ADDRESS)
+    log.debug('{}: CRV BTC Price {}', [pool.name, crvPrice.toString()])
+  } else {
+    // Other
+    const lpTokenAddress = bytesToAddress(pool.lpToken)
+    cvxPrice = getTokenValueInLpUnderlyingToken(CVX_ADDRESS, lpTokenAddress)
+    crvPrice = getTokenValueInLpUnderlyingToken(CRV_ADDRESS, lpTokenAddress)
+    log.debug('CRV {} Price {}', [pool.name, crvPrice.toString()])
   }
   let apr = crvPerYear.times(crvPrice)
   apr = apr.plus(cvxPerYear.times(cvxPrice))
