@@ -9,6 +9,7 @@ import { Pool } from '../generated/schema'
 import { Deposit, Withdrawal } from '../generated/schema'
 import { getDailyPoolSnapshot, getPool, getPoolApr, getPoolCoins } from './services/pools'
 import {
+  ADDRESS_ZERO,
   ASSET_TYPES,
   BIG_DECIMAL_1E18,
   BIG_INT_ONE, BIG_INT_ZERO,
@@ -30,6 +31,8 @@ export function handleAddPool(call: AddPoolCall): void {
   // for instance with multicall. The contract call above will only
   // return the contract's final state on the block, so all contracts
   // created in the same call will have the same id
+  // TODO: No auto-increming IDs but could have a Counter entity for this?
+  // would also save the contract call to poolLength
   while (pid.gt(BIG_INT_ZERO) && !Pool.load(pid.minus(BIG_INT_ONE).toString())) {
     pid = pid.minus(BIG_INT_ONE)
   }
@@ -42,10 +45,10 @@ export function handleAddPool(call: AddPoolCall): void {
   const lpToken = call.inputs._lptoken
   pool.lpToken = lpToken
 
-  let swap = lpToken
-  if (!FACTORY_POOLS.includes(lpToken.toHexString())) {
-    swap = curveRegistry.get_pool_from_lp_token(call.inputs._lptoken)
-  }
+  let swap = curveRegistry.get_pool_from_lp_token(call.inputs._lptoken)
+  // factory pools not in the registry
+  swap = (swap == ADDRESS_ZERO) ? lpToken : swap
+
   pool.swap = swap
 
   let name = curveRegistry.get_pool_name(swap)
