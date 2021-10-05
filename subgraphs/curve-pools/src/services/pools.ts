@@ -2,14 +2,7 @@ import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { Pool, DailyPoolSnapshot } from '../../generated/schema'
 import { BaseRewardPool } from '../../generated/Booster/BaseRewardPool'
 import { bytesToAddress } from 'utils'
-import {
-  BIG_DECIMAL_1E18,
-  BIG_DECIMAL_ZERO,
-  CRV_ADDRESS,
-  CVX_ADDRESS,
-  FOREX_ORACLES,
-  WBTC_ADDRESS,
-} from 'const'
+import { BIG_DECIMAL_1E18, BIG_DECIMAL_ZERO, CRV_ADDRESS, CVX_ADDRESS, FOREX_ORACLES, WBTC_ADDRESS } from 'const'
 import { getEthRate, getTokenAValueInTokenB, getUSDRate } from 'utils/pricing'
 import { DAY, getIntervalFromTimestamp } from 'utils/time'
 import { CurvePool } from '../../generated/Booster/CurvePool'

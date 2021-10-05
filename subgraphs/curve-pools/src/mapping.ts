@@ -5,22 +5,23 @@ import {
   Booster,
   ShutdownPoolCall,
 } from '../generated/Booster/Booster'
-import { Pool } from '../generated/schema'
+import { DailyPoolSnapshot, Pool } from '../generated/schema'
 import { Deposit, Withdrawal } from '../generated/schema'
-import { getDailyPoolSnapshot, getPool, getPoolApr, getPoolCoins } from './services/pools'
+import { getPool, getPoolApr, getPoolCoins } from './services/pools'
 import {
   ADDRESS_ZERO,
   ASSET_TYPES,
   BIG_DECIMAL_1E18,
-  BIG_INT_ONE, BIG_INT_ZERO,
+  BIG_INT_ONE,
+  BIG_INT_ZERO,
   BOOSTER_ADDRESS,
   CURVE_REGISTRY,
-  FACTORY_POOLS
 } from 'const'
 import { CurveRegistry } from '../generated/Booster/CurveRegistry'
 import { ERC20 } from '../generated/Booster/ERC20'
 import { getLpTokenPriceUSD, getLpTokenVirtualPrice, getPoolBaseApr } from './services/apr'
 import { log } from '@graphprotocol/graph-ts'
+import { DAY, getIntervalFromTimestamp } from '../../../packages/utils/time'
 
 export function handleAddPool(call: AddPoolCall): void {
   const booster = Booster.bind(BOOSTER_ADDRESS)
@@ -47,12 +48,12 @@ export function handleAddPool(call: AddPoolCall): void {
 
   let swap = curveRegistry.get_pool_from_lp_token(call.inputs._lptoken)
   // factory pools not in the registry
-  swap = (swap == ADDRESS_ZERO) ? lpToken : swap
+  swap = swap == ADDRESS_ZERO ? lpToken : swap
 
   pool.swap = swap
 
   let name = curveRegistry.get_pool_name(swap)
-  if (name == "") {
+  if (name == '') {
     const lpTokenContract = ERC20.bind(lpToken)
     const lpTokenNameResult = lpTokenContract.try_name()
     name = lpTokenNameResult.reverted ? '' : lpTokenNameResult.value
@@ -87,19 +88,32 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
   pool.lpTokenBalance = pool.lpTokenBalance.minus(withdrawal.amount)
   const lpPrice = getLpTokenPriceUSD(pool)
   pool.tvl = pool.lpTokenBalance.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice)
-  pool.apr = getPoolApr(pool)
 
-  const snapshot = getDailyPoolSnapshot(withdrawal.poolid, pool.name, event.block.timestamp)
+  // TODO: can be replaced by getDailyPoolSnapshot to DRY once AssemblyScript
+  // supports tuples as return values
+  const day = getIntervalFromTimestamp(event.block.timestamp, DAY)
+  const snapId = pool.name + '-' + withdrawal.poolid.toString() + '-' + day.toString()
+  let snapshot = DailyPoolSnapshot.load(snapId)
+
+  // we only do call-heavy calculations once upon snapshot creation
+  if (!snapshot) {
+    snapshot = new DailyPoolSnapshot(snapId)
+    snapshot.poolid = event.params.poolid
+    snapshot.poolName = pool.name
+    snapshot.timestamp = event.block.timestamp
+    pool.apr = getPoolApr(pool)
+    snapshot.lpTokenVirtualPrice = getLpTokenVirtualPrice(pool.lpToken)
+    snapshot.tvl = pool.tvl
+    snapshot.apr = pool.apr
+    snapshot.lpTokenBalance = pool.lpTokenBalance
+
+    pool.baseApr = getPoolBaseApr(pool, snapshot.lpTokenVirtualPrice, event.block.timestamp)
+    snapshot.baseApr = pool.baseApr
+  }
+
   snapshot.withdrawalCount = snapshot.withdrawalCount.plus(BIG_INT_ONE)
   snapshot.withdrawalVolume = snapshot.withdrawalVolume.plus(event.params.amount)
   snapshot.withdrawalValue = snapshot.withdrawalValue.plus(event.params.amount.toBigDecimal().times(lpPrice))
-  snapshot.lpTokenVirtualPrice = getLpTokenVirtualPrice(pool.lpToken)
-  snapshot.tvl = pool.tvl
-  snapshot.lpTokenBalance = pool.lpTokenBalance
-  snapshot.apr = pool.apr
-
-  pool.baseApr = getPoolBaseApr(pool, snapshot.lpTokenVirtualPrice, event.block.timestamp)
-  snapshot.baseApr = pool.baseApr
 
   pool.save()
   snapshot.save()
@@ -115,22 +129,36 @@ export function handleDeposited(event: DepositedEvent): void {
 
   const pool = getPool(deposit.poolid)
   pool.lpTokenBalance = pool.lpTokenBalance.plus(deposit.amount)
+
   const lpPrice = getLpTokenPriceUSD(pool)
   log.debug('LP Token price USD for pool {}: {}', [pool.name, lpPrice.toString()])
   pool.tvl = pool.lpTokenBalance.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice)
-  pool.apr = getPoolApr(pool)
 
-  const snapshot = getDailyPoolSnapshot(deposit.poolid, pool.name, event.block.timestamp)
+  // TODO: can be replaced by getDailyPoolSnapshot to DRY once AssemblyScript
+  // supports tuples as return values
+  const day = getIntervalFromTimestamp(event.block.timestamp, DAY)
+  const snapId = pool.name + '-' + deposit.poolid.toString() + '-' + day.toString()
+  let snapshot = DailyPoolSnapshot.load(snapId)
+
+  // we only do call-heavy calculations once upon snapshot creation
+  if (!snapshot) {
+    snapshot = new DailyPoolSnapshot(snapId)
+    snapshot.poolid = event.params.poolid
+    snapshot.poolName = pool.name
+    snapshot.timestamp = event.block.timestamp
+    pool.apr = getPoolApr(pool)
+    snapshot.lpTokenVirtualPrice = getLpTokenVirtualPrice(pool.lpToken)
+    snapshot.tvl = pool.tvl
+    snapshot.apr = pool.apr
+    snapshot.lpTokenBalance = pool.lpTokenBalance
+
+    pool.baseApr = getPoolBaseApr(pool, snapshot.lpTokenVirtualPrice, event.block.timestamp)
+    snapshot.baseApr = pool.baseApr
+  }
+
   snapshot.depositCount = snapshot.depositCount.plus(BIG_INT_ONE)
   snapshot.depositVolume = snapshot.depositVolume.plus(event.params.amount)
   snapshot.depositValue = snapshot.depositValue.plus(event.params.amount.toBigDecimal().times(lpPrice))
-  snapshot.lpTokenVirtualPrice = getLpTokenVirtualPrice(pool.lpToken)
-  snapshot.tvl = pool.tvl
-  snapshot.apr = pool.apr
-  snapshot.lpTokenBalance = pool.lpTokenBalance
-
-  pool.baseApr = getPoolBaseApr(pool, snapshot.lpTokenVirtualPrice, event.block.timestamp)
-  snapshot.baseApr = pool.baseApr
 
   pool.save()
   snapshot.save()
