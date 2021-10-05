@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt, Bytes } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
 import { bytesToAddress } from 'utils'
 import { CurveRegistry } from '../../generated/Booster/CurveRegistry'
 import {
@@ -68,6 +68,7 @@ export function getForexUsdRate(lpToken: Bytes): BigDecimal {
   const conversionRate = conversionRateReponse.reverted
     ? BIG_DECIMAL_ONE
     : conversionRateReponse.value.toBigDecimal().div(BIG_DECIMAL_1E8)
+  log.debug('Answer from Forex oracle {} for token {}: {}', [FOREX_ORACLES[lpToken.toHexString()].toHexString(), lpToken.toHexString(), conversionRate.toString()])
   return conversionRate
 }
 
