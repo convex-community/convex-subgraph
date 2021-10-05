@@ -3,7 +3,7 @@ import {BigInt, Address} from "@graphprotocol/graph-ts/index";
 import {Token} from "../../generated/schema";
 import {
     ERC20
-} from "../../generated/CvxLocker/ERC20"
+} from "curve-pools/generated/Booster/ERC20"
 
 class TokenInfo {
     constructor(readonly name: string | null, readonly symbol: string | null, readonly decimals: BigInt) {}
