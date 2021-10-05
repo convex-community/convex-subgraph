@@ -28,6 +28,7 @@ import { Pool } from '../../generated/schema'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
 import { getDailyPoolSnapshot } from './pools'
 import { DAY } from '../../../../packages/utils/time'
+import { CurvePool } from '../../generated/Booster/CurvePool'
 
 export function getV2LpTokenPrice(pool: Pool): BigDecimal {
   const lpToken = bytesToAddress(pool.lpToken)
@@ -86,10 +87,17 @@ export function getLpUnderlyingTokenValueInOtherToken(lpToken: Address, token: A
 export function getLpTokenVirtualPrice(lpToken: Bytes): BigDecimal {
   const lpTokenAddress = bytesToAddress(lpToken)
   const curveRegistry = CurveRegistry.bind(CURVE_REGISTRY)
-  const vPriceCallResult = curveRegistry.try_get_virtual_price_from_lp_token(lpTokenAddress)
-  const vPrice = vPriceCallResult.reverted
-    ? BIG_DECIMAL_ZERO
-    : vPriceCallResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
+  let vPriceCallResult = curveRegistry.try_get_virtual_price_from_lp_token(lpTokenAddress)
+  let vPrice = BIG_DECIMAL_ZERO
+  if (!vPriceCallResult.reverted) {
+    vPrice = vPriceCallResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
+  }
+  // most likely for when factory pools are not included in the registry
+  else {
+    const lpTokenContract = CurvePool.bind(lpTokenAddress)
+    vPriceCallResult = lpTokenContract.try_get_virtual_price()
+    vPrice = !vPriceCallResult.reverted ? vPriceCallResult.value.toBigDecimal().div(BIG_DECIMAL_1E18) : vPrice
+  }
   return vPrice
 }
 
