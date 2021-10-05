@@ -36,6 +36,7 @@ type Pool @entity {
   creationDate: BigInt!
   tvl: BigDecimal!
   apr: BigDecimal!
+  baseApr: BigDecimal!
   deposits: [Deposit!] @derivedfrom(field: poolid)
   withdrawals: [Withdrawal!] @derivedfrom(field: poolid)
   " Curve swap pool "
@@ -56,8 +57,10 @@ type DailyPoolSnapshot @entity {
   withdrawalValue: BigDecimal!
   depositValue: BigDecimal!
   lpTokenBalance: BigInt!
+  lpTokenVirtualPrice: BigDecimal!
   tvl: BigDecimal!
   apr: BigDecimal!
+  baseApr: BigDecimal!
   timestamp: BigInt!
 }
 
