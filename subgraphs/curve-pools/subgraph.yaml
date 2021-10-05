@@ -30,6 +30,10 @@ dataSources:
           file: ../../abis/UniswapV2Factory.json
         - name: Pair
           file: ../../abis/UniswapV2Pair.json
+        - name: ChainlinkAggregator
+          file: ../../abis/CLAggregator.json
+        - name: CurvePool
+          file: ../../abis/CurvePool.json
       eventHandlers:
         - event: Deposited(indexed address,indexed uint256,uint256)
           handler: handleDeposited

@@ -42,7 +42,8 @@ type Pool @entity {
   " Curve swap pool "
   swap: Bytes! #address
   " Underlying asset type (USD, BTC...) "
-  assetType: BigInt!
+  assetType: Int!
+  coins: [Bytes!]!
   snapshots: [DailyPoolSnapshot!] @derivedfrom(field: poolid)
 }
 

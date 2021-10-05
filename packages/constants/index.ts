@@ -27,15 +27,14 @@ export const GBP_LP_TOKEN = "0xd6ac1cb9019137a896343da59dde6d097f710538";
 export const AUD_LP_TOKEN = "0x3f1b0278a9ee595635b61817630cc19de792f506";
 export const CHF_LP_TOKEN = "0x9c2c8910f113181783c249d8f6aa41b51cde0f0c";
 
-export const FOREX_ORACLES = {
-  EURT_LP_TOKEN: Address.fromString("0xb49f677943BC038e9857d61E7d053CaA2C1734C1"),
-  EURS_LP_TOKEN: Address.fromString("0xb49f677943BC038e9857d61E7d053CaA2C1734C1"),
-  KRW_LP_TOKEN: Address.fromString("0x01435677FB11763550905594A16B645847C1d0F3"),
-  JPY_LP_TOKEN: Address.fromString("0xBcE206caE7f0ec07b545EddE332A47C2F75bbeb3"),
-  GBP_LP_TOKEN: Address.fromString("0x5c0Ab2d9b5a7ed9f470386e82BB36A3613cDd4b5"),
-  AUD_LP_TOKEN: Address.fromString("0x77F9710E7d0A19669A13c055F62cd80d313dF022"),
-  CHF_LP_TOKEN: Address.fromString("0x449d117117838fFA61263B61dA6301AA2a88B13A")
-}
+export var FOREX_ORACLES = new Map<string, Address>()
+FOREX_ORACLES.set(EURT_LP_TOKEN, Address.fromString("0xb49f677943BC038e9857d61E7d053CaA2C1734C1"));
+FOREX_ORACLES.set(EURS_LP_TOKEN, Address.fromString("0xb49f677943BC038e9857d61E7d053CaA2C1734C1"));
+FOREX_ORACLES.set(KRW_LP_TOKEN, Address.fromString("0x01435677FB11763550905594A16B645847C1d0F3"));
+FOREX_ORACLES.set(JPY_LP_TOKEN, Address.fromString("0xBcE206caE7f0ec07b545EddE332A47C2F75bbeb3"));
+FOREX_ORACLES.set(GBP_LP_TOKEN, Address.fromString("0x5c0Ab2d9b5a7ed9f470386e82BB36A3613cDd4b5"));
+FOREX_ORACLES.set(AUD_LP_TOKEN, Address.fromString("0x77F9710E7d0A19669A13c055F62cd80d313dF022"));
+FOREX_ORACLES.set(CHF_LP_TOKEN, Address.fromString("0x449d117117838fFA61263B61dA6301AA2a88B13A"));
 
 export const SUSHISWAP_WETH_USDT_PAIR_ADDRESS = Address.fromString("0x06da0fd433c1a5d7a4faa01111c044910a184553");
 export const SUSHI_FACTORY_ADDRESS = Address.fromString("0xc0aee478e3658e2610c5f7a4a2e1777ce9e4f2ac");
@@ -50,3 +49,98 @@ export const V2_POOL_ADDRESSES = [TRICRYPTO_LP_ADDRESS, TRICRYPTO2_LP_ADDRESS]
 export const CVX_CLIFF_SIZE = BigDecimal.fromString("100000"); // * 1e18; //new cliff every 100,000 tokens
 export const CVX_CLIFF_COUNT = BigDecimal.fromString("1000"); // 1,000 cliffs
 export const CVX_MAX_SUPPLY = BigDecimal.fromString("100000000"); // * 1e18; //100 mil max supply
+
+
+// The arrays are to map the asset types for the various curve pools
+// It's necessary because pools are often instantiated with the wrong asset type
+// so the values from the registry's get_pool_asset_type method can't be relied
+// upon and can change.
+// Also Curve only ran a batch fix on June 19th, after most of the tracked pools
+// were instantiated. Map will likely need manual update in the future and
+// therefore resyncs.
+// cf: https://etherscan.io/tx/0xf8e8d67ec16657ecc707614f733979d105e0b814aa698154c153ba9b44bf779b
+
+
+export var ASSET_TYPES = new Map<string, i32>()
+ASSET_TYPES.set('0x06364f10b501e868329afbc005b3492902d6c763', 0)
+ASSET_TYPES.set('0x071c661b4deefb59e2a3ddb20db036821eee8f4b', 2)
+ASSET_TYPES.set('0x0ce6a5ff5217e38315f87032cf90686c96627caa', 3)
+ASSET_TYPES.set('0x0f9cb53ebe405d49a0bbdbd291a65ff571bc83e1', 0)
+ASSET_TYPES.set('0x2dded6da1bf5dbdf597c45fcfaa3194e53ecfeaf', 0)
+ASSET_TYPES.set('0x3e01dd8a5e1fb3481f0f589056b428fc308af0fb', 0)
+ASSET_TYPES.set('0x3ef6a01a0f81d6046290f3e2a8c5b843e738e604', 0)
+ASSET_TYPES.set('0x42d7025938bec20b69cbae5a77421082407f053a', 0)
+ASSET_TYPES.set('0x43b4fdfd4ff969587185cdb6f0bd875c5fc83f8c', 0)
+ASSET_TYPES.set('0x45f783cce6b7ff23b2ab2d70e416cdb7d6055f51', 0)
+ASSET_TYPES.set('0x4807862aa8b2bf68830e4c8dc86d0e9a998e085a', 0)
+ASSET_TYPES.set('0x4ca9b3063ec5866a4b82e437059d2c43d1be596f', 2)
+ASSET_TYPES.set('0x4f062658eaaf2c1ccf8c8e36d6824cdf41167956', 0)
+ASSET_TYPES.set('0x52ea46506b9cc5ef470c5bf89f17dc28bb35d85c', 0)
+ASSET_TYPES.set('0x79a8c46dea5ada233abaffd40f3a0a2b1e5a4f27', 0)
+ASSET_TYPES.set('0x7f55dde206dbad629c080068923b36fe9d6bdbef', 2)
+ASSET_TYPES.set('0x7fc77b5c7614e1533320ea6ddc2eb61fa00a9714', 2)
+ASSET_TYPES.set('0x8038c01a0390a8c547446a0b2c18fc9aefecc10c', 0)
+ASSET_TYPES.set('0x80466c64868e1ab14a1ddf27a676c3fcbe638fe5', 4)
+ASSET_TYPES.set('0x8474ddbe98f5aa3179b3b3f5942d724afcdec9f6', 0)
+ASSET_TYPES.set('0x890f4e345b1daed0367a877a1612f86a1f86985f', 0)
+ASSET_TYPES.set('0x93054188d876f558f4a66b2ef1d97d16edf0895b', 2)
+ASSET_TYPES.set('0xa2b47e3d5c44877cca798226b7b8118f9bfb7a56', 0)
+ASSET_TYPES.set('0xa5407eae9ba41422680e2e00537571bcc53efbfd', 0)
+ASSET_TYPES.set('0xa96a65c051bf88b4095ee1f2451c2a9d43f53ae2', 1)
+ASSET_TYPES.set('0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7', 0)
+ASSET_TYPES.set('0xc18cc39da8b11da8c3541c598ee022258f9744da', 0)
+ASSET_TYPES.set('0xc25099792e9349c7dd09759744ea681c7de2cb66', 2)
+ASSET_TYPES.set('0xc5424b857f758e906013f3555dad202e4bdb4567', 1)
+ASSET_TYPES.set('0xd51a44d3fae010294c616388b506acda1bfaae46', 0)
+ASSET_TYPES.set('0xd632f22692fac7611d2aa1c0d552930d43caed3b', 0)
+ASSET_TYPES.set('0xd81da8d904b52208541bade1bd6595d8a251f8dd', 2)
+ASSET_TYPES.set('0xdc24316b9ae028f1497c275eb9192a3ea0f67022', 1)
+ASSET_TYPES.set('0xdebf20617708857ebe4f679508e7b7863a8a8eee', 0)
+ASSET_TYPES.set('0xeb16ae0052ed37f479f7fe63849198df1765a733', 0)
+ASSET_TYPES.set('0xecd5e75afb02efa118af914515d6521aabd189f1', 0)
+ASSET_TYPES.set('0xed279fdd11ca84beef15af5d39bb4d4bee23f0ca', 0)
+ASSET_TYPES.set('0xf178c0b5bb7e7abf4e12a4838c7b7c5ba2c623c0', 3)
+ASSET_TYPES.set('0xf9440930043eb3997fc70e1339dbb11f341de7a8', 1)
+ASSET_TYPES.set('0xfd5db7463a3ab53fd211b4af195c5bccc1a03890', 3)
+  /*[
+  ['0x06364f10b501e868329afbc005b3492902d6c763', 0],
+  ['0x071c661b4deefb59e2a3ddb20db036821eee8f4b', 2],
+  ['0x0ce6a5ff5217e38315f87032cf90686c96627caa', 3],
+  ['0x0f9cb53ebe405d49a0bbdbd291a65ff571bc83e1', 0],
+  ['0x2dded6da1bf5dbdf597c45fcfaa3194e53ecfeaf', 0],
+  ['0x3e01dd8a5e1fb3481f0f589056b428fc308af0fb', 0],
+  ['0x3ef6a01a0f81d6046290f3e2a8c5b843e738e604', 0],
+  ['0x42d7025938bec20b69cbae5a77421082407f053a', 0],
+  ['0x43b4fdfd4ff969587185cdb6f0bd875c5fc83f8c', 0],
+  ['0x45f783cce6b7ff23b2ab2d70e416cdb7d6055f51', 0],
+  ['0x4807862aa8b2bf68830e4c8dc86d0e9a998e085a', 0],
+  ['0x4ca9b3063ec5866a4b82e437059d2c43d1be596f', 2],
+  ['0x4f062658eaaf2c1ccf8c8e36d6824cdf41167956', 0],
+  ['0x52ea46506b9cc5ef470c5bf89f17dc28bb35d85c', 0],
+  ['0x79a8c46dea5ada233abaffd40f3a0a2b1e5a4f27', 0],
+  ['0x7f55dde206dbad629c080068923b36fe9d6bdbef', 2],
+  ['0x7fc77b5c7614e1533320ea6ddc2eb61fa00a9714', 2],
+  ['0x8038c01a0390a8c547446a0b2c18fc9aefecc10c', 0],
+  ['0x80466c64868e1ab14a1ddf27a676c3fcbe638fe5', 4],
+  ['0x8474ddbe98f5aa3179b3b3f5942d724afcdec9f6', 0],
+  ['0x890f4e345b1daed0367a877a1612f86a1f86985f', 0],
+  ['0x93054188d876f558f4a66b2ef1d97d16edf0895b', 2],
+  ['0xa2b47e3d5c44877cca798226b7b8118f9bfb7a56', 0],
+  ['0xa5407eae9ba41422680e2e00537571bcc53efbfd', 0],
+  ['0xa96a65c051bf88b4095ee1f2451c2a9d43f53ae2', 1],
+  ['0xbebc44782c7db0a1a60cb6fe97d0b483032ff1c7', 0],
+  ['0xc18cc39da8b11da8c3541c598ee022258f9744da', 0],
+  ['0xc25099792e9349c7dd09759744ea681c7de2cb66', 2],
+  ['0xc5424b857f758e906013f3555dad202e4bdb4567', 1],
+  ['0xd51a44d3fae010294c616388b506acda1bfaae46', 0],
+  ['0xd632f22692fac7611d2aa1c0d552930d43caed3b', 0],
+  ['0xd81da8d904b52208541bade1bd6595d8a251f8dd', 2],
+  ['0xdc24316b9ae028f1497c275eb9192a3ea0f67022', 1],
+  ['0xdebf20617708857ebe4f679508e7b7863a8a8eee', 0],
+  ['0xeb16ae0052ed37f479f7fe63849198df1765a733', 0],
+  ['0xecd5e75afb02efa118af914515d6521aabd189f1', 0],
+  ['0xed279fdd11ca84beef15af5d39bb4d4bee23f0ca', 0],
+  ['0xf178c0b5bb7e7abf4e12a4838c7b7c5ba2c623c0', 3],
+  ['0xf9440930043eb3997fc70e1339dbb11f341de7a8', 1],
+  ['0xfd5db7463a3ab53fd211b4af195c5bccc1a03890', 0]
+  ])*/
