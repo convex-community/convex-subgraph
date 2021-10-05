@@ -11,12 +11,12 @@ import {
   updateAggregatedRewards, updateAggregatedWithdrawals
 } from "./services/events";
 import {getOrCreateToken} from "./services/tokens";
-import {CVX_TOKEN} from "const";
+import {CVX_ADDRESS} from "const";
 import {getUSDRate} from "utils/pricing"
 import {Address} from '@graphprotocol/graph-ts';
 import {exponentToBigDecimal} from "utils/maths";
 
-const cvx = getOrCreateToken(CVX_TOKEN);
+const cvx = getOrCreateToken(CVX_ADDRESS);
 
 export function handleKickReward(event: KickReward): void {
 
@@ -24,7 +24,7 @@ export function handleKickReward(event: KickReward): void {
   const reward = new Reward(getEventId(event));
   reward.user = user.id;
   reward.amount = event.params._reward;
-  reward.amountUSD = getUSDRate(CVX_TOKEN).times(reward.amount.toBigDecimal()
+  reward.amountUSD = getUSDRate(CVX_ADDRESS).times(reward.amount.toBigDecimal()
       .div(exponentToBigDecimal(cvx.decimals)));
   reward.token = cvx.id;
   reward.time = event.block.timestamp;
@@ -63,7 +63,7 @@ export function handleStaked(event: Staked): void {
   const lock = new Lock(getEventId(event));
   lock.user = user.id;
   lock.lockAmount = event.params._lockedAmount;
-  lock.amountUSD = getUSDRate(CVX_TOKEN).times(lock.lockAmount.toBigDecimal().div(exponentToBigDecimal(cvx.decimals)));
+  lock.amountUSD = getUSDRate(CVX_ADDRESS).times(lock.lockAmount.toBigDecimal().div(exponentToBigDecimal(cvx.decimals)));
   lock.boostedAmount = event.params._boostedAmount;
   lock.time = event.block.timestamp;
   user.totalLocked = user.totalLocked.plus(lock.lockAmount);
@@ -79,7 +79,7 @@ export function handleWithdrawn(event: Withdrawn): void {
   const withdrawal = new Withdrawal(getEventId(event));
   withdrawal.user = user.id;
   withdrawal.amount = event.params._amount;
-  withdrawal.amountUSD = getUSDRate(CVX_TOKEN).times(withdrawal.amount.toBigDecimal().div(exponentToBigDecimal(cvx.decimals)));
+  withdrawal.amountUSD = getUSDRate(CVX_ADDRESS).times(withdrawal.amount.toBigDecimal().div(exponentToBigDecimal(cvx.decimals)));
   withdrawal.time = event.block.timestamp;
   user.totalLocked = user.totalLocked.minus(withdrawal.amount);
   user.save();
