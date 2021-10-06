@@ -103,7 +103,6 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
     snapshot.timestamp = event.block.timestamp
     pool.apr = getPoolApr(pool)
     snapshot.lpTokenVirtualPrice = getLpTokenVirtualPrice(pool.lpToken)
-    snapshot.tvl = pool.tvl
     snapshot.apr = pool.apr
     snapshot.lpTokenBalance = pool.lpTokenBalance
 
@@ -111,6 +110,7 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
     snapshot.baseApr = pool.baseApr
   }
 
+  snapshot.tvl = pool.tvl
   snapshot.withdrawalCount = snapshot.withdrawalCount.plus(BIG_INT_ONE)
   snapshot.withdrawalVolume = snapshot.withdrawalVolume.plus(event.params.amount)
   snapshot.withdrawalValue = snapshot.withdrawalValue.plus(event.params.amount.toBigDecimal().times(lpPrice))
@@ -148,7 +148,6 @@ export function handleDeposited(event: DepositedEvent): void {
     snapshot.timestamp = event.block.timestamp
     pool.apr = getPoolApr(pool)
     snapshot.lpTokenVirtualPrice = getLpTokenVirtualPrice(pool.lpToken)
-    snapshot.tvl = pool.tvl
     snapshot.apr = pool.apr
     snapshot.lpTokenBalance = pool.lpTokenBalance
 
@@ -156,6 +155,7 @@ export function handleDeposited(event: DepositedEvent): void {
     snapshot.baseApr = pool.baseApr
   }
 
+  snapshot.tvl = pool.tvl
   snapshot.depositCount = snapshot.depositCount.plus(BIG_INT_ONE)
   snapshot.depositVolume = snapshot.depositVolume.plus(event.params.amount)
   snapshot.depositValue = snapshot.depositValue.plus(event.params.amount.toBigDecimal().times(lpPrice))

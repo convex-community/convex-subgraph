@@ -67,7 +67,7 @@ export function getPoolApr(pool: Pool): BigDecimal {
     cvxPrice = exchangeRate != BIG_DECIMAL_ZERO ? getUSDRate(CVX_ADDRESS).div(exchangeRate) : getUSDRate(CVX_ADDRESS)
     crvPrice = exchangeRate != BIG_DECIMAL_ZERO ? getUSDRate(CRV_ADDRESS).div(exchangeRate) : getUSDRate(CVX_ADDRESS)
     log.debug('Forex CRV {} Price {}', [pool.name, crvPrice.toString()])
-  } else if (pool.assetType == 0) {
+  } else if ((pool.assetType == 0) || (pool.assetType == 4)) {
     // USD
     cvxPrice = getUSDRate(CVX_ADDRESS)
     crvPrice = getUSDRate(CRV_ADDRESS)

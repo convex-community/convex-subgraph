@@ -39,7 +39,7 @@ export function getV2LpTokenPrice(pool: Pool): BigDecimal {
   for (let i = 0; i < pool.coins.length; ++i) {
     const currentCoin = bytesToAddress(pool.coins[i])
     const coinContract = ERC20.bind(currentCoin)
-    const balanceResult = coinContract.try_balanceOf(lpToken)
+    const balanceResult = coinContract.try_balanceOf(bytesToAddress(pool.swap))
     const decimalsResult = coinContract.try_decimals()
     let balance = balanceResult.reverted ? BIG_DECIMAL_ZERO : balanceResult.value.toBigDecimal()
     const decimals = decimalsResult.reverted ? BigInt.fromI32(18) : BigInt.fromI32(decimalsResult.value)
