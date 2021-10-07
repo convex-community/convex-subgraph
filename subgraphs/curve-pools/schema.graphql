@@ -40,6 +40,7 @@ type Pool @entity {
   crvRewardsPool: Bytes! #address
   stash: Bytes! #address
   stashVersion: BigInt!
+  stashMinorVersion: BigInt!
   active: Boolean!
   creationDate: BigInt!
   creationBlock: BigInt!
