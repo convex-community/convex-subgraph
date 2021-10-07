@@ -58,7 +58,7 @@ export function getTokenAValueInTokenB(tokenA: Address, tokenB: Address): BigDec
   return (ethRateA.div(ethRateB)).times(exponentToBigDecimal(decimalsA)).div(exponentToBigDecimal(decimalsB))
 }
 
-export function getUSDRate(token: Address): BigDecimal {
+export function getUsdRate(token: Address): BigDecimal {
   const usdt = BIG_DECIMAL_ONE
 
   if (token != USDT_ADDRESS) {
@@ -69,7 +69,7 @@ export function getUSDRate(token: Address): BigDecimal {
 }
 
 
-export function getBTCRate(token: Address): BigDecimal {
+export function getBtcRate(token: Address): BigDecimal {
   const wbtc = BIG_DECIMAL_ONE
 
   if (token != WBTC_ADDRESS) {
