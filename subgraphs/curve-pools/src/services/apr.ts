@@ -22,7 +22,7 @@ import {
 } from 'const'
 
 import { ERC20 } from '../../generated/Booster/ERC20'
-import { getBTCRate, getEthRate, getTokenAValueInTokenB, getUSDRate } from '../../../../packages/utils/pricing'
+import { getBtcRate, getEthRate, getTokenAValueInTokenB, getUsdRate } from '../../../../packages/utils/pricing'
 import { ChainlinkAggregator } from '../../generated/Booster/ChainlinkAggregator'
 import { Pool } from '../../generated/schema'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
@@ -47,13 +47,13 @@ export function getV2LpTokenPrice(pool: Pool): BigDecimal {
     let price = BIG_DECIMAL_ONE
     switch (pool.assetType) {
       default:
-        price = getUSDRate(currentCoin)
+        price = getUsdRate(currentCoin)
         break
       case 1:
         price = getEthRate(currentCoin)
         break
       case 2:
-        price = getBTCRate(currentCoin)
+        price = getBtcRate(currentCoin)
         break
     }
     total = total.plus(price.times(balance))
@@ -126,9 +126,9 @@ export function getLpTokenPriceUSD(pool: Pool): BigDecimal {
       // USD
       return vPrice
     case 1: // ETH
-      return vPrice.times(getUSDRate(WETH_ADDRESS))
+      return vPrice.times(getUsdRate(WETH_ADDRESS))
     case 2: // BTC
-      return vPrice.times(getUSDRate(WBTC_ADDRESS))
+      return vPrice.times(getUsdRate(WBTC_ADDRESS))
     case 3:
       return vPrice.times(getLpUnderlyingTokenValueInOtherToken(lpTokenAddress, USDT_ADDRESS)) //quoteInSpecifiedToken(USDT_ADDRESS, pool.lpToken).times(exponentToBigDecimal(BigInt.fromI32(12))))
   }

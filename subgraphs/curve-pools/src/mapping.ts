@@ -7,7 +7,12 @@ import {
 } from '../generated/Booster/Booster'
 import { DailyPoolSnapshot, Pool } from '../generated/schema'
 import { Deposit, Withdrawal } from '../generated/schema'
-import { getPool, getPoolApr, getPoolCoins } from './services/pools'
+import {
+  getPool,
+  getPoolApr,
+  getPoolCoins,
+  getPoolExtras
+} from './services/pools'
 import {
   ADDRESS_ZERO,
   ASSET_TYPES,
@@ -39,11 +44,13 @@ export function handleAddPool(call: AddPoolCall): void {
   }
   const poolInfo = booster.try_poolInfo(pid)
   const pool = new Pool(pid.toString())
+  const stash = poolInfo.value.value4
   if (!poolInfo.reverted) {
     pool.crvRewardsPool = poolInfo.value.value3
-    pool.stash = poolInfo.value.value4
+    pool.stash = stash
   }
   const lpToken = call.inputs._lptoken
+  pool.poolid = pid
   pool.lpToken = lpToken
 
   let swap = curveRegistry.get_pool_from_lp_token(call.inputs._lptoken)
@@ -62,10 +69,16 @@ export function handleAddPool(call: AddPoolCall): void {
 
   getPoolCoins(pool)
   log.info('New pool added {} at block {}', [pool.name, call.block.number.toString()])
+
   pool.assetType = ASSET_TYPES.has(swap.toHexString()) ? ASSET_TYPES.get(swap.toHexString()) : 0
   pool.gauge = call.inputs._gauge
   pool.stashVersion = call.inputs._stashVersion
+  // If there is a stash contract, get the reward tokens
+  if (stash != ADDRESS_ZERO) {
+    getPoolExtras(pool)
+  }
   pool.active = true
+  pool.creationBlock = call.block.number
   pool.creationDate = call.block.timestamp
   pool.save()
 }
@@ -101,9 +114,14 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
     snapshot.poolid = event.params.poolid
     snapshot.poolName = pool.name
     snapshot.timestamp = event.block.timestamp
-    pool.apr = getPoolApr(pool)
+    const aprs = getPoolApr(pool)
+    pool.crvApr = aprs[0]
+    pool.cvxApr = aprs[1]
+    pool.extraRewardsApr = aprs[2]
     snapshot.lpTokenVirtualPrice = getLpTokenVirtualPrice(pool.lpToken)
-    snapshot.apr = pool.apr
+    snapshot.crvApr = pool.crvApr
+    snapshot.cvxApr = pool.cvxApr
+    snapshot.extraRewardsApr = pool.extraRewardsApr
     snapshot.lpTokenBalance = pool.lpTokenBalance
 
     pool.baseApr = getPoolBaseApr(pool, snapshot.lpTokenVirtualPrice, event.block.timestamp)
@@ -146,9 +164,14 @@ export function handleDeposited(event: DepositedEvent): void {
     snapshot.poolid = event.params.poolid
     snapshot.poolName = pool.name
     snapshot.timestamp = event.block.timestamp
-    pool.apr = getPoolApr(pool)
+    const aprs = getPoolApr(pool)
+    pool.crvApr = aprs[0]
+    pool.cvxApr = aprs[1]
+    pool.extraRewardsApr = aprs[2]
     snapshot.lpTokenVirtualPrice = getLpTokenVirtualPrice(pool.lpToken)
-    snapshot.apr = pool.apr
+    snapshot.crvApr = pool.crvApr
+    snapshot.cvxApr = pool.cvxApr
+    snapshot.extraRewardsApr = pool.extraRewardsApr
     snapshot.lpTokenBalance = pool.lpTokenBalance
 
     pool.baseApr = getPoolBaseApr(pool, snapshot.lpTokenVirtualPrice, event.block.timestamp)

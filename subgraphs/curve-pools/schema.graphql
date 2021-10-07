@@ -22,8 +22,16 @@ type User @entity {
   deposits: [Deposit!] @derivedfrom(field: user)
 }
 
+type ExtraReward @entity {
+  id: ID!
+  poolid: BigInt!
+  contract: Bytes! #address
+  token: Bytes! #address
+}
+
 type Pool @entity {
   id: ID!
+  poolid: BigInt!
   name: String!
   lpToken: Bytes! #address
   lpTokenBalance: BigInt!
@@ -34,8 +42,11 @@ type Pool @entity {
   stashVersion: BigInt!
   active: Boolean!
   creationDate: BigInt!
+  creationBlock: BigInt!
   tvl: BigDecimal!
-  apr: BigDecimal!
+  crvApr: BigDecimal!
+  cvxApr: BigDecimal!
+  extraRewardsApr: BigDecimal!
   baseApr: BigDecimal!
   deposits: [Deposit!] @derivedfrom(field: poolid)
   withdrawals: [Withdrawal!] @derivedfrom(field: poolid)
@@ -43,7 +54,9 @@ type Pool @entity {
   swap: Bytes! #address
   " Underlying asset type (USD, BTC...) "
   assetType: Int!
-  coins: [Bytes!]!
+  " Extra reward contracts "
+  extras: [String!]!
+  coins: [Bytes!]! #address
   snapshots: [DailyPoolSnapshot!] @derivedfrom(field: poolid)
 }
 
@@ -60,7 +73,9 @@ type DailyPoolSnapshot @entity {
   lpTokenBalance: BigInt!
   lpTokenVirtualPrice: BigDecimal!
   tvl: BigDecimal!
-  apr: BigDecimal!
+  crvApr: BigDecimal!
+  cvxApr: BigDecimal!
+  extraRewardsApr: BigDecimal!
   baseApr: BigDecimal!
   timestamp: BigInt!
 }
