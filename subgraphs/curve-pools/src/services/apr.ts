@@ -18,7 +18,7 @@ import {
   BIG_DECIMAL_1E8,
   V2_POOL_ADDRESSES,
   BIG_DECIMAL_ONE,
-  USDT_ADDRESS,
+  USDT_ADDRESS, CVX_CRV_LP_TOKEN, CRV_ADDRESS
 } from 'const'
 
 import { ERC20 } from '../../generated/Booster/ERC20'
@@ -34,7 +34,7 @@ export function getV2LpTokenPrice(pool: Pool): BigDecimal {
   const lpToken = bytesToAddress(pool.lpToken)
   const tokenContract = ERC20.bind(lpToken)
   const supplyResult = tokenContract.try_totalSupply()
-  const supply = supplyResult.reverted ? BIG_INT_ZERO : supplyResult.value
+  const supply = supplyResult.reverted ? BIG_DECIMAL_ZERO : supplyResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
   let total = BIG_DECIMAL_ZERO
   for (let i = 0; i < pool.coins.length; ++i) {
     const currentCoin = bytesToAddress(pool.coins[i])
@@ -58,7 +58,7 @@ export function getV2LpTokenPrice(pool: Pool): BigDecimal {
     }
     total = total.plus(price.times(balance))
   }
-  const value = total.div(supply.toBigDecimal())
+  const value = (supply == BIG_DECIMAL_ZERO) ? BIG_DECIMAL_ZERO : total.div(supply)
   return value
 }
 
@@ -69,13 +69,20 @@ export function getForexUsdRate(lpToken: Bytes): BigDecimal {
   const conversionRate = conversionRateReponse.reverted
     ? BIG_DECIMAL_ONE
     : conversionRateReponse.value.toBigDecimal().div(BIG_DECIMAL_1E8)
-  log.debug('Answer from Forex oracle {} for token {}: {}', [FOREX_ORACLES[lpToken.toHexString()].toHexString(), lpToken.toHexString(), conversionRate.toString()])
+  log.debug('Answer from Forex oracle {} for token {}: {}', [
+    FOREX_ORACLES[lpToken.toHexString()].toHexString(),
+    lpToken.toHexString(),
+    conversionRate.toString(),
+  ])
   return conversionRate
 }
 
 export function getTokenValueInLpUnderlyingToken(token: Address, lpToken: Address): BigDecimal {
   if (lpToken == LINK_LP_TOKEN_ADDRESS) {
     return getTokenAValueInTokenB(token, LINK_ADDRESS)
+  }
+  else if (lpToken == Address.fromString(CVX_CRV_LP_TOKEN)) {
+    return getTokenAValueInTokenB(token, CRV_ADDRESS)
   }
   return BIG_DECIMAL_ONE
 }
@@ -116,6 +123,7 @@ export function getLpTokenPriceUSD(pool: Pool): BigDecimal {
   const vPrice = getLpTokenVirtualPrice(pool.lpToken)
   // TODO : check how to determine v1/v2 pool on-chain
   if (V2_POOL_ADDRESSES.includes(lpTokenAddress)) {
+    // TODO: this will break for v2 pools whose currency is NOT usd
     return getV2LpTokenPrice(pool)
   }
   if (FOREX_ORACLES.has(pool.lpToken.toHexString())) {

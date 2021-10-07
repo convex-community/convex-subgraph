@@ -5,11 +5,11 @@ import { bytesToAddress } from 'utils'
 import {
   ADDRESS_ZERO,
   BIG_DECIMAL_1E18, BIG_DECIMAL_ONE,
-  BIG_DECIMAL_ZERO,
+  BIG_DECIMAL_ZERO, BIG_INT_ONE,
   BIG_INT_ZERO,
   CRV_ADDRESS,
   CVX_ADDRESS,
-  FOREX_ORACLES,
+  FOREX_ORACLES, V2_POOL_ADDRESSES,
   WBTC_ADDRESS
 } from 'const'
 import {
@@ -20,12 +20,18 @@ import {
 } from 'utils/pricing'
 import { DAY, getIntervalFromTimestamp } from 'utils/time'
 import { CurvePool } from '../../generated/Booster/CurvePool'
-import { getCvxMintAmount, getForexUsdRate, getLpTokenVirtualPrice, getTokenValueInLpUnderlyingToken } from './apr'
-import { ExtraRewardStash } from '../../generated/Booster/ExtraRewardStash'
-import { ExtraRewardStashV3 } from '../../generated/Booster/ExtraRewardStashV3'
+import {
+  getCvxMintAmount,
+  getForexUsdRate,
+  getLpTokenVirtualPrice,
+  getTokenValueInLpUnderlyingToken,
+  getV2LpTokenPrice
+} from './apr'
 import { ExtraRewardStashV2 } from '../../generated/Booster/ExtraRewardStashV2'
 import { ExtraRewardStashV1 } from '../../generated/Booster/ExtraRewardStashV1'
 import { VirtualBalanceRewardPool } from '../../generated/Booster/VirtualBalanceRewardPool'
+import { ExtraRewardStashV32 } from '../../generated/Booster/ExtraRewardStashV32'
+import { ExtraRewardStashV31 } from '../../generated/Booster/ExtraRewardStashV31'
 
 export function getPool(pid: BigInt): Pool {
   let pool = Pool.load(pid.toString())
@@ -130,8 +136,49 @@ export function getPoolExtrasV2(pool: Pool): void {
   }
 }
 
+export function getPoolExtrasV31(pool: Pool): void {
+  // TODO: DRY this by using common ABI for v3.1 & v2 since logic and methods
+  // are the same
+  const stashContract = ExtraRewardStashV31.bind(bytesToAddress(pool.stash))
+  const tokenCountResult = stashContract.try_tokenCount()
+  const tokenCount = tokenCountResult.reverted ? BigInt.fromI32(pool.extras.length) : tokenCountResult.value
+  for (let i = pool.extras.length; i < tokenCount.toI32(); i++) {
+    const tokenInfoResult = stashContract.try_tokenInfo(BigInt.fromI32(i))
+    if (tokenInfoResult.reverted) {
+      continue
+    }
+    const rewardToken = tokenInfoResult.value.value0
+    const rewardContract = tokenInfoResult.value.value1
+    if (rewardToken != ADDRESS_ZERO || rewardContract != ADDRESS_ZERO) {
+      let extras = pool.extras
+      extras.push(createNewExtraReward(pool.poolid, rewardContract, rewardToken))
+      pool.extras = extras
+      pool.save()
+    }
+  }
+}
+
 export function getPoolExtrasV3(pool: Pool): void {
-  const stashContract = ExtraRewardStashV3.bind(bytesToAddress(pool.stash))
+
+  const stashContract = ExtraRewardStashV32.bind(bytesToAddress(pool.stash))
+
+  // determine what minor version of version 3 contracts we are using
+  // if it hasn't been determined before
+  if (pool.stashMinorVersion == BIG_INT_ZERO) {
+    const contractNameResult = stashContract.try_getName()
+    if (!contractNameResult.reverted) {
+      // only 2 versions for now
+      const minorVersion = (contractNameResult.value[contractNameResult.value.length] == '2') ? 2 : 1
+      pool.stashMinorVersion = BigInt.fromI32(minorVersion)
+      pool.save()
+    }
+  }
+
+  if (pool.stashMinorVersion == BIG_INT_ONE) {
+    getPoolExtrasV31(pool)
+    return
+  }
+
   const tokenCountResult = stashContract.try_tokenCount()
   const tokenCount = tokenCountResult.reverted ? BigInt.fromI32(pool.extras.length) : tokenCountResult.value
 
@@ -171,7 +218,7 @@ export function getTokenPriceForAssetType(token: Address, pool: Pool): BigDecima
 }
 
 export function getPoolApr(pool: Pool): Array<BigDecimal> {
-  const vPrice = getLpTokenVirtualPrice(pool.lpToken)
+  const vPrice = (V2_POOL_ADDRESSES.includes(bytesToAddress(pool.lpToken))) ? getV2LpTokenPrice(pool) : getLpTokenVirtualPrice(pool.lpToken)
   const rewardContract = BaseRewardPool.bind(bytesToAddress(pool.crvRewardsPool))
   // TODO: getSupply function also to be used in CVXMint to DRY
   const supplyResult = rewardContract.try_totalSupply()
@@ -201,7 +248,7 @@ export function getPoolApr(pool: Pool): Array<BigDecimal> {
   }
   const crvApr = crvPerYear.times(crvPrice)
   const cvxApr = cvxPerYear.times(cvxPrice)
-  // TODO: add extra token rewards
+
   let extraRewardsApr = BIG_DECIMAL_ZERO
   // look for updates to extra rewards
   getPoolExtras(pool)
