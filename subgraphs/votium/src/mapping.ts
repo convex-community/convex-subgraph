@@ -1,7 +1,7 @@
 import { BigInt } from '@graphprotocol/graph-ts'
 import { Bribed, UpdatedFee, InitiateProposalCall } from '../generated/VotiumBribe/VotiumBribe'
 import { Bribe, Epoch, Fee } from '../generated/schema'
-import { VOTIUM_BRIBE_CONTRACT } from 'const'
+import { BIG_INT_ONE, VOTIUM_BRIBE_CONTRACT } from 'const'
 
 export function getPlatformFee(): Fee {
   let fee = Fee.load(VOTIUM_BRIBE_CONTRACT)
@@ -27,6 +27,12 @@ export function handleBribed(event: Bribed): void {
   bribe.amount = event.params._amount.times(fee).div(BigInt.fromI32(10000))
   bribe.token = event.params._token
   bribe.save()
+
+  const epoch = Epoch.load(bribe.epoch)
+  if (epoch) {
+    epoch.bribeCount = epoch.bribeCount.plus(BIG_INT_ONE)
+    epoch.save()
+  }
 }
 
 export function handleInitiated(call: InitiateProposalCall): void {

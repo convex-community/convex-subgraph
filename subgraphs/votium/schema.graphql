@@ -2,6 +2,7 @@ type Epoch @entity {
   id: ID!
   deadline: BigInt!
   initiatedAt: BigInt!
+  bribeCount: BigInt!
   bribes: [Bribe!]! @derivedFrom(field: "epoch")
 }
 
