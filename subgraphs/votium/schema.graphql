@@ -1,0 +1,18 @@
+type Epoch @entity {
+  id: ID!
+  deadline: BigInt!
+  initiatedAt: BigInt!
+  bribes: [Bribe!]! @derivedFrom(field: "epoch")
+}
+
+type Bribe @entity {
+  id: ID!
+  epoch: Epoch!
+  token: Bytes! # address
+  amount: BigInt! # uint256
+}
+
+type Fee @entity {
+  id: ID!
+  amount: BigInt!
+}
