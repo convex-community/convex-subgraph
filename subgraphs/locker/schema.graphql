@@ -9,9 +9,9 @@ type Token @entity {
 type User @entity {
   id: ID!
   address: Bytes!
-  rewards: [Reward!] @derivedfrom(field: user)
-  locks: [Lock!] @derivedfrom(field: user)
-  withdrawals: [Withdrawal!] @derivedfrom(field: user)
+  receivedRewards: [ReceivedReward!] @derivedFrom(field: "user")
+  locks: [Lock!] @derivedFrom(field: "user")
+  withdrawals: [Withdrawal!] @derivedFrom(field: "user")
   totalLocked: BigInt!
   totalLockedUSD: BigDecimal!
 }
@@ -33,9 +33,18 @@ type Withdrawal @entity {
   time: BigInt!
 }
 
-type Reward @entity {
+type ReceivedReward @entity {
   id: ID!
   user: User!
+  token: Token!
+  kickReward: Boolean!
+  amount: BigInt!
+  amountUSD: BigDecimal!
+  time: BigInt!
+}
+
+type AddedReward @entity {
+  id: ID!
   token: Token!
   amount: BigInt!
   amountUSD: BigDecimal!

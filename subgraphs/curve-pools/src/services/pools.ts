@@ -5,7 +5,7 @@ import { bytesToAddress } from 'utils'
 import {
   ADDRESS_ZERO,
   BIG_DECIMAL_1E18, BIG_DECIMAL_ONE,
-  BIG_DECIMAL_ZERO, BIG_INT_ONE,
+  BIG_DECIMAL_ZERO, BIG_INT_MINUS_ONE, BIG_INT_ONE,
   BIG_INT_ZERO,
   CRV_ADDRESS,
   CVX_ADDRESS,
@@ -32,6 +32,7 @@ import { ExtraRewardStashV1 } from '../../generated/Booster/ExtraRewardStashV1'
 import { VirtualBalanceRewardPool } from '../../generated/Booster/VirtualBalanceRewardPool'
 import { ExtraRewardStashV32 } from '../../generated/Booster/ExtraRewardStashV32'
 import { ExtraRewardStashV31 } from '../../generated/Booster/ExtraRewardStashV31'
+import { ExtraRewardStashV30 } from '../../generated/Booster/ExtraRewardStashV30'
 
 export function getPool(pid: BigInt): Pool {
   let pool = Pool.load(pid.toString())
@@ -136,10 +137,10 @@ export function getPoolExtrasV2(pool: Pool): void {
   }
 }
 
-export function getPoolExtrasV31(pool: Pool): void {
-  // TODO: DRY this by using common ABI for v3.1 & v2 since logic and methods
+export function getPoolExtrasV30(pool: Pool): void {
+  // TODO: DRY this by using common ABI for v3.0 & v2 since logic and methods
   // are the same
-  const stashContract = ExtraRewardStashV31.bind(bytesToAddress(pool.stash))
+  const stashContract = ExtraRewardStashV30.bind(bytesToAddress(pool.stash))
   const tokenCountResult = stashContract.try_tokenCount()
   const tokenCount = tokenCountResult.reverted ? BigInt.fromI32(pool.extras.length) : tokenCountResult.value
   for (let i = pool.extras.length; i < tokenCount.toI32(); i++) {
@@ -163,22 +164,30 @@ export function getPoolExtrasV3(pool: Pool): void {
   const stashContract = ExtraRewardStashV32.bind(bytesToAddress(pool.stash))
 
   // determine what minor version of version 3 contracts we are using
-  // if it hasn't been determined before
-  if (pool.stashMinorVersion == BIG_INT_ZERO) {
+  // if it hasn't been determined before.
+  if (pool.stashMinorVersion == BIG_INT_MINUS_ONE) {
     const contractNameResult = stashContract.try_getName()
     if (!contractNameResult.reverted) {
-      // only 2 versions for now
-      const minorVersion = (contractNameResult.value[contractNameResult.value.length] == '2') ? 2 : 1
+      // Need to account for "ExtraRewardStashV3", "ExtraRewardStashV3.1" and "ExtraRewardStashV3.2"
+      const suffix = contractNameResult.value.slice(contractNameResult.value.length - 2, contractNameResult.value.length)
+      let minorVersion = 0
+      if (suffix == ".1") {
+          minorVersion = 1
+      }
+      else if (suffix == ".2") {
+          minorVersion = 2
+      }
       pool.stashMinorVersion = BigInt.fromI32(minorVersion)
       pool.save()
     }
   }
 
-  if (pool.stashMinorVersion == BIG_INT_ONE) {
-    getPoolExtrasV31(pool)
+  if (pool.stashMinorVersion == BIG_INT_ZERO) {
+    getPoolExtrasV30(pool)
     return
   }
 
+  // v3.1 and above share the same ABI
   const tokenCountResult = stashContract.try_tokenCount()
   const tokenCount = tokenCountResult.reverted ? BigInt.fromI32(pool.extras.length) : tokenCountResult.value
 

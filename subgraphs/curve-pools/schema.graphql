@@ -1,15 +1,15 @@
 type Deposit @entity {
   id: ID!
-  user: Bytes! # address
-  poolid: BigInt! # uint256
+  user: User! # address
+  poolid: Pool! 
   amount: BigInt! # uint256
   timestamp: BigInt!
 }
 
 type Withdrawal @entity {
   id: ID!
-  user: Bytes! # address
-  poolid: BigInt! # uint256
+  user: User! # address
+  poolid: Pool!
   amount: BigInt! # uint256
   timestamp: BigInt!
 }
@@ -18,13 +18,13 @@ type Withdrawal @entity {
 type User @entity {
   id: ID!
   address: Bytes!
-  withdrawals: [Withdrawal!] @derivedfrom(field: user)
-  deposits: [Deposit!] @derivedfrom(field: user)
+  withdrawals: [Withdrawal!] @derivedFrom(field: "user")
+  deposits: [Deposit!] @derivedFrom(field: "user")
 }
 
 type ExtraReward @entity {
   id: ID!
-  poolid: BigInt!
+  poolid: Pool!
   contract: Bytes! #address
   token: Bytes! #address
 }
@@ -49,21 +49,23 @@ type Pool @entity {
   cvxApr: BigDecimal!
   extraRewardsApr: BigDecimal!
   baseApr: BigDecimal!
-  deposits: [Deposit!] @derivedfrom(field: poolid)
-  withdrawals: [Withdrawal!] @derivedfrom(field: poolid)
+  " TODO: set up relations "
+  deposits: [Deposit!] @derivedFrom(field: "poolid")
+  withdrawals: [Withdrawal!] @derivedFrom(field: "poolid")
   " Curve swap pool "
   swap: Bytes! #address
   " Underlying asset type (USD, BTC...) "
   assetType: Int!
   " Extra reward contracts "
   extras: [String!]!
+  extraRewards: [ExtraReward!] @derivedFrom(field: "poolid")
   coins: [Bytes!]! #address
-  snapshots: [DailyPoolSnapshot!] @derivedfrom(field: poolid)
+  snapshots: [DailyPoolSnapshot!] @derivedFrom(field: "poolid")
 }
 
 type DailyPoolSnapshot @entity {
   id: ID!
-  poolid: BigInt!
+  poolid: Pool!
   poolName: String!
   withdrawalCount: BigInt!
   depositCount: BigInt!
