@@ -6,6 +6,7 @@ export const BIG_DECIMAL_1E18 = BigDecimal.fromString('1e18')
 export const BIG_DECIMAL_ZERO = BigDecimal.fromString('0')
 export const BIG_DECIMAL_ONE = BigDecimal.fromString('1')
 
+export const BIG_INT_MINUS_ONE = BigInt.fromI32(-1)
 export const BIG_INT_ZERO = BigInt.fromString('0')
 export const BIG_INT_ONE = BigInt.fromString('1')
 
@@ -62,6 +63,9 @@ export const V2_POOL_ADDRESSES = [TRICRYPTO_LP_ADDRESS, TRICRYPTO2_LP_ADDRESS]
 export const CVX_CLIFF_SIZE = BigDecimal.fromString('100000') // * 1e18; //new cliff every 100,000 tokens
 export const CVX_CLIFF_COUNT =BigDecimal.fromString('1000') // 1,000 cliffs
 export const CVX_MAX_SUPPLY = BigDecimal.fromString('100000000') // * 1e18; //100 mil max supply
+
+export const VOTIUM_BRIBE_CONTRACT = "0x19bbc3463dd8d07f55438014b021fb457ebd4595"
+export const VOTIUM_BRIBE_CONTRACT_ADDRESS = Address.fromString(VOTIUM_BRIBE_CONTRACT)
 
 // The arrays are to map the asset types for the various curve pools
 // It's necessary because pools are often instantiated with the wrong asset type

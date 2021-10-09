@@ -16,11 +16,11 @@ import {
 import {
   ADDRESS_ZERO,
   ASSET_TYPES,
-  BIG_DECIMAL_1E18,
+  BIG_DECIMAL_1E18, BIG_INT_MINUS_ONE,
   BIG_INT_ONE,
   BIG_INT_ZERO,
   BOOSTER_ADDRESS,
-  CURVE_REGISTRY,
+  CURVE_REGISTRY
 } from 'const'
 import { CurveRegistry } from '../generated/Booster/CurveRegistry'
 import { ERC20 } from '../generated/Booster/ERC20'
@@ -73,6 +73,8 @@ export function handleAddPool(call: AddPoolCall): void {
   pool.assetType = ASSET_TYPES.has(swap.toHexString()) ? ASSET_TYPES.get(swap.toHexString()) : 0
   pool.gauge = call.inputs._gauge
   pool.stashVersion = call.inputs._stashVersion
+  // Initialize minor version at -1
+  pool.stashMinorVersion = BIG_INT_MINUS_ONE
   // If there is a stash contract, get the reward tokens
   if (stash != ADDRESS_ZERO) {
     getPoolExtras(pool)
@@ -91,7 +93,7 @@ export function handleShutdownPool(call: ShutdownPoolCall): void {
 
 export function handleWithdrawn(event: WithdrawnEvent): void {
   const withdrawal = new Withdrawal(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
-  withdrawal.user = event.params.user
+  withdrawal.user = event.params.user.toHexString()
   withdrawal.poolid = event.params.poolid
   withdrawal.amount = event.params.amount
   withdrawal.timestamp = event.block.timestamp
@@ -139,7 +141,7 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
 
 export function handleDeposited(event: DepositedEvent): void {
   const deposit = new Deposit(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
-  deposit.user = event.params.user
+  deposit.user = event.params.user.toHexString()
   deposit.poolid = event.params.poolid
   deposit.amount = event.params.amount
   deposit.timestamp = event.block.timestamp

@@ -1,10 +1,15 @@
 import {
-  KickReward,
+  KickReward, RewardAdded,
   RewardPaid,
   Staked,
   Withdrawn
-} from "../generated/CvxLocker/CvxLocker"
-import {Lock, Reward, Withdrawal} from "../generated/schema"
+} from '../generated/CvxLocker/CvxLocker'
+import {
+  AddedReward,
+  Lock,
+  ReceivedReward,
+  Withdrawal
+} from '../generated/schema'
 import {getUser} from "./services/users";
 import {
   getEventId, updateAggregatedLocks,
@@ -21,13 +26,14 @@ const cvx = getOrCreateToken(CVX_ADDRESS);
 export function handleKickReward(event: KickReward): void {
 
   const user = getUser(event.params._user);
-  const reward = new Reward(getEventId(event));
+  const reward = new ReceivedReward(getEventId(event));
   reward.user = user.id;
   reward.amount = event.params._reward;
   reward.amountUSD = getUsdRate(CVX_ADDRESS).times(reward.amount.toBigDecimal()
       .div(exponentToBigDecimal(cvx.decimals)));
   reward.token = cvx.id;
   reward.time = event.block.timestamp;
+  reward.kickReward = true;
   reward.save()
 
   updateAggregatedRewards(reward.time,
@@ -41,7 +47,7 @@ export function handleKickReward(event: KickReward): void {
 export function handleRewardPaid(event: RewardPaid): void {
 
   const user = getUser(event.params._user);
-  const reward = new Reward(getEventId(event));
+  const reward = new ReceivedReward(getEventId(event));
   reward.user = user.id;
   reward.amount = event.params._reward;
   const token = getOrCreateToken(event.params._rewardsToken);
@@ -49,6 +55,7 @@ export function handleRewardPaid(event: RewardPaid): void {
       .div(exponentToBigDecimal(token.decimals)));
   reward.token = token.id;
   reward.time = event.block.timestamp;
+  reward.kickReward = false;
   reward.save();
 
   updateAggregatedRewards(reward.time,
@@ -71,6 +78,18 @@ export function handleStaked(event: Staked): void {
   lock.save();
   updateAggregatedLocks(lock.time, lock.lockAmount,
       lock.amountUSD);
+}
+
+export function handleRewardAdded(event: RewardAdded): void {
+
+  const reward = new AddedReward(getEventId(event));
+  reward.amount = event.params._reward;
+  const token = getOrCreateToken(event.params._token);
+  reward.amountUSD = getUsdRate(Address.fromString(token.id)).times(reward.amount.toBigDecimal()
+    .div(exponentToBigDecimal(token.decimals)));
+  reward.token = token.id;
+  reward.time = event.block.timestamp;
+  reward.save();
 }
 
 export function handleWithdrawn(event: Withdrawn): void {
