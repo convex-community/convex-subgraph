@@ -61,6 +61,9 @@ export const CVX_CLIFF_SIZE = BigDecimal.fromString('100000') // * 1e18; //new c
 export const CVX_CLIFF_COUNT =BigDecimal.fromString('1000') // 1,000 cliffs
 export const CVX_MAX_SUPPLY = BigDecimal.fromString('100000000') // * 1e18; //100 mil max supply
 
+export const VOTIUM_BRIBE_CONTRACT = "0x19bbc3463dd8d07f55438014b021fb457ebd4595"
+export const VOTIUM_BRIBE_CONTRACT_ADDRESS = Address.fromString(VOTIUM_BRIBE_CONTRACT)
+
 // The arrays are to map the asset types for the various curve pools
 // It's necessary because pools are often instantiated with the wrong asset type
 // so the values from the registry's get_pool_asset_type method can't be relied
