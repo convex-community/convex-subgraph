@@ -34,8 +34,8 @@ dataSources:
           file: ../../abis/CLAggregator.json
         - name: CurvePool
           file: ../../abis/CurvePool.json
-        - name: ExtraRewardStashV31
-          file: ../../abis/ExtraRewardStashV31.json
+        - name: ExtraRewardStashV30
+          file: ../../abis/ExtraRewardStashV30.json
         - name: ExtraRewardStashV32
           file: ../../abis/ExtraRewardStashV32.json
         - name: ExtraRewardStashV2
