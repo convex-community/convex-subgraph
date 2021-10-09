@@ -42,4 +42,6 @@ dataSources:
           handler: handleStaked
         - event: Withdrawn(indexed address,uint256,bool)
           handler: handleWithdrawn
+        - event: RewardAdded(indexed address,uint256)
+          handler: handleRewardAdded
       file: ./src/mapping.ts
