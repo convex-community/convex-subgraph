@@ -4,20 +4,16 @@ import { BaseRewardPool } from '../../generated/Booster/BaseRewardPool'
 import { bytesToAddress } from 'utils'
 import {
   ADDRESS_ZERO,
-  BIG_DECIMAL_1E18, BIG_DECIMAL_ONE,
-  BIG_DECIMAL_ZERO, BIG_INT_MINUS_ONE, BIG_INT_ONE,
+  BIG_DECIMAL_1E18,
+  BIG_DECIMAL_ZERO,
+  BIG_INT_MINUS_ONE,
   BIG_INT_ZERO,
   CRV_ADDRESS,
   CVX_ADDRESS,
-  FOREX_ORACLES, V2_POOL_ADDRESSES,
-  WBTC_ADDRESS
+  FOREX_ORACLES,
+  V2_POOL_ADDRESSES,
 } from 'const'
-import {
-  getBtcRate,
-  getEthRate,
-  getTokenAValueInTokenB,
-  getUsdRate
-} from 'utils/pricing'
+import { getBtcRate, getEthRate, getUsdRate } from 'utils/pricing'
 import { DAY, getIntervalFromTimestamp } from 'utils/time'
 import { CurvePool } from '../../generated/Booster/CurvePool'
 import {
@@ -25,19 +21,18 @@ import {
   getForexUsdRate,
   getLpTokenVirtualPrice,
   getTokenValueInLpUnderlyingToken,
-  getV2LpTokenPrice
+  getV2LpTokenPrice,
 } from './apr'
 import { ExtraRewardStashV2 } from '../../generated/Booster/ExtraRewardStashV2'
 import { ExtraRewardStashV1 } from '../../generated/Booster/ExtraRewardStashV1'
 import { VirtualBalanceRewardPool } from '../../generated/Booster/VirtualBalanceRewardPool'
 import { ExtraRewardStashV32 } from '../../generated/Booster/ExtraRewardStashV32'
-import { ExtraRewardStashV31 } from '../../generated/Booster/ExtraRewardStashV31'
 import { ExtraRewardStashV30 } from '../../generated/Booster/ExtraRewardStashV30'
 
-export function getPool(pid: BigInt): Pool {
-  let pool = Pool.load(pid.toString())
+export function getPool(pid: string): Pool {
+  let pool = Pool.load(pid)
   if (!pool) {
-    pool = new Pool(pid.toString())
+    pool = new Pool(pid)
   }
   return pool
 }
@@ -62,7 +57,7 @@ export function getDailyPoolSnapshot(poolid: BigInt, name: string, timestamp: Bi
   let dailySnapshot = DailyPoolSnapshot.load(snapId)
   if (!dailySnapshot) {
     dailySnapshot = new DailyPoolSnapshot(snapId)
-    dailySnapshot.poolid = poolid
+    dailySnapshot.poolid = poolid.toString()
     dailySnapshot.poolName = name.toString()
     dailySnapshot.timestamp = day
   }
@@ -78,7 +73,7 @@ export function getExtraReward(id: string): ExtraReward {
 }
 
 export function getPoolExtras(pool: Pool): void {
-  switch(pool.stashVersion.toI32()){
+  switch (pool.stashVersion.toI32()) {
     case 1:
       getPoolExtrasV1(pool)
       break
@@ -94,7 +89,7 @@ export function getPoolExtras(pool: Pool): void {
 export function createNewExtraReward(poolid: BigInt, rewardContract: Address, rewardToken: Address): string {
   const extraRewardId = poolid.toString() + rewardContract.toHexString() + rewardToken.toHexString()
   const extraReward = new ExtraReward(extraRewardId)
-  extraReward.poolid = poolid
+  extraReward.poolid = poolid.toString()
   extraReward.contract = rewardContract
   extraReward.token = rewardToken
   extraReward.save()
@@ -110,7 +105,7 @@ export function getPoolExtrasV1(pool: Pool): void {
   const rewardToken = tokenInfoResult.value.value0
   const rewardContract = tokenInfoResult.value.value1
   if (rewardToken != ADDRESS_ZERO || rewardContract != ADDRESS_ZERO) {
-    let extras = pool.extras
+    const extras = pool.extras
     extras.push(createNewExtraReward(pool.poolid, rewardContract, rewardToken))
     pool.extras = extras
     pool.save()
@@ -129,7 +124,7 @@ export function getPoolExtrasV2(pool: Pool): void {
     const rewardToken = tokenInfoResult.value.value0
     const rewardContract = tokenInfoResult.value.value1
     if (rewardToken != ADDRESS_ZERO || rewardContract != ADDRESS_ZERO) {
-      let extras = pool.extras
+      const extras = pool.extras
       extras.push(createNewExtraReward(pool.poolid, rewardContract, rewardToken))
       pool.extras = extras
       pool.save()
@@ -151,7 +146,7 @@ export function getPoolExtrasV30(pool: Pool): void {
     const rewardToken = tokenInfoResult.value.value0
     const rewardContract = tokenInfoResult.value.value1
     if (rewardToken != ADDRESS_ZERO || rewardContract != ADDRESS_ZERO) {
-      let extras = pool.extras
+      const extras = pool.extras
       extras.push(createNewExtraReward(pool.poolid, rewardContract, rewardToken))
       pool.extras = extras
       pool.save()
@@ -160,7 +155,6 @@ export function getPoolExtrasV30(pool: Pool): void {
 }
 
 export function getPoolExtrasV3(pool: Pool): void {
-
   const stashContract = ExtraRewardStashV32.bind(bytesToAddress(pool.stash))
 
   // determine what minor version of version 3 contracts we are using
@@ -169,13 +163,15 @@ export function getPoolExtrasV3(pool: Pool): void {
     const contractNameResult = stashContract.try_getName()
     if (!contractNameResult.reverted) {
       // Need to account for "ExtraRewardStashV3", "ExtraRewardStashV3.1" and "ExtraRewardStashV3.2"
-      const suffix = contractNameResult.value.slice(contractNameResult.value.length - 2, contractNameResult.value.length)
+      const suffix = contractNameResult.value.slice(
+        contractNameResult.value.length - 2,
+        contractNameResult.value.length
+      )
       let minorVersion = 0
-      if (suffix == ".1") {
-          minorVersion = 1
-      }
-      else if (suffix == ".2") {
-          minorVersion = 2
+      if (suffix == '.1') {
+        minorVersion = 1
+      } else if (suffix == '.2') {
+        minorVersion = 2
       }
       pool.stashMinorVersion = BigInt.fromI32(minorVersion)
       pool.save()
@@ -203,7 +199,7 @@ export function getPoolExtrasV3(pool: Pool): void {
     const rewardToken = tokenInfoResult.value.value0
     const rewardContract = tokenInfoResult.value.value1
     if (rewardToken != ADDRESS_ZERO || rewardContract != ADDRESS_ZERO) {
-      let extras = pool.extras
+      const extras = pool.extras
       extras.push(createNewExtraReward(pool.poolid, rewardContract, rewardToken))
       pool.extras = extras
       pool.save()
@@ -212,22 +208,25 @@ export function getPoolExtrasV3(pool: Pool): void {
 }
 
 export function getTokenPriceForAssetType(token: Address, pool: Pool): BigDecimal {
-  if ((pool.assetType == 0) || (pool.assetType == 4)) { // USD
+  if (pool.assetType == 0 || pool.assetType == 4) {
+    // USD
     return getUsdRate(token)
-  }
-  else if (pool.assetType == 1) { // ETH
+  } else if (pool.assetType == 1) {
+    // ETH
     return getEthRate(token)
-  }
-  else if (pool.assetType == 2) { // BTC
+  } else if (pool.assetType == 2) {
+    // BTC
     return getBtcRate(token)
-  }
-  else { // Other
+  } else {
+    // Other
     return getTokenValueInLpUnderlyingToken(CVX_ADDRESS, bytesToAddress(pool.lpToken))
   }
 }
 
 export function getPoolApr(pool: Pool): Array<BigDecimal> {
-  const vPrice = (V2_POOL_ADDRESSES.includes(bytesToAddress(pool.lpToken))) ? getV2LpTokenPrice(pool) : getLpTokenVirtualPrice(pool.lpToken)
+  const vPrice = V2_POOL_ADDRESSES.includes(bytesToAddress(pool.lpToken))
+    ? getV2LpTokenPrice(pool)
+    : getLpTokenVirtualPrice(pool.lpToken)
   const rewardContract = BaseRewardPool.bind(bytesToAddress(pool.crvRewardsPool))
   // TODO: getSupply function also to be used in CVXMint to DRY
   const supplyResult = rewardContract.try_totalSupply()
@@ -261,23 +260,22 @@ export function getPoolApr(pool: Pool): Array<BigDecimal> {
   let extraRewardsApr = BIG_DECIMAL_ZERO
   // look for updates to extra rewards
   getPoolExtras(pool)
-  log.warning("POOL EXTRAS {}", [pool.extras.length.toString()])
+  log.warning('POOL EXTRAS {}', [pool.extras.length.toString()])
   for (let i = 0; i < pool.extras.length; i++) {
     const extra = ExtraReward.load(pool.extras[i])
-    log.warning("EXTRA ID {}", [pool.extras[i]])
     if (extra) {
       const rewardContractAddress = bytesToAddress(extra.contract)
       const rewardTokenAddress = bytesToAddress(extra.token)
       const rewardContract = VirtualBalanceRewardPool.bind(rewardContractAddress)
       const rewardRateResult = rewardContract.try_rewardRate()
-      const rewardRate = rewardRateResult.reverted ? BIG_DECIMAL_ZERO : rewardRateResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
-      log.error("REWARD RATE POOL {} : {}", [pool.name, rewardRate.toString()])
-      const perUnderlying = (virtualSupply == BIG_DECIMAL_ZERO) ? BIG_DECIMAL_ZERO : rewardRate.div(virtualSupply)
-      const perYear = perUnderlying.times(BigDecimal.fromString("31536000")) // (86400 * 365))
+      const rewardRate = rewardRateResult.reverted
+        ? BIG_DECIMAL_ZERO
+        : rewardRateResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
+      const perUnderlying = virtualSupply == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : rewardRate.div(virtualSupply)
+      const perYear = perUnderlying.times(BigDecimal.fromString('31536000')) // (86400 * 365))
       const rewardTokenPrice = getTokenPriceForAssetType(rewardTokenAddress, pool)
-      log.warning("REWARD TOKEN PRICE {} : {}", [pool.name, rewardTokenPrice.toString()])
       extraRewardsApr = extraRewardsApr.plus(rewardTokenPrice.times(perYear))
-      log.debug("Extra rewards APR for token {}: {}", [rewardTokenAddress.toHexString(), rewardTokenPrice.toString()])
+      log.debug('Extra rewards APR for token {}: {}', [rewardTokenAddress.toHexString(), rewardTokenPrice.toString()])
     }
   }
   return [crvApr, cvxApr, extraRewardsApr]

@@ -86,7 +86,7 @@ export function handleAddPool(call: AddPoolCall): void {
 }
 
 export function handleShutdownPool(call: ShutdownPoolCall): void {
-  const pool = getPool(call.inputs._pid)
+  const pool = getPool(call.inputs._pid.toString())
   pool.active = false
   pool.save()
 }
@@ -94,7 +94,7 @@ export function handleShutdownPool(call: ShutdownPoolCall): void {
 export function handleWithdrawn(event: WithdrawnEvent): void {
   const withdrawal = new Withdrawal(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
   withdrawal.user = event.params.user.toHexString()
-  withdrawal.poolid = event.params.poolid
+  withdrawal.poolid = event.params.poolid.toString()
   withdrawal.amount = event.params.amount
   withdrawal.timestamp = event.block.timestamp
   withdrawal.save()
@@ -113,7 +113,7 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
   // we only do call-heavy calculations once upon snapshot creation
   if (!snapshot) {
     snapshot = new DailyPoolSnapshot(snapId)
-    snapshot.poolid = event.params.poolid
+    snapshot.poolid = event.params.poolid.toString()
     snapshot.poolName = pool.name
     snapshot.timestamp = event.block.timestamp
     const aprs = getPoolApr(pool)
@@ -142,7 +142,7 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
 export function handleDeposited(event: DepositedEvent): void {
   const deposit = new Deposit(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
   deposit.user = event.params.user.toHexString()
-  deposit.poolid = event.params.poolid
+  deposit.poolid = event.params.poolid.toString()
   deposit.amount = event.params.amount
   deposit.timestamp = event.block.timestamp
   deposit.save()
@@ -163,7 +163,7 @@ export function handleDeposited(event: DepositedEvent): void {
   // we only do call-heavy calculations once upon snapshot creation
   if (!snapshot) {
     snapshot = new DailyPoolSnapshot(snapId)
-    snapshot.poolid = event.params.poolid
+    snapshot.poolid = event.params.poolid.toString()
     snapshot.poolName = pool.name
     snapshot.timestamp = event.block.timestamp
     const aprs = getPoolApr(pool)
