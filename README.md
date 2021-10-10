@@ -13,6 +13,7 @@ Currently available subgraphs:
 
 - **curve-pools**: Indexes events around the Booster contract where users deposit their Curve LP tokens. Allows, for instance, to query a pool's historical TVL and APR or a user's deposits and withdrawals.
 - **locker**: Indexes the vlCVX locker contract, allows to track the amount of CVX locked, the amount of rewards paid out over time.
+- **votium**: Indexes bribes deposited on the <a href="https://votium.app">Votium</a> platform.
 
 More to come!
 
