@@ -1,7 +1,7 @@
 type Deposit @entity {
   id: ID!
   user: User! # address
-  poolid: Pool! 
+  poolid: Pool!
   amount: BigInt! # uint256
   timestamp: BigInt!
 }

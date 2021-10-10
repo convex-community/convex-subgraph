@@ -50,6 +50,9 @@ export function getDecimals(token: Address): BigInt {
 // Computes the value of one unit of Token A in units of Token B
 // Only works if both tokens have an ETH pair on Sushi
 export function getTokenAValueInTokenB(tokenA: Address, tokenB: Address): BigDecimal {
+  if (tokenA == tokenB) {
+    return BIG_DECIMAL_ONE
+  }
   const decimalsA = getDecimals(tokenA)
   const decimalsB = getDecimals(tokenB)
   const ethRateA = getEthRate(tokenA).times(BIG_DECIMAL_1E18)

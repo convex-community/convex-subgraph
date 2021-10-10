@@ -4,7 +4,6 @@ import { CurveRegistry } from '../../generated/Booster/CurveRegistry'
 import {
   BIG_DECIMAL_1E18,
   BIG_DECIMAL_ZERO,
-  BIG_INT_ZERO,
   CURVE_REGISTRY,
   CVX_CLIFF_COUNT,
   CVX_CLIFF_SIZE,
@@ -18,7 +17,9 @@ import {
   BIG_DECIMAL_1E8,
   V2_POOL_ADDRESSES,
   BIG_DECIMAL_ONE,
-  USDT_ADDRESS, CVX_CRV_LP_TOKEN, CRV_ADDRESS
+  USDT_ADDRESS,
+  CVX_CRV_LP_TOKEN,
+  CRV_ADDRESS,
 } from 'const'
 
 import { ERC20 } from '../../generated/Booster/ERC20'
@@ -58,7 +59,7 @@ export function getV2LpTokenPrice(pool: Pool): BigDecimal {
     }
     total = total.plus(price.times(balance))
   }
-  const value = (supply == BIG_DECIMAL_ZERO) ? BIG_DECIMAL_ZERO : total.div(supply)
+  const value = supply == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : total.div(supply)
   return value
 }
 
@@ -80,8 +81,7 @@ export function getForexUsdRate(lpToken: Bytes): BigDecimal {
 export function getTokenValueInLpUnderlyingToken(token: Address, lpToken: Address): BigDecimal {
   if (lpToken == LINK_LP_TOKEN_ADDRESS) {
     return getTokenAValueInTokenB(token, LINK_ADDRESS)
-  }
-  else if (lpToken == Address.fromString(CVX_CRV_LP_TOKEN)) {
+  } else if (lpToken == Address.fromString(CVX_CRV_LP_TOKEN)) {
     return getTokenAValueInTokenB(token, CRV_ADDRESS)
   }
   return BIG_DECIMAL_ONE
