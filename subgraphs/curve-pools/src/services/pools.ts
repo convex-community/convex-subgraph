@@ -219,7 +219,7 @@ export function getTokenPriceForAssetType(token: Address, pool: Pool): BigDecima
     return getBtcRate(token)
   } else {
     // Other
-    return getTokenValueInLpUnderlyingToken(CVX_ADDRESS, bytesToAddress(pool.lpToken))
+    return getTokenValueInLpUnderlyingToken(token, bytesToAddress(pool.lpToken))
   }
 }
 
