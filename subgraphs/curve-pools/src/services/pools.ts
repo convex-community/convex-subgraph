@@ -97,6 +97,10 @@ export function createNewExtraReward(poolid: BigInt, rewardContract: Address, re
 }
 
 export function getPoolExtrasV1(pool: Pool): void {
+  // rewards already set
+  if (pool.extras.length > 0) {
+    return;
+  }
   const stashContract = ExtraRewardStashV1.bind(bytesToAddress(pool.stash))
   const tokenInfoResult = stashContract.try_tokenInfo()
   if (tokenInfoResult.reverted) {
@@ -116,6 +120,7 @@ export function getPoolExtrasV2(pool: Pool): void {
   const stashContract = ExtraRewardStashV2.bind(bytesToAddress(pool.stash))
   const tokenCountResult = stashContract.try_tokenCount()
   const tokenCount = tokenCountResult.reverted ? BigInt.fromI32(pool.extras.length) : tokenCountResult.value
+  // we only add new rewards if tokenCount is different from what we already know
   for (let i = pool.extras.length; i < tokenCount.toI32(); i++) {
     const tokenInfoResult = stashContract.try_tokenInfo(BigInt.fromI32(i))
     if (tokenInfoResult.reverted) {
@@ -138,6 +143,7 @@ export function getPoolExtrasV30(pool: Pool): void {
   const stashContract = ExtraRewardStashV30.bind(bytesToAddress(pool.stash))
   const tokenCountResult = stashContract.try_tokenCount()
   const tokenCount = tokenCountResult.reverted ? BigInt.fromI32(pool.extras.length) : tokenCountResult.value
+  // we only add new rewards if tokenCount is different from what we already know
   for (let i = pool.extras.length; i < tokenCount.toI32(); i++) {
     const tokenInfoResult = stashContract.try_tokenInfo(BigInt.fromI32(i))
     if (tokenInfoResult.reverted) {
@@ -260,7 +266,7 @@ export function getPoolApr(pool: Pool): Array<BigDecimal> {
   let extraRewardsApr = BIG_DECIMAL_ZERO
   // look for updates to extra rewards
   getPoolExtras(pool)
-  log.warning('POOL EXTRAS {}', [pool.extras.length.toString()])
+  log.debug('POOL EXTRAS {}: {}', [pool.name, pool.extras.length.toString()])
   for (let i = 0; i < pool.extras.length; i++) {
     const extra = ExtraReward.load(pool.extras[i])
     if (extra) {
@@ -273,6 +279,7 @@ export function getPoolApr(pool: Pool): Array<BigDecimal> {
         : rewardRateResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
       const perUnderlying = virtualSupply == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : rewardRate.div(virtualSupply)
       const perYear = perUnderlying.times(BigDecimal.fromString('31536000')) // (86400 * 365))
+      log.debug("Per underlying {}, rewardRate {}, vsupply {}", [perUnderlying.toString(), rewardRate.toString(), virtualSupply.toString()])
       const rewardTokenPrice = getTokenPriceForAssetType(rewardTokenAddress, pool)
       extraRewardsApr = extraRewardsApr.plus(rewardTokenPrice.times(perYear))
       log.debug('Extra rewards APR for token {}: {}', [rewardTokenAddress.toHexString(), rewardTokenPrice.toString()])
