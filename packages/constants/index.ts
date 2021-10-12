@@ -1,5 +1,7 @@
 import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 
+export const PLATFORM_ID = "Convex"
+
 export const BIG_DECIMAL_1E6 = BigDecimal.fromString('1e6')
 export const BIG_DECIMAL_1E8 = BigDecimal.fromString('1e8')
 export const BIG_DECIMAL_1E18 = BigDecimal.fromString('1e18')

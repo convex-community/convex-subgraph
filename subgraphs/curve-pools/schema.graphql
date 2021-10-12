@@ -1,3 +1,35 @@
+type Platform @entity {
+  id: ID!
+  poolCount: BigInt!
+  curvePools: [Pool!]! @derivedFrom(field: "platform")
+  revenue: [RevenueWeeklySnapshot!] @derivedFrom(field: "platform")
+}
+
+type RevenueWeeklySnapshot @entity {
+  id: ID!
+  timestamp: BigInt!
+  platform: Platform!
+  crvRevenueAmount: BigInt!
+  crvRevenueValue: BigDecimal!
+  crvRevenueToLpProvidersAmount: BigInt! # pool.crvRewards
+  crvRevenueToLpProvidersValue: BigInt!
+  crvRevenueToCvxCrvStakersAmount: BigInt! # lockRewards / _lockIncentive
+  crvRevenueToCvxCrvStakersValue: BigDecimal!
+  crvRevenueToCvxStakersAmount: BigInt! # stakerRewards / _stakerIncentive
+  crvRevenueToCvxStakersValue: BigDecimal!
+  feesRevenueAmount: BigInt!
+  feesRevenueValue: BigDecimal!
+  extraTokenRewards: [ExtraTokenReward!]! @derivedFrom(field: "revenueSnapshot")
+}
+
+type ExtraTokenReward @entity {
+  id: ID!
+  revenueSnapshot: RevenueWeeklySnapshot!
+  token: Bytes! #address
+  amount: BigInt!
+  value: BigDecimal!
+}
+
 type Deposit @entity {
   id: ID!
   user: User! # address
@@ -32,6 +64,7 @@ type ExtraReward @entity {
 type Pool @entity {
   id: ID!
   poolid: BigInt!
+  platform: Platform!
   name: String!
   lpToken: Bytes! #address
   lpTokenBalance: BigInt!

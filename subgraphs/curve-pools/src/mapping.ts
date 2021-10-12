@@ -15,10 +15,10 @@ import {
 } from './services/pools'
 import {
   ADDRESS_ZERO,
+  PLATFORM_ID,
   ASSET_TYPES,
   BIG_DECIMAL_1E18, BIG_INT_MINUS_ONE,
   BIG_INT_ONE,
-  BIG_INT_ZERO,
   BOOSTER_ADDRESS,
   CURVE_REGISTRY
 } from 'const'
@@ -27,21 +27,16 @@ import { ERC20 } from '../generated/Booster/ERC20'
 import { getLpTokenPriceUSD, getLpTokenVirtualPrice, getPoolBaseApr } from './services/apr'
 import { log } from '@graphprotocol/graph-ts'
 import { DAY, getIntervalFromTimestamp } from '../../../packages/utils/time'
+import { getPlatform } from './services/platform'
 
 export function handleAddPool(call: AddPoolCall): void {
+  const platform = getPlatform()
   const booster = Booster.bind(BOOSTER_ADDRESS)
   const curveRegistry = CurveRegistry.bind(CURVE_REGISTRY)
-  let pid = booster.poolLength().minus(BIG_INT_ONE)
 
-  // Necessary to handle pools that are added in the same block
-  // for instance with multicall. The contract call above will only
-  // return the contract's final state on the block, so all contracts
-  // created in the same call will have the same id
-  // TODO: No auto-increming IDs but could have a Counter entity for this?
-  // would also save the contract call to poolLength
-  while (pid.gt(BIG_INT_ZERO) && !Pool.load(pid.minus(BIG_INT_ONE).toString())) {
-    pid = pid.minus(BIG_INT_ONE)
-  }
+  let pid = platform.poolCount
+  platform.poolCount = platform.poolCount.plus(BIG_INT_ONE)
+
   const poolInfo = booster.try_poolInfo(pid)
   const pool = new Pool(pid.toString())
   const stash = poolInfo.value.value4
@@ -52,6 +47,7 @@ export function handleAddPool(call: AddPoolCall): void {
   const lpToken = call.inputs._lptoken
   pool.poolid = pid
   pool.lpToken = lpToken
+  pool.platform = PLATFORM_ID
 
   let swap = curveRegistry.get_pool_from_lp_token(call.inputs._lptoken)
   // factory pools not in the registry
@@ -83,6 +79,7 @@ export function handleAddPool(call: AddPoolCall): void {
   pool.creationBlock = call.block.number
   pool.creationDate = call.block.timestamp
   pool.save()
+  platform.save()
 }
 
 export function handleShutdownPool(call: ShutdownPoolCall): void {
@@ -147,6 +144,7 @@ export function handleDeposited(event: DepositedEvent): void {
   deposit.timestamp = event.block.timestamp
   deposit.save()
 
+  const platform = getPlatform()
   const pool = getPool(deposit.poolid)
   pool.lpTokenBalance = pool.lpTokenBalance.plus(deposit.amount)
 

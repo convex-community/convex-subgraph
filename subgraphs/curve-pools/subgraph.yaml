@@ -15,8 +15,12 @@ dataSources:
       language: wasm/assemblyscript
       entities:
         - Pool
-        - Deposited
-        - Withdrawn
+        - Deposit
+        - Withdrawal
+        - User
+        - ExtraReward
+        - RevenueWeeklySnapshot
+        - Platform
       abis:
         - name: Booster
           file: ./abis/Booster.json
