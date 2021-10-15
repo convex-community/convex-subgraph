@@ -15,8 +15,12 @@ dataSources:
       language: wasm/assemblyscript
       entities:
         - Pool
-        - Deposited
-        - Withdrawn
+        - Deposit
+        - Withdrawal
+        - User
+        - ExtraReward
+        - RevenueWeeklySnapshot
+        - Platform
       abis:
         - name: Booster
           file: ./abis/Booster.json
@@ -44,6 +48,8 @@ dataSources:
           file: ../../abis/ExtraRewardStashV1.json
         - name: VirtualBalanceRewardPool
           file: ../../abis/VirtualBalanceRewardPool.json
+        - name: BaseRewardPool
+          file: ./abis/BaseRewardPool.json
 
       eventHandlers:
         - event: Deposited(indexed address,indexed uint256,uint256)
@@ -55,4 +61,8 @@ dataSources:
           handler: handleAddPool
         - function: shutdownPool(uint256)
           handler: handleShutdownPool
+        - function: earmarkRewards(uint256)
+          handler: handleEarmarkRewards
+        - function: earmarkFees()
+          handler: handleEarmarkFees
       file: ./src/mapping.ts

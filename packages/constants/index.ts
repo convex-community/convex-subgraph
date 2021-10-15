@@ -1,5 +1,7 @@
 import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 
+export const PLATFORM_ID = "Convex"
+
 export const BIG_DECIMAL_1E6 = BigDecimal.fromString('1e6')
 export const BIG_DECIMAL_1E8 = BigDecimal.fromString('1e8')
 export const BIG_DECIMAL_1E18 = BigDecimal.fromString('1e18')
@@ -63,6 +65,10 @@ export const V2_POOL_ADDRESSES = [TRICRYPTO_LP_ADDRESS, TRICRYPTO2_LP_ADDRESS]
 export const CVX_CLIFF_SIZE = BigDecimal.fromString('100000') // * 1e18; //new cliff every 100,000 tokens
 export const CVX_CLIFF_COUNT =BigDecimal.fromString('1000') // 1,000 cliffs
 export const CVX_MAX_SUPPLY = BigDecimal.fromString('100000000') // * 1e18; //100 mil max supply
+
+export const DENOMINATOR = BigInt.fromI32(10000)
+export const CVXCRV_REWARDS_ADDRESS = Address.fromString("0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e")
+export const LOCK_FEES_ADDRESS = Address.fromString("0x7091dbb7fcbA54569eF1387Ac89Eb2a5C9F6d2EA")
 
 export const VOTIUM_BRIBE_CONTRACT = "0x19bbc3463dd8d07f55438014b021fb457ebd4595"
 export const VOTIUM_BRIBE_CONTRACT_ADDRESS = Address.fromString(VOTIUM_BRIBE_CONTRACT)
