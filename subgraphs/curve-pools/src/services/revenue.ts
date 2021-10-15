@@ -1,4 +1,4 @@
-import { Address, BigInt } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 import { BaseRewardPool } from '../../generated/Booster/BaseRewardPool'
 import {
   BIG_INT_ZERO,
@@ -6,12 +6,13 @@ import {
   CVXCRV_REWARDS_ADDRESS,
   LOCK_FEES_ADDRESS,
   DENOMINATOR,
-  PLATFORM_ID,
+  PLATFORM_ID, CRV_ADDRESS, BIG_DECIMAL_ZERO
 } from '../../../../packages/constants'
 import { Booster } from '../../generated/Booster/Booster'
 import { getIntervalFromTimestamp, WEEK } from '../../../../packages/utils/time'
 import { FeeRevenue, RevenueWeeklySnapshot } from '../../generated/schema'
 import { VirtualBalanceRewardPool } from '../../generated/Booster/VirtualBalanceRewardPool'
+import { getUsdRate } from '../../../../packages/utils/pricing'
 
 export function getHistoricalRewards(contract: Address): BigInt {
   const rewardContract = BaseRewardPool.bind(contract)
@@ -42,6 +43,7 @@ export function takeWeeklyRevenueSnapshot(timestamp: BigInt): void {
       ? previousWeekRevenue.crvRevenueToCallersAmountCumulative
       : BIG_INT_ZERO
     const prevPlatformRewards = previousWeekRevenue ? previousWeekRevenue.crvRevenueToPlatformAmount : BIG_INT_ZERO
+    const prevCrvPrice = previousWeekRevenue ? previousWeekRevenue.crvPrice : BIG_DECIMAL_ZERO
 
     crvRevenue = new RevenueWeeklySnapshot(week.toString())
     crvRevenue.platform = PLATFORM_ID
@@ -78,6 +80,9 @@ export function takeWeeklyRevenueSnapshot(timestamp: BigInt): void {
     crvRevenue.crvRevenueToPlatformAmountCumulative = prevPlatformRewards.plus(crvRevenue.crvRevenueToPlatformAmount)
     crvRevenue.totalCrvRevenueCumulative = prevTotalRevenueWeeklySnapshot.plus(weeklyCrvTotalRevenue)
     crvRevenue.timestamp = timestamp
+
+    const currentCrvPrice = getUsdRate(CRV_ADDRESS)
+    crvRevenue.crvPrice = prevCrvPrice == BIG_DECIMAL_ZERO ? currentCrvPrice : currentCrvPrice.plus(prevCrvPrice).div(BigDecimal.fromString("2"))
     crvRevenue.save()
   }
 }
