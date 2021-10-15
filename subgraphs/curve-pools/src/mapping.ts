@@ -4,23 +4,21 @@ import {
   AddPoolCall,
   Booster,
   ShutdownPoolCall,
+  EarmarkRewardsCall,
+  EarmarkFeesCall,
 } from '../generated/Booster/Booster'
 import { DailyPoolSnapshot, Pool } from '../generated/schema'
 import { Deposit, Withdrawal } from '../generated/schema'
-import {
-  getPool,
-  getPoolApr,
-  getPoolCoins,
-  getPoolExtras
-} from './services/pools'
+import { getPool, getPoolApr, getPoolCoins, getPoolExtras } from './services/pools'
 import {
   ADDRESS_ZERO,
   PLATFORM_ID,
   ASSET_TYPES,
-  BIG_DECIMAL_1E18, BIG_INT_MINUS_ONE,
+  BIG_DECIMAL_1E18,
+  BIG_INT_MINUS_ONE,
   BIG_INT_ONE,
   BOOSTER_ADDRESS,
-  CURVE_REGISTRY
+  CURVE_REGISTRY,
 } from 'const'
 import { CurveRegistry } from '../generated/Booster/CurveRegistry'
 import { ERC20 } from '../generated/Booster/ERC20'
@@ -28,6 +26,7 @@ import { getLpTokenPriceUSD, getLpTokenVirtualPrice, getPoolBaseApr } from './se
 import { log } from '@graphprotocol/graph-ts'
 import { DAY, getIntervalFromTimestamp } from '../../../packages/utils/time'
 import { getPlatform } from './services/platform'
+import { recordFeeRevenue, takeWeeklyRevenueSnapshot } from './services/revenue'
 
 export function handleAddPool(call: AddPoolCall): void {
   const platform = getPlatform()
@@ -185,4 +184,12 @@ export function handleDeposited(event: DepositedEvent): void {
 
   pool.save()
   snapshot.save()
+}
+
+export function handleEarmarkRewards(call: EarmarkRewardsCall): void {
+  takeWeeklyRevenueSnapshot(call.block.timestamp)
+}
+
+export function handleEarmarkFees(call: EarmarkFeesCall): void {
+  recordFeeRevenue(call.block.timestamp)
 }

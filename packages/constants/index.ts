@@ -66,6 +66,10 @@ export const CVX_CLIFF_SIZE = BigDecimal.fromString('100000') // * 1e18; //new c
 export const CVX_CLIFF_COUNT =BigDecimal.fromString('1000') // 1,000 cliffs
 export const CVX_MAX_SUPPLY = BigDecimal.fromString('100000000') // * 1e18; //100 mil max supply
 
+export const DENOMINATOR = BigInt.fromI32(10000)
+export const CVXCRV_REWARDS_ADDRESS = Address.fromString("0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e")
+export const LOCK_FEES_ADDRESS = Address.fromString("0x7091dbb7fcbA54569eF1387Ac89Eb2a5C9F6d2EA")
+
 export const VOTIUM_BRIBE_CONTRACT = "0x19bbc3463dd8d07f55438014b021fb457ebd4595"
 export const VOTIUM_BRIBE_CONTRACT_ADDRESS = Address.fromString(VOTIUM_BRIBE_CONTRACT)
 

@@ -3,23 +3,35 @@ type Platform @entity {
   poolCount: BigInt!
   curvePools: [Pool!]! @derivedFrom(field: "platform")
   revenue: [RevenueWeeklySnapshot!] @derivedFrom(field: "platform")
+  feeRevenue: [FeeRevenue!]! @derivedFrom(field: "platform")
 }
 
 type RevenueWeeklySnapshot @entity {
   id: ID!
-  timestamp: BigInt!
   platform: Platform!
-  crvRevenueAmount: BigInt!
-  crvRevenueValue: BigDecimal!
+  # weekly values
   crvRevenueToLpProvidersAmount: BigInt! # pool.crvRewards
-  crvRevenueToLpProvidersValue: BigInt!
-  crvRevenueToCvxCrvStakersAmount: BigInt! # lockRewards / _lockIncentive
-  crvRevenueToCvxCrvStakersValue: BigDecimal!
-  crvRevenueToCvxStakersAmount: BigInt! # stakerRewards / _stakerIncentive
-  crvRevenueToCvxStakersValue: BigDecimal!
-  feesRevenueAmount: BigInt!
-  feesRevenueValue: BigDecimal!
+  crvRevenueToCvxCrvStakersAmount: BigInt! # lockRewards
+  crvRevenueToCvxStakersAmount: BigInt! # stakerRewards
+  crvRevenueToCallersAmount: BigInt! # call incentive
+  crvRevenueToPlatformAmount: BigInt! # to treasury
+  totalCrvRevenue: BigInt!
+  # cumulative
+  crvRevenueToLpProvidersAmountCumulative: BigInt! # pool.crvRewards
+  crvRevenueToCvxCrvStakersAmountCumulative: BigInt! # lockRewards
+  crvRevenueToCvxStakersAmountCumulative: BigInt! # stakerRewards
+  crvRevenueToCallersAmountCumulative: BigInt!
+  crvRevenueToPlatformAmountCumulative: BigInt!
+  totalCrvRevenueCumulative: BigInt!
+  timestamp: BigInt!
   extraTokenRewards: [ExtraTokenReward!]! @derivedFrom(field: "revenueSnapshot")
+}
+
+type FeeRevenue @entity {
+  id: ID!
+  platform: Platform!
+  amount: BigInt!
+  timestamp: BigInt!
 }
 
 type ExtraTokenReward @entity {
