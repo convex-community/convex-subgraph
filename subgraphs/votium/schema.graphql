@@ -9,8 +9,9 @@ type Epoch @entity {
 type Bribe @entity {
   id: ID!
   epoch: Epoch!
-  token: Bytes! # address
-  amount: BigInt! # uint256
+  token: Bytes!
+  choiceIndex: BigInt!
+  amount: BigInt!
 }
 
 type Fee @entity {

@@ -24,6 +24,7 @@ export function handleBribed(event: Bribed): void {
 
   bribe.epoch = event.params._proposal.toHexString()
   bribe.amount = event.params._amount
+  bribe.choiceIndex = event.params._choiceIndex
   bribe.token = event.params._token
   bribe.save()
 
