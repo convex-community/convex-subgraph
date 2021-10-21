@@ -45,3 +45,36 @@ dataSources:
         - event: RewardAdded(indexed address,uint256)
           handler: handleRewardAdded
       file: ./src/mapping.ts
+
+  - kind: ethereum/contract
+    name: vlCvxExtraRewardDistribution
+    network: mainnet
+    source:
+      address: "0xDecc7d761496d30F30b92Bdf764fb8803c79360D"
+      abi: vlCvxExtraRewardDistribution
+      startBlock: 13375314
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - AddedReward
+        - ReceivedReward
+        - User
+        - Token
+      abis:
+        - name: vlCvxExtraRewardDistribution
+          file: ./abis/vlCvxExtraRewardDistribution.json
+        - name: ERC20
+          file: ../../abis/ERC20.json
+        - name: Factory
+          file: ../../abis/UniswapV2Factory.json
+        - name: Pair
+          file: ../../abis/UniswapV2Pair.json
+      eventHandlers:
+        - event: RewardAdded(indexed address,indexed uint256,uint256)
+          handler: handleRewardAdded
+        - event: RewardPaid(indexed address,indexed address,uint256)
+          handler: handleRewardPaid
+      file: ./src/extraMapping.ts
+
