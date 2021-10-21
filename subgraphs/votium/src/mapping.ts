@@ -21,10 +21,9 @@ export function handleUpdatedFee(event: UpdatedFee): void {
 
 export function handleBribed(event: Bribed): void {
   const bribe = new Bribe(event.transaction.hash.toHexString() + '-' + event.params._token.toHexString())
-  const fee = getPlatformFee().amount
 
   bribe.epoch = event.params._proposal.toHexString()
-  bribe.amount = event.params._amount.times(fee).div(BigInt.fromI32(10000))
+  bribe.amount = event.params._amount
   bribe.token = event.params._token
   bribe.save()
 
