@@ -17,12 +17,12 @@ import { getBtcRate, getEthRate, getUsdRate } from 'utils/pricing'
 import { DAY, getIntervalFromTimestamp } from 'utils/time'
 import { CurvePool } from '../../generated/Booster/CurvePool'
 import {
-  getCvxMintAmount,
   getForexUsdRate,
   getLpTokenVirtualPrice,
   getTokenValueInLpUnderlyingToken,
   getV2LpTokenPrice,
 } from './apr'
+import {getCvxMintAmount} from 'utils/convex'
 import { ExtraRewardStashV2 } from '../../generated/Booster/ExtraRewardStashV2'
 import { ExtraRewardStashV1 } from '../../generated/Booster/ExtraRewardStashV1'
 import { VirtualBalanceRewardPool } from '../../generated/Booster/VirtualBalanceRewardPool'
