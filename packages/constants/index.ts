@@ -69,9 +69,14 @@ export const CVX_MAX_SUPPLY = BigDecimal.fromString('100000000') // * 1e18; //10
 export const DENOMINATOR = BigInt.fromI32(10000)
 export const CVXCRV_REWARDS_ADDRESS = Address.fromString("0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e")
 export const LOCK_FEES_ADDRESS = Address.fromString("0x7091dbb7fcbA54569eF1387Ac89Eb2a5C9F6d2EA")
+export const THREEPOOL_ADDRESS = Address.fromString("0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7")
 
 export const VOTIUM_BRIBE_CONTRACT = "0x19bbc3463dd8d07f55438014b021fb457ebd4595"
 export const VOTIUM_BRIBE_CONTRACT_ADDRESS = Address.fromString(VOTIUM_BRIBE_CONTRACT)
+
+
+export var STAKING_CONTRACTS = new Map<string, string>()
+STAKING_CONTRACTS.set('0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e', 'cvxCrv')
 
 // The arrays are to map the asset types for the various curve pools
 // It's necessary because pools are often instantiated with the wrong asset type
