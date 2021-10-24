@@ -9,21 +9,21 @@ type Platform @entity {
 type RevenueWeeklySnapshot @entity {
   id: ID!
   platform: Platform!
-  # weekly values
+  " weekly values"
   crvRevenueToLpProvidersAmount: BigInt! # pool.crvRewards
   crvRevenueToCvxCrvStakersAmount: BigInt! # lockRewards
   crvRevenueToCvxStakersAmount: BigInt! # stakerRewards
   crvRevenueToCallersAmount: BigInt! # call incentive
   crvRevenueToPlatformAmount: BigInt! # to treasury
   totalCrvRevenue: BigInt!
-  # cumulative
+  " cumulative "
   crvRevenueToLpProvidersAmountCumulative: BigInt! # pool.crvRewards
   crvRevenueToCvxCrvStakersAmountCumulative: BigInt! # lockRewards
   crvRevenueToCvxStakersAmountCumulative: BigInt! # stakerRewards
   crvRevenueToCallersAmountCumulative: BigInt!
   crvRevenueToPlatformAmountCumulative: BigInt!
   totalCrvRevenueCumulative: BigInt!
-  # crv USD price as (price_at_time_of_previous_snapshot + price_at_time_of_snapshot) / 2
+  " crv USD price as (price_at_time_of_previous_snapshot + price_at_time_of_snapshot) / 2 "
   crvPrice: BigDecimal!
   timestamp: BigInt!
   extraTokenRewards: [ExtraTokenReward!]! @derivedFrom(field: "revenueSnapshot")
@@ -96,7 +96,6 @@ type Pool @entity {
   cvxApr: BigDecimal!
   extraRewardsApr: BigDecimal!
   baseApr: BigDecimal!
-  " TODO: set up relations "
   deposits: [Deposit!] @derivedFrom(field: "poolid")
   withdrawals: [Withdrawal!] @derivedFrom(field: "poolid")
   " Curve swap pool "
