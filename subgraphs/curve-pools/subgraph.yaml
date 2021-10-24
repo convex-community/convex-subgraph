@@ -28,8 +28,6 @@ dataSources:
           file: ../../abis/CurveRegistry.json
         - name: ERC20
           file: ../../abis/ERC20.json
-        - name: BaseRewardPool
-          file: ./abis/BaseRewardPool.json
         - name: Factory
           file: ../../abis/UniswapV2Factory.json
         - name: Pair
@@ -49,7 +47,7 @@ dataSources:
         - name: VirtualBalanceRewardPool
           file: ../../abis/VirtualBalanceRewardPool.json
         - name: BaseRewardPool
-          file: ./abis/BaseRewardPool.json
+          file: ../../abis/BaseRewardPool.json
 
       eventHandlers:
         - event: Deposited(indexed address,indexed uint256,uint256)
@@ -66,3 +64,24 @@ dataSources:
         - function: earmarkFees()
           handler: handleEarmarkFees
       file: ./src/mapping.ts
+templates:
+  - name: PoolCrvRewards
+    kind: ethereum/contract
+    network: mainnet
+    source:
+      abi: BaseRewardPool
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - PoolRewards
+      abis:
+        - name: BaseRewardPool
+          file: ../../abis/BaseRewardPool.json
+      callHandlers:
+        - function: queueNewRewards(uint256)
+          handler: handleNewRewardsQueued
+      file: ./src/mapping-rewards.ts
+

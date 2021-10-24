@@ -98,6 +98,7 @@ type Pool @entity {
   baseApr: BigDecimal!
   deposits: [Deposit!] @derivedFrom(field: "poolid")
   withdrawals: [Withdrawal!] @derivedFrom(field: "poolid")
+  crvRewards: [PoolReward!] @derivedFrom(field: "poolid")
   " Curve swap pool "
   swap: Bytes! #address
   " Underlying asset type (USD, BTC...) "
@@ -129,3 +130,10 @@ type DailyPoolSnapshot @entity {
   timestamp: BigInt!
 }
 
+type PoolReward @entity {
+  id: ID!
+  poolid: Pool!
+  contract: Bytes!
+  crvRewards: BigInt!
+  timestamp: BigInt!
+}

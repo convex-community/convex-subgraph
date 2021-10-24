@@ -23,10 +23,11 @@ import {
 import { CurveRegistry } from '../generated/Booster/CurveRegistry'
 import { ERC20 } from '../generated/Booster/ERC20'
 import { getLpTokenPriceUSD, getLpTokenVirtualPrice, getPoolBaseApr } from './services/apr'
-import { log } from '@graphprotocol/graph-ts'
+import { DataSourceContext, log } from '@graphprotocol/graph-ts'
 import { DAY, getIntervalFromTimestamp } from '../../../packages/utils/time'
 import { getPlatform } from './services/platform'
 import { recordFeeRevenue, takeWeeklyRevenueSnapshot } from './services/revenue'
+import { PoolCrvRewards } from '../generated/templates'
 
 export function handleAddPool(call: AddPoolCall): void {
   const platform = getPlatform()
@@ -41,6 +42,10 @@ export function handleAddPool(call: AddPoolCall): void {
   let stash = ADDRESS_ZERO
   if (!poolInfo.reverted) {
     pool.crvRewardsPool = poolInfo.value.value3
+    let context = new DataSourceContext()
+    context.setString('pid', pid.toString())
+    PoolCrvRewards.createWithContext(poolInfo.value.value3, context)
+
     stash = poolInfo.value.value4
     pool.stash = stash
   }
