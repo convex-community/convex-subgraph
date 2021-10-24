@@ -84,6 +84,8 @@ export function takeWeeklyRevenueSnapshot(timestamp: BigInt): void {
     const currentCrvPrice = getUsdRate(CRV_ADDRESS)
     crvRevenue.crvPrice = prevCrvPrice == BIG_DECIMAL_ZERO ? currentCrvPrice : currentCrvPrice.plus(prevCrvPrice).div(BigDecimal.fromString("2"))
     crvRevenue.save()
+
+    // Create a snapshot for the specific pool
   }
 }
 
