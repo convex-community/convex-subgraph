@@ -38,9 +38,10 @@ export function handleAddPool(call: AddPoolCall): void {
 
   const poolInfo = booster.try_poolInfo(pid)
   const pool = new Pool(pid.toString())
-  const stash = poolInfo.value.value4
+  let stash = ADDRESS_ZERO
   if (!poolInfo.reverted) {
     pool.crvRewardsPool = poolInfo.value.value3
+    stash = poolInfo.value.value4
     pool.stash = stash
   }
   const lpToken = call.inputs._lptoken
