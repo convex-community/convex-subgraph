@@ -8,18 +8,30 @@ dataSources:
     source:
       address: "0x3Fe65692bfCD0e6CF84cB1E7d24108E434A7587e"
       abi: BaseRewardPool
+      startBlock: 12451039
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
-        - RewardAdded
-        - RewardPaid
+        - StakingContract
+        - DailySnapshot
+        - ExtraRewardApr
         - Staked
         - Withdrawn
       abis:
         - name: BaseRewardPool
           file: ../../abis/BaseRewardPool.json
+        - name: VirtualBalanceRewardPool
+          file: ../../abis/VirtualBalanceRewardPool.json
+        - name: CurvePool
+          file: ../../abis/CurvePool.json
+        - name: ERC20
+          file: ../../abis/ERC20.json
+        - name: Factory
+          file: ../../abis/UniswapV2Factory.json
+        - name: Pair
+          file: ../../abis/UniswapV2Pair.json
       eventHandlers:
         - event: RewardAdded(uint256)
           handler: handleRewardAdded

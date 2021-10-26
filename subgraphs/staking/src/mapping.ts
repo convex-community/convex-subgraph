@@ -1,4 +1,4 @@
-import { BigInt } from "@graphprotocol/graph-ts"
+import { Address, BigInt } from '@graphprotocol/graph-ts'
 import {
   RewardAdded,
   RewardPaid,
@@ -6,10 +6,18 @@ import {
   Withdrawn
 } from "../generated/CvxCrvStakingRewards/BaseRewardPool"
 import { getStakingContract } from './services/contracts'
-import { DailySnapshot, Deposit, Withdrawal } from '../generated/schema'
+import {
+  DailySnapshot,
+  Deposit,
+  ExtraRewardApr,
+  Withdrawal
+} from '../generated/schema'
 import { DAY, getIntervalFromTimestamp } from '../../../packages/utils/time'
 import { DailyPoolSnapshot } from '../../curve-pools/generated/schema'
 import { getContractApr } from './services/apr'
+import { getUsdRate } from '../../../packages/utils/pricing'
+import { CRV_ADDRESS, THREE_CRV_TOKEN } from '../../../packages/constants'
+import { createSnapShot } from './services/snapshot'
 
 export function handleRewardAdded(event: RewardAdded): void {
 
@@ -29,8 +37,12 @@ export function handleStaked(event: Staked): void {
   deposit.contract = contract.id
   deposit.save()
 
+  const snapshot = createSnapShot(contract, event.block.timestamp)
+  const crvPrice = getUsdRate(CRV_ADDRESS)
   contract.tokenBalance = contract.tokenBalance.plus(event.params.amount)
-  // TODO: add TVL Calc
+  snapshot.tokenBalance = contract.tokenBalance
+  snapshot.tvl = contract.tokenBalance.toBigDecimal().times(crvPrice)
+  snapshot.save()
   contract.save()
 }
 
@@ -44,15 +56,11 @@ export function handleWithdrawn(event: Withdrawn): void {
   withdrawal.contract = contract.id
   withdrawal.save()
 
-  const day = getIntervalFromTimestamp(event.block.timestamp, DAY)
-  const snapId = contract.name + '-' + '-' + day.toString()
-  let snapshot = DailySnapshot.load(snapId)
-  if (!snapshot) {
-    snapshot = new DailySnapshot(snapId)
-    snapshot.contract = contract.id.toString()
-    const aprs = getContractApr(contract.id)
-  }
+  const snapshot = createSnapShot(contract, event.block.timestamp)
+  const crvPrice = getUsdRate(CRV_ADDRESS)
   contract.tokenBalance = contract.tokenBalance.minus(event.params.amount)
-  // TODO: add TVL Calc
+  snapshot.tokenBalance = contract.tokenBalance
+  snapshot.tvl = contract.tokenBalance.toBigDecimal().times(crvPrice)
+  snapshot.save()
   contract.save()
 }

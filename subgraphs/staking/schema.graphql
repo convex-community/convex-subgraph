@@ -2,7 +2,6 @@ type StakingContract @entity {
   id: ID!
   name: String!
   tokenBalance: BigInt!
-  tvl: BigDecimal!
   snapshots: [DailySnapshot!] @derivedFrom(field: "contract")
 }
 
@@ -13,8 +12,17 @@ type DailySnapshot @entity {
   tvl: BigDecimal!
   crvApr: BigDecimal!
   cvxApr: BigDecimal!
-  extraRewardsApr: BigDecimal!
+  extraRewardsApr: [ExtraRewardApr!]! @derivedFrom(field: "snapshot")
   timestamp: BigInt!
+}
+
+
+type ExtraRewardApr @entity {
+  id: ID!
+  snapshot: DailySnapshot!
+  token: Bytes! #address
+  tokenName: String!
+  apr: BigDecimal!
 }
 
 type Deposit @entity {
