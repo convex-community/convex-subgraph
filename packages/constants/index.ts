@@ -12,6 +12,8 @@ export const BIG_INT_MINUS_ONE = BigInt.fromI32(-1)
 export const BIG_INT_ZERO = BigInt.fromString('0')
 export const BIG_INT_ONE = BigInt.fromString('1')
 
+export const SECONDS_PER_YEAR = BigDecimal.fromString("31536000")
+
 export const CVXCRV_TOKEN = ""
 export const CVX_TOKEN = "0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B"
 export const CVX_ADDRESS = Address.fromString(CVX_TOKEN)
@@ -71,6 +73,7 @@ export const CVX_MAX_SUPPLY = BigDecimal.fromString('100000000') // * 1e18; //10
 
 export const DENOMINATOR = BigInt.fromI32(10000)
 export const CVX_REWARDS = "0xcf50b810e57ac33b91dcf525c6ddd9881b139332"
+export const CVX_REWARDS_ADDRESS = Address.fromString(CVX_REWARDS)
 export const CVXCRV_REWARDS = "0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e"
 export const CVXCRV_REWARDS_ADDRESS = Address.fromString(CVXCRV_REWARDS)
 export const LOCK_FEES_ADDRESS = Address.fromString("0x7091dbb7fcbA54569eF1387Ac89Eb2a5C9F6d2EA")
