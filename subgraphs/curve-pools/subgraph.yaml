@@ -32,8 +32,6 @@ dataSources:
           file: ../../abis/UniswapV2Factory.json
         - name: Pair
           file: ../../abis/UniswapV2Pair.json
-        - name: ChainlinkAggregator
-          file: ../../abis/CLAggregator.json
         - name: CurvePool
           file: ../../abis/CurvePool.json
         - name: ExtraRewardStashV30
