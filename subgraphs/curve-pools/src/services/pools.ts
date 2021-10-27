@@ -6,12 +6,12 @@ import {
   ADDRESS_ZERO,
   BIG_DECIMAL_1E18,
   BIG_DECIMAL_ZERO,
-  BIG_INT_MINUS_ONE,
+  BIG_INT_MINUS_ONE, BIG_INT_ONE,
   BIG_INT_ZERO,
   CRV_ADDRESS,
   CVX_ADDRESS,
   FOREX_ORACLES,
-  V2_POOL_ADDRESSES,
+  V2_POOL_ADDRESSES
 } from 'const'
 import { getBtcRate, getEthRate, getUsdRate } from 'utils/pricing'
 import { DAY, getIntervalFromTimestamp } from 'utils/time'
@@ -229,7 +229,7 @@ export function getTokenPriceForAssetType(token: Address, pool: Pool): BigDecima
   }
 }
 
-export function getPoolApr(pool: Pool): Array<BigDecimal> {
+export function getPoolApr(pool: Pool, timestamp: BigInt): Array<BigDecimal> {
   const vPrice = V2_POOL_ADDRESSES.includes(bytesToAddress(pool.lpToken))
     ? getV2LpTokenPrice(pool)
     : getLpTokenVirtualPrice(pool.lpToken)
@@ -273,6 +273,11 @@ export function getPoolApr(pool: Pool): Array<BigDecimal> {
       const rewardContractAddress = bytesToAddress(extra.contract)
       const rewardTokenAddress = bytesToAddress(extra.token)
       const rewardContract = VirtualBalanceRewardPool.bind(rewardContractAddress)
+      const finishPeriodResult = rewardContract.try_periodFinish()
+      const finishPeriod = finishPeriodResult.reverted ? timestamp.plus(BIG_INT_ONE) : finishPeriodResult.value
+      if (timestamp >= finishPeriod) {
+        continue
+      }
       const rewardRateResult = rewardContract.try_rewardRate()
       const rewardRate = rewardRateResult.reverted
         ? BIG_DECIMAL_ZERO

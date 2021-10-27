@@ -93,6 +93,7 @@ export function handleShutdownPool(call: ShutdownPoolCall): void {
   pool.save()
 }
 
+// TODO: Merge logic with deposit logic
 export function handleWithdrawn(event: WithdrawnEvent): void {
   const withdrawal = new Withdrawal(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
   withdrawal.user = event.params.user.toHexString()
@@ -118,7 +119,7 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
     snapshot.poolid = event.params.poolid.toString()
     snapshot.poolName = pool.name
     snapshot.timestamp = event.block.timestamp
-    const aprs = getPoolApr(pool)
+    const aprs = getPoolApr(pool, event.block.timestamp)
     pool.crvApr = aprs[0]
     pool.cvxApr = aprs[1]
     pool.extraRewardsApr = aprs[2]
@@ -169,7 +170,7 @@ export function handleDeposited(event: DepositedEvent): void {
     snapshot.poolid = event.params.poolid.toString()
     snapshot.poolName = pool.name
     snapshot.timestamp = event.block.timestamp
-    const aprs = getPoolApr(pool)
+    const aprs = getPoolApr(pool, event.block.timestamp)
     pool.crvApr = aprs[0]
     pool.cvxApr = aprs[1]
     pool.extraRewardsApr = aprs[2]
