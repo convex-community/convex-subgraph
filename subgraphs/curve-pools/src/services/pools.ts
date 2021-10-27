@@ -6,12 +6,13 @@ import {
   ADDRESS_ZERO,
   BIG_DECIMAL_1E18,
   BIG_DECIMAL_ZERO,
-  BIG_INT_MINUS_ONE, BIG_INT_ONE,
+  BIG_INT_MINUS_ONE,
+  BIG_INT_ONE,
   BIG_INT_ZERO,
   CRV_ADDRESS,
   CVX_ADDRESS,
   FOREX_ORACLES,
-  V2_POOL_ADDRESSES
+  V2_POOL_ADDRESSES,
 } from 'const'
 import { getBtcRate, getEthRate, getUsdRate } from 'utils/pricing'
 import { DAY, getIntervalFromTimestamp } from 'utils/time'
@@ -99,7 +100,7 @@ export function createNewExtraReward(poolid: BigInt, rewardContract: Address, re
 export function getPoolExtrasV1(pool: Pool): void {
   // rewards already set
   if (pool.extras.length > 0) {
-    return;
+    return
   }
   const stashContract = ExtraRewardStashV1.bind(bytesToAddress(pool.stash))
   const tokenInfoResult = stashContract.try_tokenInfo()
@@ -278,13 +279,18 @@ export function getPoolApr(pool: Pool, timestamp: BigInt): Array<BigDecimal> {
       if (timestamp >= finishPeriod) {
         continue
       }
+
       const rewardRateResult = rewardContract.try_rewardRate()
       const rewardRate = rewardRateResult.reverted
         ? BIG_DECIMAL_ZERO
         : rewardRateResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
       const perUnderlying = virtualSupply == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : rewardRate.div(virtualSupply)
       const perYear = perUnderlying.times(BigDecimal.fromString('31536000')) // (86400 * 365))
-      log.debug("Per underlying {}, rewardRate {}, vsupply {}", [perUnderlying.toString(), rewardRate.toString(), virtualSupply.toString()])
+      log.debug('Per underlying {}, rewardRate {}, vsupply {}', [
+        perUnderlying.toString(),
+        rewardRate.toString(),
+        virtualSupply.toString(),
+      ])
       const rewardTokenPrice = getTokenPriceForAssetType(rewardTokenAddress, pool)
       extraRewardsApr = extraRewardsApr.plus(rewardTokenPrice.times(perYear))
       log.debug('Extra rewards APR for token {}: {}', [rewardTokenAddress.toHexString(), rewardTokenPrice.toString()])
