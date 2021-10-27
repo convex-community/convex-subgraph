@@ -40,3 +40,39 @@ dataSources:
         - event: Withdrawn(indexed address,uint256)
           handler: handleWithdrawn
       file: ./src/mapping.ts
+
+  - kind: ethereum/contract
+    name: cvxRewardPool
+    network: mainnet
+    source:
+      address: "0xCF50b810E57Ac33B91dCF525C6ddd9881B139332"
+      abi: cvxRewardPool
+      startBlock: 12451040
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - StakingContract
+        - DailySnapshot
+        - ExtraRewardApr
+        - Staked
+        - Withdrawn
+      abis:
+        - name: cvxRewardPool
+          file: ./abis/cvxRewardPool.json
+        - name: ERC20
+          file: ../../abis/ERC20.json
+        - name: Factory
+          file: ../../abis/UniswapV2Factory.json
+        - name: Pair
+          file: ../../abis/UniswapV2Pair.json
+      eventHandlers:
+        - event: RewardAdded(uint256)
+          handler: handleRewardAdded
+        - event: Staked(indexed address,uint256)
+          handler: handleStaked
+        - event: Withdrawn(indexed address,uint256)
+          handler: handleWithdrawn
+      file: ./src/mapping.ts
+

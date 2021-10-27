@@ -16,7 +16,11 @@ import { DAY, getIntervalFromTimestamp } from '../../../packages/utils/time'
 import { DailyPoolSnapshot } from '../../curve-pools/generated/schema'
 import { getContractApr } from './services/apr'
 import { getUsdRate } from '../../../packages/utils/pricing'
-import { CRV_ADDRESS, THREE_CRV_TOKEN } from '../../../packages/constants'
+import {
+  CRV_ADDRESS,
+  STAKING_TOKENS,
+  THREE_CRV_TOKEN
+} from '../../../packages/constants'
 import { createSnapShot } from './services/snapshot'
 
 export function handleRewardAdded(event: RewardAdded): void {
@@ -57,10 +61,10 @@ export function handleWithdrawn(event: Withdrawn): void {
   withdrawal.save()
 
   const snapshot = createSnapShot(contract, event.block.timestamp)
-  const crvPrice = getUsdRate(CRV_ADDRESS)
+  const stakingTokenPrice = getUsdRate(Address.fromString(STAKING_TOKENS.get(event.address.toHexString())))
   contract.tokenBalance = contract.tokenBalance.minus(event.params.amount)
   snapshot.tokenBalance = contract.tokenBalance
-  snapshot.tvl = contract.tokenBalance.toBigDecimal().times(crvPrice)
+  snapshot.tvl = contract.tokenBalance.toBigDecimal().times(stakingTokenPrice)
   snapshot.save()
   contract.save()
 }
