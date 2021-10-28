@@ -1,8 +1,9 @@
 import { DailySnapshot, ExtraRewardApr, StakingContract } from '../../generated/schema'
 import { Address, BigInt } from '@graphprotocol/graph-ts'
 import { DAY, getIntervalFromTimestamp } from '../../../../packages/utils/time'
-import { getContractApr } from './apr'
+import { getCvxApr, getCvxCrvApr } from './apr'
 import {
+  BIG_DECIMAL_ZERO,
   CVX_REWARDS,
   CVXCRV_REWARDS,
   THREE_CRV_TOKEN
@@ -23,16 +24,23 @@ export function createSnapShot(contract: StakingContract, timestamp: BigInt): Da
 
 export function setSnapshotAprs(contract: string, snapshot: DailySnapshot): DailySnapshot {
   if (contract == CVXCRV_REWARDS) {
-    return setCvxCrvSnapshotApr(contract, snapshot)
+    return setCvxCrvSnapshotApr(snapshot)
   }
   else if (contract = CVX_REWARDS) {
-
+    return setStakedCvxSnapshotApr(snapshot)
   }
   return snapshot
 }
 
-export function setCvxCrvSnapshotApr(contract: string, snapshot: DailySnapshot): DailySnapshot {
-  const aprs = getContractApr(contract)
+export function setStakedCvxSnapshotApr(snapshot: DailySnapshot): DailySnapshot {
+  const apr = getCvxApr(snapshot.timestamp)
+  snapshot.crvApr = apr
+  snapshot.cvxApr = BIG_DECIMAL_ZERO
+  return snapshot
+}
+
+export function setCvxCrvSnapshotApr(snapshot: DailySnapshot): DailySnapshot {
+  const aprs = getCvxCrvApr()
   snapshot.crvApr = aprs[0]
   snapshot.cvxApr = aprs[1]
   const threeCrvApr = aprs[2]

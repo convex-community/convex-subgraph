@@ -6,7 +6,7 @@ export function getStakingContract(address: Address): StakingContract {
   let contract = StakingContract.load(address.toHexString())
   if (!contract) {
     contract = new StakingContract(address.toHexString())
-    contract.name = STAKING_CONTRACTS.get(address.toHexString())
+    contract.name = STAKING_CONTRACTS.get(address.toHexString().toLowerCase())
   }
   return contract
 }

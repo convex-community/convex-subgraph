@@ -85,12 +85,12 @@ export const VOTIUM_BRIBE_CONTRACT_ADDRESS = Address.fromString(VOTIUM_BRIBE_CON
 export const THREE_CRV_TOKEN = "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490"
 
 export var STAKING_CONTRACTS = new Map<string, string>()
-STAKING_CONTRACTS.set(CVXCRV_REWARDS, 'cvxCrv')
-STAKING_CONTRACTS.set(CVX_REWARDS, 'cvx')
+STAKING_CONTRACTS.set("0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e", 'cvxCrv')
+STAKING_CONTRACTS.set("0xcf50b810e57ac33b91dcf525c6ddd9881b139332", 'cvx')
 
 export var STAKING_TOKENS = new Map<string, string>()
-STAKING_CONTRACTS.set(CVXCRV_REWARDS, CRV_TOKEN)
-STAKING_CONTRACTS.set(CVX_REWARDS, CVX_TOKEN)
+STAKING_TOKENS.set("0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e", CRV_TOKEN)
+STAKING_TOKENS.set("0xcf50b810e57ac33b91dcf525c6ddd9881b139332", CVX_TOKEN)
 
 // The arrays are to map the asset types for the various curve pools
 // It's necessary because pools are often instantiated with the wrong asset type

@@ -6,7 +6,7 @@ dataSources:
     name: CvxCrvStakingRewards
     network: mainnet
     source:
-      address: "0x3Fe65692bfCD0e6CF84cB1E7d24108E434A7587e"
+      address: "0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e"
       abi: BaseRewardPool
       startBlock: 12451039
     mapping:
@@ -45,7 +45,7 @@ dataSources:
     name: cvxRewardPool
     network: mainnet
     source:
-      address: "0xCF50b810E57Ac33B91dCF525C6ddd9881B139332"
+      address: "0xcf50b810e57ac33b91dcf525c6ddd9881b139332"
       abi: cvxRewardPool
       startBlock: 12451040
     mapping:
@@ -67,6 +67,8 @@ dataSources:
           file: ../../abis/UniswapV2Factory.json
         - name: Pair
           file: ../../abis/UniswapV2Pair.json
+        - name: BaseRewardPool
+          file: ../../abis/BaseRewardPool.json
       eventHandlers:
         - event: RewardAdded(uint256)
           handler: handleRewardAdded
