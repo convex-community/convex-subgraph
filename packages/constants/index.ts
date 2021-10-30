@@ -12,8 +12,13 @@ export const BIG_INT_MINUS_ONE = BigInt.fromI32(-1)
 export const BIG_INT_ZERO = BigInt.fromString('0')
 export const BIG_INT_ONE = BigInt.fromString('1')
 
-export const CVX_ADDRESS = Address.fromString('0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B')
-export const CRV_ADDRESS = Address.fromString('0xD533a949740bb3306d119CC777fa900bA034cd52')
+export const SECONDS_PER_YEAR = BigDecimal.fromString("31536000")
+
+export const CVXCRV_TOKEN = ""
+export const CVX_TOKEN = "0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B"
+export const CVX_ADDRESS = Address.fromString(CVX_TOKEN)
+export const CRV_TOKEN = "0xD533a949740bb3306d119CC777fa900bA034cd52"
+export const CRV_ADDRESS = Address.fromString(CRV_TOKEN)
 export const ADDRESS_ZERO = Address.fromString('0x0000000000000000000000000000000000000000')
 export const WETH_ADDRESS = Address.fromString('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2')
 export const USDT_ADDRESS = Address.fromString('0xdac17f958d2ee523a2206206994597c13d831ec7')
@@ -67,11 +72,25 @@ export const CVX_CLIFF_COUNT =BigDecimal.fromString('1000') // 1,000 cliffs
 export const CVX_MAX_SUPPLY = BigDecimal.fromString('100000000') // * 1e18; //100 mil max supply
 
 export const DENOMINATOR = BigInt.fromI32(10000)
-export const CVXCRV_REWARDS_ADDRESS = Address.fromString("0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e")
+export const CVX_REWARDS = "0xcf50b810e57ac33b91dcf525c6ddd9881b139332"
+export const CVX_REWARDS_ADDRESS = Address.fromString(CVX_REWARDS)
+export const CVXCRV_REWARDS = "0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e"
+export const CVXCRV_REWARDS_ADDRESS = Address.fromString(CVXCRV_REWARDS)
 export const LOCK_FEES_ADDRESS = Address.fromString("0x7091dbb7fcbA54569eF1387Ac89Eb2a5C9F6d2EA")
+export const THREEPOOL_ADDRESS = Address.fromString("0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7")
 
 export const VOTIUM_BRIBE_CONTRACT = "0x19bbc3463dd8d07f55438014b021fb457ebd4595"
 export const VOTIUM_BRIBE_CONTRACT_ADDRESS = Address.fromString(VOTIUM_BRIBE_CONTRACT)
+
+export const THREE_CRV_TOKEN = "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490"
+
+export var STAKING_CONTRACTS = new Map<string, string>()
+STAKING_CONTRACTS.set("0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e", 'cvxCrv')
+STAKING_CONTRACTS.set("0xcf50b810e57ac33b91dcf525c6ddd9881b139332", 'cvx')
+
+export var STAKING_TOKENS = new Map<string, string>()
+STAKING_TOKENS.set("0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e", CRV_TOKEN)
+STAKING_TOKENS.set("0xcf50b810e57ac33b91dcf525c6ddd9881b139332", CVX_TOKEN)
 
 // The arrays are to map the asset types for the various curve pools
 // It's necessary because pools are often instantiated with the wrong asset type
