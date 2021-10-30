@@ -23,10 +23,11 @@ import {
 import { CurveRegistry } from '../generated/Booster/CurveRegistry'
 import { ERC20 } from '../generated/Booster/ERC20'
 import { getLpTokenPriceUSD, getLpTokenVirtualPrice, getPoolBaseApr } from './services/apr'
-import { log } from '@graphprotocol/graph-ts'
+import { DataSourceContext, log } from '@graphprotocol/graph-ts'
 import { DAY, getIntervalFromTimestamp } from '../../../packages/utils/time'
 import { getPlatform } from './services/platform'
 import { recordFeeRevenue, takeWeeklyRevenueSnapshot } from './services/revenue'
+import { PoolCrvRewards } from '../generated/templates'
 
 export function handleAddPool(call: AddPoolCall): void {
   const platform = getPlatform()
@@ -38,9 +39,14 @@ export function handleAddPool(call: AddPoolCall): void {
 
   const poolInfo = booster.try_poolInfo(pid)
   const pool = new Pool(pid.toString())
-  const stash = poolInfo.value.value4
+  let stash = ADDRESS_ZERO
   if (!poolInfo.reverted) {
     pool.crvRewardsPool = poolInfo.value.value3
+    let context = new DataSourceContext()
+    context.setString('pid', pid.toString())
+    PoolCrvRewards.createWithContext(poolInfo.value.value3, context)
+
+    stash = poolInfo.value.value4
     pool.stash = stash
   }
   const lpToken = call.inputs._lptoken
@@ -87,6 +93,7 @@ export function handleShutdownPool(call: ShutdownPoolCall): void {
   pool.save()
 }
 
+// TODO: Merge logic with deposit logic
 export function handleWithdrawn(event: WithdrawnEvent): void {
   const withdrawal = new Withdrawal(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
   withdrawal.user = event.params.user.toHexString()
@@ -112,7 +119,7 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
     snapshot.poolid = event.params.poolid.toString()
     snapshot.poolName = pool.name
     snapshot.timestamp = event.block.timestamp
-    const aprs = getPoolApr(pool)
+    const aprs = getPoolApr(pool, event.block.timestamp)
     pool.crvApr = aprs[0]
     pool.cvxApr = aprs[1]
     pool.extraRewardsApr = aprs[2]
@@ -163,7 +170,7 @@ export function handleDeposited(event: DepositedEvent): void {
     snapshot.poolid = event.params.poolid.toString()
     snapshot.poolName = pool.name
     snapshot.timestamp = event.block.timestamp
-    const aprs = getPoolApr(pool)
+    const aprs = getPoolApr(pool, event.block.timestamp)
     pool.crvApr = aprs[0]
     pool.cvxApr = aprs[1]
     pool.extraRewardsApr = aprs[2]

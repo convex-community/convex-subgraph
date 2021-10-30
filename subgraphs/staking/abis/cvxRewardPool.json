@@ -1,9 +1,13 @@
 [
   {
     "inputs": [
-      { "internalType": "address", "name": "deposit_", "type": "address" },
-      { "internalType": "address", "name": "reward_", "type": "address" },
-      { "internalType": "address", "name": "op_", "type": "address" }
+      { "internalType": "address", "name": "stakingToken_", "type": "address" },
+      { "internalType": "address", "name": "rewardToken_", "type": "address" },
+      { "internalType": "address", "name": "crvDeposits_", "type": "address" },
+      { "internalType": "address", "name": "cvxCrvRewards_", "type": "address" },
+      { "internalType": "address", "name": "cvxCrvToken_", "type": "address" },
+      { "internalType": "address", "name": "operator_", "type": "address" },
+      { "internalType": "address", "name": "rewardManager_", "type": "address" }
     ],
     "stateMutability": "nonpayable",
     "type": "constructor"
@@ -42,9 +46,31 @@
     "type": "event"
   },
   {
+    "inputs": [],
+    "name": "FEE_DENOMINATOR",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "_reward", "type": "address" }],
+    "name": "addExtraReward",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [{ "internalType": "address", "name": "account", "type": "address" }],
     "name": "balanceOf",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  { "inputs": [], "name": "clearExtraRewards", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+  {
+    "inputs": [],
+    "name": "crvDeposits",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "stateMutability": "view",
     "type": "function"
   },
@@ -57,8 +83,15 @@
   },
   {
     "inputs": [],
-    "name": "deposits",
-    "outputs": [{ "internalType": "contract IDeposit", "name": "", "type": "address" }],
+    "name": "cvxCrvRewards",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "cvxCrvToken",
+    "outputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }],
     "stateMutability": "view",
     "type": "function"
   },
@@ -83,9 +116,33 @@
     "stateMutability": "view",
     "type": "function"
   },
-  { "inputs": [], "name": "getReward", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
   {
-    "inputs": [{ "internalType": "address", "name": "_account", "type": "address" }],
+    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "name": "extraRewards",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "extraRewardsLength",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "bool", "name": "_stake", "type": "bool" }],
+    "name": "getReward",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_account", "type": "address" },
+      { "internalType": "bool", "name": "_claimExtras", "type": "bool" },
+      { "internalType": "bool", "name": "_stake", "type": "bool" }
+    ],
     "name": "getReward",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -149,6 +206,13 @@
   },
   {
     "inputs": [],
+    "name": "rewardManager",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "rewardPerToken",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
@@ -183,13 +247,28 @@
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "_account", "type": "address" },
-      { "internalType": "uint256", "name": "amount", "type": "uint256" }
-    ],
+    "inputs": [{ "internalType": "uint256", "name": "_amount", "type": "uint256" }],
     "name": "stake",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  { "inputs": [], "name": "stakeAll", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_for", "type": "address" },
+      { "internalType": "uint256", "name": "_amount", "type": "uint256" }
+    ],
+    "name": "stakeFor",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "stakingToken",
+    "outputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -208,10 +287,17 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_account", "type": "address" },
-      { "internalType": "uint256", "name": "amount", "type": "uint256" }
+      { "internalType": "uint256", "name": "_amount", "type": "uint256" },
+      { "internalType": "bool", "name": "claim", "type": "bool" }
     ],
     "name": "withdraw",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "bool", "name": "claim", "type": "bool" }],
+    "name": "withdrawAll",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
