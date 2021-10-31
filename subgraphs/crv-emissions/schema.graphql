@@ -1,0 +1,6 @@
+type DailyEmissionSnapshot @entity {
+  id: ID!
+  crvMinted: BigInt!
+  gauge: Bytes! # address
+  timestamp: BigInt!
+}

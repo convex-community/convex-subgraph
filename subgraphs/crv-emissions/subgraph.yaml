@@ -1,0 +1,24 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: CRVMinter
+    network: mainnet
+    source:
+      address: "0xd061D61a4d941c39E5453435B6345Dc261C2fcE0"
+      abi: CRVMinter
+      startBlock: 10647887
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Minted
+      abis:
+        - name: CRVMinter
+          file: ./abis/CRVMinter.json
+      eventHandlers:
+        - event: Minted(indexed address,address,uint256)
+          handler: handleMinted
+      file: ./src/mapping.ts
