@@ -15,7 +15,7 @@ import {
   V2_POOL_ADDRESSES,
 } from 'const'
 import { getBtcRate, getEthRate, getUsdRate } from 'utils/pricing'
-import { DAY, getIntervalFromTimestamp } from 'utils/time'
+import { DAY, getIntervalFromTimestamp, HOUR } from 'utils/time'
 import { CurvePool } from '../../generated/Booster/CurvePool'
 import {
   getForexUsdRate,
@@ -23,7 +23,7 @@ import {
   getTokenValueInLpUnderlyingToken,
   getV2LpTokenPrice,
 } from './apr'
-import {getCvxMintAmount} from 'utils/convex'
+import {getCvxMintAmount} from '../../../../packages/utils/convex'
 import { ExtraRewardStashV2 } from '../../generated/Booster/ExtraRewardStashV2'
 import { ExtraRewardStashV1 } from '../../generated/Booster/ExtraRewardStashV1'
 import { VirtualBalanceRewardPool } from '../../generated/Booster/VirtualBalanceRewardPool'
@@ -53,7 +53,7 @@ export function getPoolCoins(pool: Pool): void {
 }
 
 export function getDailyPoolSnapshot(poolid: BigInt, name: string, timestamp: BigInt): DailyPoolSnapshot {
-  const day = getIntervalFromTimestamp(timestamp, DAY)
+  const day = getIntervalFromTimestamp(timestamp, HOUR)
   const snapId = name + '-' + poolid.toString() + '-' + day.toString()
   let dailySnapshot = DailyPoolSnapshot.load(snapId)
   if (!dailySnapshot) {

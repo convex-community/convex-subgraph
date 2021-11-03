@@ -24,7 +24,7 @@ import { ChainlinkAggregator } from '../../generated/Booster/ChainlinkAggregator
 import { Pool } from '../../generated/schema'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
 import { getDailyPoolSnapshot } from './pools'
-import { DAY } from '../../../../packages/utils/time'
+import { DAY, HOUR } from '../../../../packages/utils/time'
 import { CurvePool } from '../../generated/Booster/CurvePool'
 
 export function getV2LpTokenPrice(pool: Pool): BigDecimal {
@@ -105,7 +105,7 @@ export function getLpTokenVirtualPrice(lpToken: Bytes): BigDecimal {
 }
 
 export function getPoolBaseApr(pool: Pool, currentVirtualPrice: BigDecimal, timestamp: BigInt): BigDecimal {
-  const previousDaySnapshot = getDailyPoolSnapshot(BigInt.fromString(pool.id), pool.name, timestamp.minus(DAY))
+  const previousDaySnapshot = getDailyPoolSnapshot(BigInt.fromString(pool.id), pool.name, timestamp.minus(HOUR))
   const previousDayVPrice = previousDaySnapshot.lpTokenVirtualPrice
   const baseApr =
     previousDayVPrice == BIG_DECIMAL_ZERO
