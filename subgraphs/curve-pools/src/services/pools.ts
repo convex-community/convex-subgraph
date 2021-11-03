@@ -1,5 +1,5 @@
 import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
-import { Pool, DailyPoolSnapshot, ExtraReward } from '../../generated/schema'
+import { Pool, HourlyPoolSnapshot, ExtraReward } from '../../generated/schema'
 import { BaseRewardPool } from '../../generated/Booster/BaseRewardPool'
 import { bytesToAddress } from 'utils'
 import {
@@ -17,13 +17,8 @@ import {
 import { getBtcRate, getEthRate, getUsdRate } from 'utils/pricing'
 import { DAY, getIntervalFromTimestamp, HOUR } from 'utils/time'
 import { CurvePool } from '../../generated/Booster/CurvePool'
-import {
-  getForexUsdRate,
-  getLpTokenVirtualPrice,
-  getTokenValueInLpUnderlyingToken,
-  getV2LpTokenPrice,
-} from './apr'
-import {getCvxMintAmount} from '../../../../packages/utils/convex'
+import { getForexUsdRate, getLpTokenVirtualPrice, getTokenValueInLpUnderlyingToken, getV2LpTokenPrice } from './apr'
+import { getCvxMintAmount } from '../../../../packages/utils/convex'
 import { ExtraRewardStashV2 } from '../../generated/Booster/ExtraRewardStashV2'
 import { ExtraRewardStashV1 } from '../../generated/Booster/ExtraRewardStashV1'
 import { VirtualBalanceRewardPool } from '../../generated/Booster/VirtualBalanceRewardPool'
@@ -52,12 +47,12 @@ export function getPoolCoins(pool: Pool): void {
   pool.save()
 }
 
-export function getDailyPoolSnapshot(poolid: BigInt, name: string, timestamp: BigInt): DailyPoolSnapshot {
+export function getDailyPoolSnapshot(poolid: BigInt, name: string, timestamp: BigInt): HourlyPoolSnapshot {
   const day = getIntervalFromTimestamp(timestamp, HOUR)
   const snapId = name + '-' + poolid.toString() + '-' + day.toString()
-  let dailySnapshot = DailyPoolSnapshot.load(snapId)
+  let dailySnapshot = HourlyPoolSnapshot.load(snapId)
   if (!dailySnapshot) {
-    dailySnapshot = new DailyPoolSnapshot(snapId)
+    dailySnapshot = new HourlyPoolSnapshot(snapId)
     dailySnapshot.poolid = poolid.toString()
     dailySnapshot.poolName = name.toString()
     dailySnapshot.timestamp = day
