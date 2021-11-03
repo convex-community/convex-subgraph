@@ -1,6 +1,43 @@
-type DailyEmissionSnapshot @entity {
+type Gauge @entity {
   id: ID!
-  crvMinted: BigInt!
-  gauge: Bytes! # address
+  address: Bytes!
+  type: GaugeType!
+
+  lpToken: Bytes!
+
+  created: BigInt!
+  createdAtBlock: BigInt!
+  createdAtTransaction: Bytes!
+
+  weights: [GaugeWeight!] @derivedFrom(field: "gauge")
+  emissions: [Emission!] @derivedFrom(field: "gauge")
+}
+
+type GaugeWeight @entity {
+  id: ID!
+  gauge: Gauge!
   timestamp: BigInt!
+  weight: BigDecimal!
+}
+
+type Emission @entity {
+  id: ID!
+  gauge: Gauge!
+  timestamp: BigInt!
+  crvAmount: BigDecimal!
+  value: BigDecimal!
+}
+
+type GaugeType @entity {
+  id: ID!
+  name: String!
+  weight: BigDecimal!
+  gaugeCount: BigInt!
+  gauges: [Gauge!] @derivedFrom(field: "type")
+}
+
+type GaugeTotalWeight @entity {
+  id: ID!
+  timestamp: BigInt!
+  weight: BigDecimal!
 }

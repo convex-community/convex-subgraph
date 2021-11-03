@@ -3,22 +3,41 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: CRVMinter
+    name: GaugeController
     network: mainnet
     source:
-      address: "0xd061D61a4d941c39E5453435B6345Dc261C2fcE0"
-      abi: CRVMinter
-      startBlock: 10647887
+      address: '0x2f50d538606fa9edd2b11e2446beb18c9d5846bb'
+      abi: GaugeController
+      startBlock: 10647875
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
-        - Minted
+        - Gauge
+        - GaugeType
+        - GaugeWeight
+        - GaugeWeightVote
+        - SystemState
       abis:
-        - name: CRVMinter
-          file: ./abis/CRVMinter.json
+        - name: GaugeController
+          file: ./abis/GaugeController.json
+        - name: LiquidityGauge
+          file: ./abis/LiquidityGauge.json
+        - name: ERC20
+          file: ../../abis/ERC20.json
+        - name: CRVToken
+          file: ./abis/CRVToken.json
       eventHandlers:
-        - event: Minted(indexed address,address,uint256)
-          handler: handleMinted
+        - event: AddType(string,int128)
+          handler: handleAddType
+        - event: NewGauge(address,int128,uint256)
+          handler: handleNewGauge
+        - event: NewGaugeWeight(address,uint256,uint256,uint256)
+          handler: handleNewGaugeWeight
+        - event: NewTypeWeight(int128,uint256,uint256,uint256)
+          handler: handleNewTypeWeight
+        - event: VoteForGauge(uint256,address,address,uint256)
+          handler: handleVoteForGauge
       file: ./src/mapping.ts
+
