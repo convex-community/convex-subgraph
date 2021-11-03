@@ -24,7 +24,7 @@ import { CurveRegistry } from '../generated/Booster/CurveRegistry'
 import { ERC20 } from '../generated/Booster/ERC20'
 import { getLpTokenPriceUSD, getLpTokenVirtualPrice, getPoolBaseApr } from './services/apr'
 import { DataSourceContext, log } from '@graphprotocol/graph-ts'
-import { DAY, getIntervalFromTimestamp, HOUR } from '../../../packages/utils/time'
+import { getIntervalFromTimestamp, HOUR } from '../../../packages/utils/time'
 import { getPlatform } from './services/platform'
 import { recordFeeRevenue, takeWeeklyRevenueSnapshot } from './services/revenue'
 import { PoolCrvRewards } from '../generated/templates'
@@ -107,7 +107,7 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
   const lpPrice = getLpTokenPriceUSD(pool)
   pool.tvl = pool.lpTokenBalance.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice)
 
-  // TODO: can be replaced by getDailyPoolSnapshot to DRY once AssemblyScript
+  // TODO: can be replaced by getHourlyPoolSnapshot to DRY once AssemblyScript
   // supports tuples as return values
   const time = getIntervalFromTimestamp(event.block.timestamp, HOUR)
   const snapId = pool.name + '-' + withdrawal.poolid.toString() + '-' + time.toString()
@@ -150,7 +150,6 @@ export function handleDeposited(event: DepositedEvent): void {
   deposit.timestamp = event.block.timestamp
   deposit.save()
 
-  const platform = getPlatform()
   const pool = getPool(deposit.poolid)
   pool.lpTokenBalance = pool.lpTokenBalance.plus(deposit.amount)
 
@@ -158,7 +157,7 @@ export function handleDeposited(event: DepositedEvent): void {
   log.debug('LP Token price USD for pool {}: {}', [pool.name, lpPrice.toString()])
   pool.tvl = pool.lpTokenBalance.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice)
 
-  // TODO: can be replaced by getDailyPoolSnapshot to DRY once AssemblyScript
+  // TODO: can be replaced by getHourlyPoolSnapshot to DRY once AssemblyScript
   // supports tuples as return values
   const time = getIntervalFromTimestamp(event.block.timestamp, HOUR)
   const snapId = pool.name + '-' + deposit.poolid.toString() + '-' + time.toString()
