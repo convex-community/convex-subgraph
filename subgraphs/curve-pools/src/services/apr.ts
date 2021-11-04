@@ -23,8 +23,8 @@ import { getBtcRate, getEthRate, getTokenAValueInTokenB, getUsdRate } from '../.
 import { ChainlinkAggregator } from '../../generated/Booster/ChainlinkAggregator'
 import { Pool } from '../../generated/schema'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
-import { getDailyPoolSnapshot } from './pools'
-import { DAY } from '../../../../packages/utils/time'
+import { getHourlyPoolSnapshot } from './pools'
+import { HOUR } from '../../../../packages/utils/time'
 import { CurvePool } from '../../generated/Booster/CurvePool'
 
 export function getV2LpTokenPrice(pool: Pool): BigDecimal {
@@ -105,7 +105,7 @@ export function getLpTokenVirtualPrice(lpToken: Bytes): BigDecimal {
 }
 
 export function getPoolBaseApr(pool: Pool, currentVirtualPrice: BigDecimal, timestamp: BigInt): BigDecimal {
-  const previousDaySnapshot = getDailyPoolSnapshot(BigInt.fromString(pool.id), pool.name, timestamp.minus(DAY))
+  const previousDaySnapshot = getHourlyPoolSnapshot(BigInt.fromString(pool.id), pool.name, timestamp.minus(HOUR))
   const previousDayVPrice = previousDaySnapshot.lpTokenVirtualPrice
   const baseApr =
     previousDayVPrice == BIG_DECIMAL_ZERO
@@ -137,4 +137,3 @@ export function getLpTokenPriceUSD(pool: Pool): BigDecimal {
       return vPrice.times(getLpUnderlyingTokenValueInOtherToken(lpTokenAddress, USDT_ADDRESS)) //quoteInSpecifiedToken(USDT_ADDRESS, pool.lpToken).times(exponentToBigDecimal(BigInt.fromI32(12))))
   }
 }
-

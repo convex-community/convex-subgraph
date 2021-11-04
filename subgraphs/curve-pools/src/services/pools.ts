@@ -1,5 +1,5 @@
 import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
-import { Pool, DailyPoolSnapshot, ExtraReward } from '../../generated/schema'
+import { Pool, HourlyPoolSnapshot, ExtraReward } from '../../generated/schema'
 import { BaseRewardPool } from '../../generated/Booster/BaseRewardPool'
 import { bytesToAddress } from 'utils'
 import {
@@ -15,15 +15,10 @@ import {
   V2_POOL_ADDRESSES,
 } from 'const'
 import { getBtcRate, getEthRate, getUsdRate } from 'utils/pricing'
-import { DAY, getIntervalFromTimestamp } from 'utils/time'
+import { getIntervalFromTimestamp, HOUR } from 'utils/time'
 import { CurvePool } from '../../generated/Booster/CurvePool'
-import {
-  getForexUsdRate,
-  getLpTokenVirtualPrice,
-  getTokenValueInLpUnderlyingToken,
-  getV2LpTokenPrice,
-} from './apr'
-import {getCvxMintAmount} from 'utils/convex'
+import { getForexUsdRate, getLpTokenVirtualPrice, getTokenValueInLpUnderlyingToken, getV2LpTokenPrice } from './apr'
+import { getCvxMintAmount } from '../../../../packages/utils/convex'
 import { ExtraRewardStashV2 } from '../../generated/Booster/ExtraRewardStashV2'
 import { ExtraRewardStashV1 } from '../../generated/Booster/ExtraRewardStashV1'
 import { VirtualBalanceRewardPool } from '../../generated/Booster/VirtualBalanceRewardPool'
@@ -52,17 +47,17 @@ export function getPoolCoins(pool: Pool): void {
   pool.save()
 }
 
-export function getDailyPoolSnapshot(poolid: BigInt, name: string, timestamp: BigInt): DailyPoolSnapshot {
-  const day = getIntervalFromTimestamp(timestamp, DAY)
-  const snapId = name + '-' + poolid.toString() + '-' + day.toString()
-  let dailySnapshot = DailyPoolSnapshot.load(snapId)
-  if (!dailySnapshot) {
-    dailySnapshot = new DailyPoolSnapshot(snapId)
-    dailySnapshot.poolid = poolid.toString()
-    dailySnapshot.poolName = name.toString()
-    dailySnapshot.timestamp = day
+export function getHourlyPoolSnapshot(poolid: BigInt, name: string, timestamp: BigInt): HourlyPoolSnapshot {
+  const time = getIntervalFromTimestamp(timestamp, HOUR)
+  const snapId = name + '-' + poolid.toString() + '-' + time.toString()
+  let hourlySnapshot = HourlyPoolSnapshot.load(snapId)
+  if (!hourlySnapshot) {
+    hourlySnapshot = new HourlyPoolSnapshot(snapId)
+    hourlySnapshot.poolid = poolid.toString()
+    hourlySnapshot.poolName = name.toString()
+    hourlySnapshot.timestamp = time
   }
-  return dailySnapshot
+  return hourlySnapshot
 }
 
 export function getExtraReward(id: string): ExtraReward {
@@ -105,6 +100,7 @@ export function getPoolExtrasV1(pool: Pool): void {
   const stashContract = ExtraRewardStashV1.bind(bytesToAddress(pool.stash))
   const tokenInfoResult = stashContract.try_tokenInfo()
   if (tokenInfoResult.reverted) {
+    log.warning('Failed to get token info for {}', [pool.stash.toHexString()])
     return
   }
   const rewardToken = tokenInfoResult.value.value0
@@ -125,6 +121,7 @@ export function getPoolExtrasV2(pool: Pool): void {
   for (let i = pool.extras.length; i < tokenCount.toI32(); i++) {
     const tokenInfoResult = stashContract.try_tokenInfo(BigInt.fromI32(i))
     if (tokenInfoResult.reverted) {
+      log.warning('Failed to get token info for {}', [pool.stash.toHexString()])
       continue
     }
     const rewardToken = tokenInfoResult.value.value0
@@ -148,6 +145,7 @@ export function getPoolExtrasV30(pool: Pool): void {
   for (let i = pool.extras.length; i < tokenCount.toI32(); i++) {
     const tokenInfoResult = stashContract.try_tokenInfo(BigInt.fromI32(i))
     if (tokenInfoResult.reverted) {
+      log.warning('Failed to get token info for {}', [pool.stash.toHexString()])
       continue
     }
     const rewardToken = tokenInfoResult.value.value0
@@ -193,14 +191,18 @@ export function getPoolExtrasV3(pool: Pool): void {
   // v3.1 and above share the same ABI
   const tokenCountResult = stashContract.try_tokenCount()
   const tokenCount = tokenCountResult.reverted ? BigInt.fromI32(pool.extras.length) : tokenCountResult.value
-
+  if (tokenCountResult.reverted) {
+    log.warning('Failed to get token count for', [pool.stash.toHexString()])
+  }
   for (let i = pool.extras.length; i < tokenCount.toI32(); i++) {
     const tokenListResult = stashContract.try_tokenList(BigInt.fromI32(i))
     if (tokenListResult.reverted) {
+      log.warning('Failed to get token list from {}', [pool.stash.toHexString()])
       continue
     }
     const tokenInfoResult = stashContract.try_tokenInfo(tokenListResult.value)
     if (tokenInfoResult.reverted) {
+      log.warning('Failed to get token info for {}', [tokenListResult.value.toHexString()])
       continue
     }
     const rewardToken = tokenInfoResult.value.value0
@@ -241,7 +243,9 @@ export function getPoolApr(pool: Pool, timestamp: BigInt): Array<BigDecimal> {
   const virtualSupply = supply.times(vPrice)
   const rateResult = rewardContract.try_rewardRate()
   const rate = rateResult.reverted ? BIG_DECIMAL_ZERO : rateResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
-
+  if (rateResult.reverted) {
+    log.warning('Failed to get CRV reward rate for {}', [pool.crvRewardsPool.toHexString()])
+  }
   let crvPerUnderlying = BIG_DECIMAL_ZERO
   if (virtualSupply.gt(BIG_DECIMAL_ZERO)) {
     crvPerUnderlying = rate.div(virtualSupply)

@@ -7,7 +7,7 @@ import {
   EarmarkRewardsCall,
   EarmarkFeesCall,
 } from '../generated/Booster/Booster'
-import { DailyPoolSnapshot, Pool } from '../generated/schema'
+import { HourlyPoolSnapshot, Pool } from '../generated/schema'
 import { Deposit, Withdrawal } from '../generated/schema'
 import { getPool, getPoolApr, getPoolCoins, getPoolExtras } from './services/pools'
 import {
@@ -24,7 +24,7 @@ import { CurveRegistry } from '../generated/Booster/CurveRegistry'
 import { ERC20 } from '../generated/Booster/ERC20'
 import { getLpTokenPriceUSD, getLpTokenVirtualPrice, getPoolBaseApr } from './services/apr'
 import { DataSourceContext, log } from '@graphprotocol/graph-ts'
-import { DAY, getIntervalFromTimestamp } from '../../../packages/utils/time'
+import { getIntervalFromTimestamp, HOUR } from '../../../packages/utils/time'
 import { getPlatform } from './services/platform'
 import { recordFeeRevenue, takeWeeklyRevenueSnapshot } from './services/revenue'
 import { PoolCrvRewards } from '../generated/templates'
@@ -34,7 +34,7 @@ export function handleAddPool(call: AddPoolCall): void {
   const booster = Booster.bind(BOOSTER_ADDRESS)
   const curveRegistry = CurveRegistry.bind(CURVE_REGISTRY)
 
-  let pid = platform.poolCount
+  const pid = platform.poolCount
   platform.poolCount = platform.poolCount.plus(BIG_INT_ONE)
 
   const poolInfo = booster.try_poolInfo(pid)
@@ -42,7 +42,7 @@ export function handleAddPool(call: AddPoolCall): void {
   let stash = ADDRESS_ZERO
   if (!poolInfo.reverted) {
     pool.crvRewardsPool = poolInfo.value.value3
-    let context = new DataSourceContext()
+    const context = new DataSourceContext()
     context.setString('pid', pid.toString())
     PoolCrvRewards.createWithContext(poolInfo.value.value3, context)
 
@@ -107,15 +107,15 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
   const lpPrice = getLpTokenPriceUSD(pool)
   pool.tvl = pool.lpTokenBalance.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice)
 
-  // TODO: can be replaced by getDailyPoolSnapshot to DRY once AssemblyScript
+  // TODO: can be replaced by getHourlyPoolSnapshot to DRY once AssemblyScript
   // supports tuples as return values
-  const day = getIntervalFromTimestamp(event.block.timestamp, DAY)
-  const snapId = pool.name + '-' + withdrawal.poolid.toString() + '-' + day.toString()
-  let snapshot = DailyPoolSnapshot.load(snapId)
+  const time = getIntervalFromTimestamp(event.block.timestamp, HOUR)
+  const snapId = pool.name + '-' + withdrawal.poolid.toString() + '-' + time.toString()
+  let snapshot = HourlyPoolSnapshot.load(snapId)
 
   // we only do call-heavy calculations once upon snapshot creation
   if (!snapshot) {
-    snapshot = new DailyPoolSnapshot(snapId)
+    snapshot = new HourlyPoolSnapshot(snapId)
     snapshot.poolid = event.params.poolid.toString()
     snapshot.poolName = pool.name
     snapshot.timestamp = event.block.timestamp
@@ -150,7 +150,6 @@ export function handleDeposited(event: DepositedEvent): void {
   deposit.timestamp = event.block.timestamp
   deposit.save()
 
-  const platform = getPlatform()
   const pool = getPool(deposit.poolid)
   pool.lpTokenBalance = pool.lpTokenBalance.plus(deposit.amount)
 
@@ -158,15 +157,15 @@ export function handleDeposited(event: DepositedEvent): void {
   log.debug('LP Token price USD for pool {}: {}', [pool.name, lpPrice.toString()])
   pool.tvl = pool.lpTokenBalance.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice)
 
-  // TODO: can be replaced by getDailyPoolSnapshot to DRY once AssemblyScript
+  // TODO: can be replaced by getHourlyPoolSnapshot to DRY once AssemblyScript
   // supports tuples as return values
-  const day = getIntervalFromTimestamp(event.block.timestamp, DAY)
-  const snapId = pool.name + '-' + deposit.poolid.toString() + '-' + day.toString()
-  let snapshot = DailyPoolSnapshot.load(snapId)
+  const time = getIntervalFromTimestamp(event.block.timestamp, HOUR)
+  const snapId = pool.name + '-' + deposit.poolid.toString() + '-' + time.toString()
+  let snapshot = HourlyPoolSnapshot.load(snapId)
 
   // we only do call-heavy calculations once upon snapshot creation
   if (!snapshot) {
-    snapshot = new DailyPoolSnapshot(snapId)
+    snapshot = new HourlyPoolSnapshot(snapId)
     snapshot.poolid = event.params.poolid.toString()
     snapshot.poolName = pool.name
     snapshot.timestamp = event.block.timestamp

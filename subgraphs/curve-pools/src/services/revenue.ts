@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { BaseRewardPool } from '../../generated/Booster/BaseRewardPool'
 import {
   BIG_INT_ZERO,
@@ -6,18 +6,22 @@ import {
   CVXCRV_REWARDS_ADDRESS,
   LOCK_FEES_ADDRESS,
   DENOMINATOR,
-  PLATFORM_ID, CRV_ADDRESS, BIG_DECIMAL_ZERO
+  PLATFORM_ID,
+  CRV_ADDRESS,
+  BIG_DECIMAL_ZERO,
 } from '../../../../packages/constants'
 import { Booster } from '../../generated/Booster/Booster'
 import { getIntervalFromTimestamp, WEEK } from '../../../../packages/utils/time'
 import { FeeRevenue, RevenueWeeklySnapshot } from '../../generated/schema'
-import { VirtualBalanceRewardPool } from '../../generated/Booster/VirtualBalanceRewardPool'
 import { getUsdRate } from '../../../../packages/utils/pricing'
 
 export function getHistoricalRewards(contract: Address): BigInt {
   const rewardContract = BaseRewardPool.bind(contract)
   const histRewardResults = rewardContract.try_historicalRewards()
   const histRewards = histRewardResults.reverted ? BIG_INT_ZERO : histRewardResults.value
+  if (histRewardResults.reverted) {
+    log.warning('Failed to get historical rewards for {}', [contract.toHexString()])
+  }
   return histRewards
 }
 
@@ -82,7 +86,10 @@ export function takeWeeklyRevenueSnapshot(timestamp: BigInt): void {
     crvRevenue.timestamp = timestamp
 
     const currentCrvPrice = getUsdRate(CRV_ADDRESS)
-    crvRevenue.crvPrice = prevCrvPrice == BIG_DECIMAL_ZERO ? currentCrvPrice : currentCrvPrice.plus(prevCrvPrice).div(BigDecimal.fromString("2"))
+    crvRevenue.crvPrice =
+      prevCrvPrice == BIG_DECIMAL_ZERO
+        ? currentCrvPrice
+        : currentCrvPrice.plus(prevCrvPrice).div(BigDecimal.fromString('2'))
     crvRevenue.save()
 
     // Create a snapshot for the specific pool
