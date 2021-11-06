@@ -105,12 +105,12 @@ export function getLpTokenVirtualPrice(lpToken: Bytes): BigDecimal {
 }
 
 export function getPoolBaseApr(pool: Pool, currentVirtualPrice: BigDecimal, timestamp: BigInt): BigDecimal {
-  const previousDaySnapshot = getHourlyPoolSnapshot(BigInt.fromString(pool.id), pool.name, timestamp.minus(HOUR))
-  const previousDayVPrice = previousDaySnapshot.lpTokenVirtualPrice
+  const previousHourSnapshot = getHourlyPoolSnapshot(BigInt.fromString(pool.id), pool.name, timestamp.minus(HOUR))
+  const previousHourVPrice = previousHourSnapshot.lpTokenVirtualPrice
   const baseApr =
-    previousDayVPrice == BIG_DECIMAL_ZERO
+    previousHourVPrice == BIG_DECIMAL_ZERO
       ? BIG_DECIMAL_ZERO
-      : currentVirtualPrice.minus(previousDayVPrice).div(previousDayVPrice).times(BigDecimal.fromString('365'))
+      : currentVirtualPrice.minus(previousHourVPrice).div(previousHourVPrice).times(BigDecimal.fromString('8760')) // 365 days * 24 hours
   return baseApr
 }
 
