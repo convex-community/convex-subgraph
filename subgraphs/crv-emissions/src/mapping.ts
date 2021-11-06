@@ -2,7 +2,7 @@
 // https://github.com/curvefi/curve-subgraph/blob/main/src/mappings/dao/gauge-controller.ts
 
 import { getIntervalFromTimestamp, WEEK } from 'utils/time'
-import { Emission, Gauge, GaugeTotalWeight, GaugeType, GaugeWeight } from '../generated/schema'
+import { Emission, Gauge, GaugeTotalWeight, GaugeType, GaugeWeight, PoolSnapshot } from '../generated/schema'
 import {
   AddType,
   GaugeController,
@@ -11,11 +11,13 @@ import {
   NewTypeWeight,
   VoteForGauge,
 } from '../generated/GaugeController/GaugeController'
-import { BIG_DECIMAL_1E18, BIG_DECIMAL_ONE, BIG_INT_ONE, CRV_ADDRESS } from '../../../packages/constants'
+import { ADDRESS_ZERO, BIG_DECIMAL_1E18, BIG_DECIMAL_ONE, BIG_INT_ONE, CRV_ADDRESS } from '../../../packages/constants'
 import { LiquidityGauge } from '../generated/GaugeController/LiquidityGauge'
 import { registerGaugeType } from './services/gauges'
 import { CRVToken } from '../generated/GaugeController/CRVToken'
-import { BigDecimal } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal } from '@graphprotocol/graph-ts'
+import { createSnapshot, getPool, getPoolCoins } from './services/pools'
+import { getUsdRate } from '../../../packages/utils/pricing'
 
 export function handleAddType(event: AddType): void {
   const gaugeController = GaugeController.bind(event.address)
@@ -39,7 +41,6 @@ export function handleNewGauge(event: NewGauge): void {
   const gaugeController = GaugeController.bind(event.address)
 
   const nextWeek = getIntervalFromTimestamp(event.block.timestamp.plus(WEEK), WEEK)
-
   // Get or register gauge type
   let gaugeType = GaugeType.load(event.params.gauge_type.toString())
 
@@ -66,7 +67,9 @@ export function handleNewGauge(event: NewGauge): void {
   const lpToken = LiquidityGauge.bind(event.params.addr).try_lp_token()
 
   if (!lpToken.reverted) {
-    gauge.lpToken = lpToken.value
+    gauge.pool = lpToken.value.toHexString()
+  } else {
+    gauge.pool = ADDRESS_ZERO.toHexString()
   }
 
   gauge.save()
@@ -95,6 +98,9 @@ export function handleNewGauge(event: NewGauge): void {
   const fullWeight = gaugeWeight.weight.times(gaugeTypeWeight).div(totalWeight.weight)
   const weeklyEmissions = crvTokenMinted.toBigDecimal().times(fullWeight)
   emission.crvAmount = weeklyEmissions.div(BIG_DECIMAL_1E18)
+  if (event.block.number.toI32() > 10928474) {
+    emission.value = emission.crvAmount.times(getUsdRate(CRV_ADDRESS))
+  }
   emission.gauge = gauge.id
   emission.save()
 }
@@ -132,8 +138,18 @@ export function handleNewGaugeWeight(event: NewGaugeWeight): void {
     const fullWeight = gaugeWeight.weight.times(gaugeTypeWeight).div(totalWeight.weight)
     const weeklyEmissions = crvTokenMinted.toBigDecimal().times(fullWeight)
     emission.crvAmount = weeklyEmissions.div(BIG_DECIMAL_1E18)
+    if (event.block.number.toI32() > 10928474) {
+      emission.value = emission.crvAmount.times(getUsdRate(CRV_ADDRESS))
+    }
     emission.gauge = gauge.id
     emission.save()
+
+    const gaugePool = Address.fromString(gauge.pool)
+    // no registry info before this block
+    if (gaugePool != ADDRESS_ZERO && event.block.number.toI32() >= 12667823) {
+      const pool = getPool(gaugePool)
+      createSnapshot(pool, event.block)
+    }
   }
 }
 
@@ -185,7 +201,18 @@ export function handleVoteForGauge(event: VoteForGauge): void {
     const fullWeight = gaugeWeight.weight.times(gaugeTypeWeight).div(totalWeight.weight)
     const weeklyEmissions = crvTokenMinted.toBigDecimal().times(fullWeight)
     emission.crvAmount = weeklyEmissions.div(BIG_DECIMAL_1E18)
+    // ETH-CRV SLP creation block
+    if (event.block.number.toI32() > 10928474) {
+      emission.value = emission.crvAmount.times(getUsdRate(CRV_ADDRESS))
+    }
     emission.gauge = gauge.id
     emission.save()
+
+    const gaugePool = Address.fromString(gauge.pool)
+    // no registry info before this block
+    if (gaugePool != ADDRESS_ZERO && event.block.number.toI32() >= 12667823) {
+      const pool = getPool(gaugePool)
+      createSnapshot(pool, event.block)
+    }
   }
 }

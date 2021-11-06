@@ -3,14 +3,36 @@ type Gauge @entity {
   address: Bytes!
   type: GaugeType!
 
-  lpToken: Bytes!
-
+  pool: Pool!
   created: BigInt!
   createdAtBlock: BigInt!
   createdAtTransaction: Bytes!
 
   weights: [GaugeWeight!] @derivedFrom(field: "gauge")
   emissions: [Emission!] @derivedFrom(field: "gauge")
+}
+
+type Pool @entity {
+  id: ID!
+  lpToken: Bytes!
+  name: String!
+  swap: Bytes!
+  assetType: Int!
+  coins: [Bytes!]! #address
+  gauges: [Gauge!] @derivedFrom(field: "pool")
+  snapshots: [PoolSnapshot!] @derivedFrom(field: "pool")
+
+}
+
+type PoolSnapshot @entity {
+  id: ID!
+  pool: Pool!
+  virtualPrice: BigDecimal!
+  fees: BigDecimal!
+  lpTokenSupply: BigInt!
+  tvl: BigDecimal!
+  timestamp: BigInt!
+  block: BigInt!
 }
 
 type GaugeWeight @entity {
