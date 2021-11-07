@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
 import { Pool, HourlyPoolSnapshot, ExtraReward } from '../../generated/schema'
 import { BaseRewardPool } from '../../generated/Booster/BaseRewardPool'
 import { bytesToAddress } from 'utils'
@@ -24,6 +24,7 @@ import { ExtraRewardStashV1 } from '../../generated/Booster/ExtraRewardStashV1'
 import { VirtualBalanceRewardPool } from '../../generated/Booster/VirtualBalanceRewardPool'
 import { ExtraRewardStashV32 } from '../../generated/Booster/ExtraRewardStashV32'
 import { ExtraRewardStashV30 } from '../../generated/Booster/ExtraRewardStashV30'
+import { ERC20 } from '../../generated/Booster/ERC20'
 
 export function getPool(pid: string): Pool {
   let pool = Pool.load(pid)
@@ -230,6 +231,18 @@ export function getTokenPriceForAssetType(token: Address, pool: Pool): BigDecima
     // Other
     return getTokenValueInLpUnderlyingToken(token, bytesToAddress(pool.lpToken))
   }
+}
+
+export function getLpTokenSupply(lpToken: Bytes): BigInt {
+  const lpTokenAddress = bytesToAddress(lpToken)
+  const lpTokenSupplyResult = ERC20.bind(lpTokenAddress).try_totalSupply()
+  let totalSupply = BIG_INT_ZERO
+  if (!lpTokenSupplyResult) {
+    log.warning('Failed to fetch total supply for LP Token {}', [lpTokenAddress.toHexString()])
+  } else {
+    totalSupply = lpTokenSupplyResult.value
+  }
+  return totalSupply
 }
 
 export function getPoolApr(pool: Pool, timestamp: BigInt): Array<BigDecimal> {
