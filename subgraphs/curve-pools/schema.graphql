@@ -92,6 +92,7 @@ type Pool @entity {
   creationDate: BigInt!
   creationBlock: BigInt!
   tvl: BigDecimal!
+  curveTvlRatio: BigDecimal!
   crvApr: BigDecimal!
   cvxApr: BigDecimal!
   extraRewardsApr: BigDecimal!
@@ -123,6 +124,7 @@ type HourlyPoolSnapshot @entity {
   lpTokenBalance: BigInt!
   lpTokenVirtualPrice: BigDecimal!
   tvl: BigDecimal!
+  curveTvlRatio: BigDecimal!
   crvApr: BigDecimal!
   cvxApr: BigDecimal!
   extraRewardsApr: BigDecimal!
