@@ -18,6 +18,7 @@ type Pool @entity {
   name: String!
   swap: Bytes!
   assetType: Int!
+  tvl: BigDecimal!
   coins: [Bytes!]! #address
   gauges: [Gauge!] @derivedFrom(field: "pool")
   snapshots: [PoolSnapshot!] @derivedFrom(field: "pool")
