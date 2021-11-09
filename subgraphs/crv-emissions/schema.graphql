@@ -21,6 +21,7 @@ type Pool @entity {
   coins: [Bytes!]! #address
   gauges: [Gauge!] @derivedFrom(field: "pool")
   snapshots: [PoolSnapshot!] @derivedFrom(field: "pool")
+  emissions: [Emission!] @derivedFrom(field: "pool")
 
 }
 
@@ -46,6 +47,7 @@ type GaugeWeight @entity {
 type Emission @entity {
   id: ID!
   gauge: Gauge!
+  pool: Pool!
   timestamp: BigInt!
   block: BigInt!
   crvAmount: BigDecimal!

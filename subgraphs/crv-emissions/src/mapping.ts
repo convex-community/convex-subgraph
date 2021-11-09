@@ -91,6 +91,7 @@ export function handleNewGauge(event: NewGauge): void {
 
   const emission = new Emission(gauge.id + '-' + nextWeek.toString())
   emission.timestamp = nextWeek
+  emission.pool = gauge.pool
   emission.block = event.block.number
   const crvTokenContract = CRVToken.bind(CRV_ADDRESS)
   const crvTokenMinted = crvTokenContract.mintable_in_timeframe(nextWeek, nextWeek.plus(WEEK))
@@ -130,6 +131,7 @@ export function handleNewGaugeWeight(event: NewGaugeWeight): void {
 
     const emission = new Emission(gauge.id + '-' + nextWeek.toString())
     emission.timestamp = nextWeek
+    emission.pool = gauge.pool
     emission.block = event.block.number
     const crvTokenContract = CRVToken.bind(CRV_ADDRESS)
     const crvTokenMinted = crvTokenContract.mintable_in_timeframe(nextWeek, nextWeek.plus(WEEK))
@@ -193,6 +195,7 @@ export function handleVoteForGauge(event: VoteForGauge): void {
 
     const emission = new Emission(gauge.id + '-' + nextWeek.toString())
     emission.timestamp = nextWeek
+    emission.pool = gauge.pool
     emission.block = event.block.number
     const crvTokenContract = CRVToken.bind(CRV_ADDRESS)
     const crvTokenMinted = crvTokenContract.mintable_in_timeframe(nextWeek, nextWeek.plus(WEEK))
