@@ -87,4 +87,6 @@ export function createSnapshot(pool: Pool, block: ethereum.Block): void {
   const rate = getGrowthRate(pool, snapshot.virtualPrice, block.timestamp)
   snapshot.fees = snapshot.tvl.times(rate).times(BigDecimal.fromString('2'))
   snapshot.save()
+  pool.tvl = snapshot.tvl
+  pool.save()
 }
