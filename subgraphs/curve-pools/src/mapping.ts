@@ -9,7 +9,7 @@ import {
 } from '../generated/Booster/Booster'
 import { HourlyPoolSnapshot, Pool } from '../generated/schema'
 import { Deposit, Withdrawal } from '../generated/schema'
-import { getPool, getPoolApr, getPoolCoins, getPoolExtras } from './services/pools'
+import { getLpTokenSupply, getPool, getPoolApr, getPoolCoins, getPoolExtras } from './services/pools'
 import {
   ADDRESS_ZERO,
   PLATFORM_ID,
@@ -19,6 +19,8 @@ import {
   BIG_INT_ONE,
   BOOSTER_ADDRESS,
   CURVE_REGISTRY,
+  BIG_INT_ZERO,
+  BIG_DECIMAL_ONE,
 } from 'const'
 import { CurveRegistry } from '../generated/Booster/CurveRegistry'
 import { ERC20 } from '../generated/Booster/ERC20'
@@ -105,6 +107,9 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
   const pool = getPool(withdrawal.poolid)
   pool.lpTokenBalance = pool.lpTokenBalance.minus(withdrawal.amount)
   const lpPrice = getLpTokenPriceUSD(pool)
+  const lpSupply = getLpTokenSupply(pool.lpToken)
+  pool.curveTvlRatio =
+    lpSupply == BIG_INT_ZERO ? BIG_DECIMAL_ONE : pool.lpTokenBalance.toBigDecimal().div(lpSupply.toBigDecimal())
   pool.tvl = pool.lpTokenBalance.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice)
 
   // TODO: can be replaced by getHourlyPoolSnapshot to DRY once AssemblyScript
@@ -128,6 +133,7 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
     snapshot.cvxApr = pool.cvxApr
     snapshot.extraRewardsApr = pool.extraRewardsApr
     snapshot.lpTokenBalance = pool.lpTokenBalance
+    snapshot.curveTvlRatio = pool.curveTvlRatio
 
     pool.baseApr = getPoolBaseApr(pool, snapshot.lpTokenVirtualPrice, event.block.timestamp)
     snapshot.baseApr = pool.baseApr
@@ -152,7 +158,9 @@ export function handleDeposited(event: DepositedEvent): void {
 
   const pool = getPool(deposit.poolid)
   pool.lpTokenBalance = pool.lpTokenBalance.plus(deposit.amount)
-
+  const lpSupply = getLpTokenSupply(pool.lpToken)
+  pool.curveTvlRatio =
+    lpSupply == BIG_INT_ZERO ? BIG_DECIMAL_ONE : pool.lpTokenBalance.toBigDecimal().div(lpSupply.toBigDecimal())
   const lpPrice = getLpTokenPriceUSD(pool)
   log.debug('LP Token price USD for pool {}: {}', [pool.name, lpPrice.toString()])
   pool.tvl = pool.lpTokenBalance.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice)
@@ -178,6 +186,7 @@ export function handleDeposited(event: DepositedEvent): void {
     snapshot.cvxApr = pool.cvxApr
     snapshot.extraRewardsApr = pool.extraRewardsApr
     snapshot.lpTokenBalance = pool.lpTokenBalance
+    snapshot.curveTvlRatio = pool.curveTvlRatio
 
     pool.baseApr = getPoolBaseApr(pool, snapshot.lpTokenVirtualPrice, event.block.timestamp)
     snapshot.baseApr = pool.baseApr
