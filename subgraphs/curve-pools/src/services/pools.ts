@@ -271,7 +271,7 @@ export function getPoolApr(pool: Pool, timestamp: BigInt): Array<BigDecimal> {
   if (FOREX_ORACLES.has(pool.lpToken.toHexString())) {
     const exchangeRate = getForexUsdRate(pool.lpToken)
     cvxPrice = exchangeRate != BIG_DECIMAL_ZERO ? getUsdRate(CVX_ADDRESS).div(exchangeRate) : getUsdRate(CVX_ADDRESS)
-    crvPrice = exchangeRate != BIG_DECIMAL_ZERO ? getUsdRate(CRV_ADDRESS).div(exchangeRate) : getUsdRate(CVX_ADDRESS)
+    crvPrice = exchangeRate != BIG_DECIMAL_ZERO ? getUsdRate(CRV_ADDRESS).div(exchangeRate) : getUsdRate(CRV_ADDRESS)
     log.debug('Forex CRV {} Price {}', [pool.name, crvPrice.toString()])
   } else {
     cvxPrice = getTokenPriceForAssetType(CVX_ADDRESS, pool)
