@@ -91,10 +91,12 @@ export function getLpTokenVirtualPrice(lpToken: Bytes): BigDecimal {
   let vPriceCallResult = curveRegistry.try_get_virtual_price_from_lp_token(lpTokenAddress)
   let vPrice = BIG_DECIMAL_ZERO
   if (!vPriceCallResult.reverted) {
+    log.debug('Virtual price from registry for {} : {}', [lpToken.toHexString(), vPriceCallResult.value.toString()])
     vPrice = vPriceCallResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
   }
   // most likely for when factory pools are not included in the registry
   else {
+    log.debug('Failed to fetch virtual price from registry for {}', [lpToken.toHexString()])
     const lpTokenContract = CurvePool.bind(lpTokenAddress)
     vPriceCallResult = lpTokenContract.try_get_virtual_price()
     vPrice = !vPriceCallResult.reverted ? vPriceCallResult.value.toBigDecimal().div(BIG_DECIMAL_1E18) : vPrice

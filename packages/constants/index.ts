@@ -1,6 +1,7 @@
 import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 
-export const PLATFORM_ID = "Convex"
+export const CONVEX_PLATFORM_ID = 'Convex'
+export const CURVE_PLATFORM_ID = 'Curve'
 
 export const BIG_DECIMAL_1E6 = BigDecimal.fromString('1e6')
 export const BIG_DECIMAL_1E8 = BigDecimal.fromString('1e8')
@@ -12,12 +13,12 @@ export const BIG_INT_MINUS_ONE = BigInt.fromI32(-1)
 export const BIG_INT_ZERO = BigInt.fromString('0')
 export const BIG_INT_ONE = BigInt.fromString('1')
 
-export const SECONDS_PER_YEAR = BigDecimal.fromString("31536000")
+export const SECONDS_PER_YEAR = BigDecimal.fromString('31536000')
 
-export const CVXCRV_TOKEN = ""
-export const CVX_TOKEN = "0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B"
+export const CVXCRV_TOKEN = ''
+export const CVX_TOKEN = '0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B'
 export const CVX_ADDRESS = Address.fromString(CVX_TOKEN)
-export const CRV_TOKEN = "0xD533a949740bb3306d119CC777fa900bA034cd52"
+export const CRV_TOKEN = '0xD533a949740bb3306d119CC777fa900bA034cd52'
 export const CRV_ADDRESS = Address.fromString(CRV_TOKEN)
 export const ADDRESS_ZERO = Address.fromString('0x0000000000000000000000000000000000000000')
 export const WETH_ADDRESS = Address.fromString('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2')
@@ -46,7 +47,7 @@ export const MIM_LP_TOKEN = '0x5a6a4d54456819380173272a5e8e9b9904bdf41b'
 
 // https://etherscan.io/address/0x3abce8f1db258fbc64827b0926e14a0f90525cf7#code
 
-export var FOREX_ORACLES = new Map<string, Address>()
+export const FOREX_ORACLES = new Map<string, Address>()
 FOREX_ORACLES.set(EURT_LP_TOKEN, Address.fromString('0xb49f677943BC038e9857d61E7d053CaA2C1734C1'))
 FOREX_ORACLES.set(EURS_LP_TOKEN, Address.fromString('0xb49f677943BC038e9857d61E7d053CaA2C1734C1'))
 FOREX_ORACLES.set(EURN_LP_TOKEN, Address.fromString('0xb49f677943BC038e9857d61E7d053CaA2C1734C1'))
@@ -68,29 +69,29 @@ export const TRICRYPTO2_LP_ADDRESS = Address.fromString('0xc4ad29ba4b3c580e6d591
 export const V2_POOL_ADDRESSES = [TRICRYPTO_LP_ADDRESS, TRICRYPTO2_LP_ADDRESS]
 
 export const CVX_CLIFF_SIZE = BigDecimal.fromString('100000') // * 1e18; //new cliff every 100,000 tokens
-export const CVX_CLIFF_COUNT =BigDecimal.fromString('1000') // 1,000 cliffs
+export const CVX_CLIFF_COUNT = BigDecimal.fromString('1000') // 1,000 cliffs
 export const CVX_MAX_SUPPLY = BigDecimal.fromString('100000000') // * 1e18; //100 mil max supply
 
 export const DENOMINATOR = BigInt.fromI32(10000)
-export const CVX_REWARDS = "0xcf50b810e57ac33b91dcf525c6ddd9881b139332"
+export const CVX_REWARDS = '0xcf50b810e57ac33b91dcf525c6ddd9881b139332'
 export const CVX_REWARDS_ADDRESS = Address.fromString(CVX_REWARDS)
-export const CVXCRV_REWARDS = "0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e"
+export const CVXCRV_REWARDS = '0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e'
 export const CVXCRV_REWARDS_ADDRESS = Address.fromString(CVXCRV_REWARDS)
-export const LOCK_FEES_ADDRESS = Address.fromString("0x7091dbb7fcbA54569eF1387Ac89Eb2a5C9F6d2EA")
-export const THREEPOOL_ADDRESS = Address.fromString("0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7")
+export const LOCK_FEES_ADDRESS = Address.fromString('0x7091dbb7fcbA54569eF1387Ac89Eb2a5C9F6d2EA')
+export const THREEPOOL_ADDRESS = Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
 
-export const VOTIUM_BRIBE_CONTRACT = "0x19bbc3463dd8d07f55438014b021fb457ebd4595"
+export const VOTIUM_BRIBE_CONTRACT = '0x19bbc3463dd8d07f55438014b021fb457ebd4595'
 export const VOTIUM_BRIBE_CONTRACT_ADDRESS = Address.fromString(VOTIUM_BRIBE_CONTRACT)
 
-export const THREE_CRV_TOKEN = "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490"
+export const THREE_CRV_TOKEN = '0x6c3f90f043a72fa612cbac8115ee7e52bde6e490'
 
-export var STAKING_CONTRACTS = new Map<string, string>()
-STAKING_CONTRACTS.set("0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e", 'cvxCrv')
-STAKING_CONTRACTS.set("0xcf50b810e57ac33b91dcf525c6ddd9881b139332", 'cvx')
+export const STAKING_CONTRACTS = new Map<string, string>()
+STAKING_CONTRACTS.set('0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e', 'cvxCrv')
+STAKING_CONTRACTS.set('0xcf50b810e57ac33b91dcf525c6ddd9881b139332', 'cvx')
 
-export var STAKING_TOKENS = new Map<string, string>()
-STAKING_TOKENS.set("0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e", CRV_TOKEN)
-STAKING_TOKENS.set("0xcf50b810e57ac33b91dcf525c6ddd9881b139332", CVX_TOKEN)
+export const STAKING_TOKENS = new Map<string, string>()
+STAKING_TOKENS.set('0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e', CRV_TOKEN)
+STAKING_TOKENS.set('0xcf50b810e57ac33b91dcf525c6ddd9881b139332', CVX_TOKEN)
 
 // The arrays are to map the asset types for the various curve pools
 // It's necessary because pools are often instantiated with the wrong asset type
@@ -101,7 +102,7 @@ STAKING_TOKENS.set("0xcf50b810e57ac33b91dcf525c6ddd9881b139332", CVX_TOKEN)
 // therefore resyncs.
 // cf: https://etherscan.io/tx/0xf8e8d67ec16657ecc707614f733979d105e0b814aa698154c153ba9b44bf779b
 
-export var ASSET_TYPES = new Map<string, i32>()
+export const ASSET_TYPES = new Map<string, i32>()
 ASSET_TYPES.set('0x06364f10b501e868329afbc005b3492902d6c763', 0)
 ASSET_TYPES.set('0x071c661b4deefb59e2a3ddb20db036821eee8f4b', 2)
 ASSET_TYPES.set('0x0ce6a5ff5217e38315f87032cf90686c96627caa', 3)

@@ -1,8 +1,18 @@
+type Platform @entity {
+  id: ID!
+  poolCount: BigInt!
+  pools: [Pool!]! @derivedFrom(field: "platform")
+  gauges: [Gauge!] @derivedFrom(field: "platform")
+  gaugeIds: [String!]!
+  snapshotTimes: [SnapshotTime!] @derivedFrom(field: "platform")
+}
+
+
 type Gauge @entity {
   id: ID!
   address: Bytes!
   type: GaugeType!
-
+  platform: Platform!
   pool: Pool!
   created: BigInt!
   createdAtBlock: BigInt!
@@ -17,6 +27,7 @@ type Pool @entity {
   lpToken: Bytes!
   name: String!
   swap: Bytes!
+  platform: Platform!
   assetType: Int!
   tvl: BigDecimal!
   coins: [Bytes!]! #address
@@ -24,6 +35,11 @@ type Pool @entity {
   snapshots: [PoolSnapshot!] @derivedFrom(field: "pool")
   emissions: [Emission!] @derivedFrom(field: "pool")
 
+}
+
+type SnapshotTime @entity {
+  id: ID!
+  platform: Platform!
 }
 
 type PoolSnapshot @entity {

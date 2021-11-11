@@ -2,7 +2,7 @@
 // https://github.com/curvefi/curve-subgraph/blob/main/src/mappings/dao/gauge-controller.ts
 
 import { getIntervalFromTimestamp, WEEK } from 'utils/time'
-import { Emission, Gauge, GaugeTotalWeight, GaugeType, GaugeWeight, PoolSnapshot } from '../generated/schema'
+import { Gauge, GaugeTotalWeight, GaugeType, GaugeWeight } from '../generated/schema'
 import {
   AddType,
   GaugeController,
@@ -11,13 +11,11 @@ import {
   NewTypeWeight,
   VoteForGauge,
 } from '../generated/GaugeController/GaugeController'
-import { ADDRESS_ZERO, BIG_DECIMAL_1E18, BIG_DECIMAL_ONE, BIG_INT_ONE, CRV_ADDRESS } from '../../../packages/constants'
+import { ADDRESS_ZERO, BIG_DECIMAL_1E18, BIG_INT_ONE } from '../../../packages/constants'
 import { LiquidityGauge } from '../generated/GaugeController/LiquidityGauge'
 import { registerGaugeType } from './services/gauges'
-import { CRVToken } from '../generated/GaugeController/CRVToken'
-import { Address, BigDecimal } from '@graphprotocol/graph-ts'
-import { createSnapshot, getPool, getPoolCoins } from './services/pools'
-import { getUsdRate } from '../../../packages/utils/pricing'
+import { getPlatform } from './services/platform'
+import { createAllSnapshots } from './services/snapshot'
 
 export function handleAddType(event: AddType): void {
   const gaugeController = GaugeController.bind(event.address)
@@ -39,6 +37,7 @@ export function handleAddType(event: AddType): void {
 
 export function handleNewGauge(event: NewGauge): void {
   const gaugeController = GaugeController.bind(event.address)
+  const platform = getPlatform()
 
   const nextWeek = getIntervalFromTimestamp(event.block.timestamp.plus(WEEK), WEEK)
   // Get or register gauge type
@@ -58,6 +57,10 @@ export function handleNewGauge(event: NewGauge): void {
   const gauge = new Gauge(event.params.addr.toHexString())
   gauge.address = event.params.addr
   gauge.type = gaugeType.id
+  gauge.platform = platform.id
+  const gaugeIds = platform.gaugeIds
+  gaugeIds.push(event.params.addr.toHexString())
+  platform.gaugeIds = gaugeIds
 
   gauge.created = event.block.timestamp
   gauge.createdAtBlock = event.block.number
@@ -72,6 +75,7 @@ export function handleNewGauge(event: NewGauge): void {
     gauge.pool = ADDRESS_ZERO.toHexString()
   }
 
+  platform.save()
   gauge.save()
 
   // Save gauge weight
@@ -88,22 +92,6 @@ export function handleNewGauge(event: NewGauge): void {
   totalWeight.block = event.block.number
   totalWeight.weight = gaugeController.points_total(nextWeek).toBigDecimal().div(BIG_DECIMAL_1E18)
   totalWeight.save()
-
-  const emission = new Emission(gauge.id + '-' + nextWeek.toString())
-  emission.timestamp = nextWeek
-  emission.pool = gauge.pool
-  emission.block = event.block.number
-  const crvTokenContract = CRVToken.bind(CRV_ADDRESS)
-  const crvTokenMinted = crvTokenContract.mintable_in_timeframe(nextWeek, nextWeek.plus(WEEK))
-  const gaugeTypeWeight = gaugeType ? gaugeType.weight.div(BIG_DECIMAL_1E18) : BIG_DECIMAL_ONE
-  const fullWeight = gaugeWeight.weight.times(gaugeTypeWeight).div(totalWeight.weight)
-  const weeklyEmissions = crvTokenMinted.toBigDecimal().times(fullWeight)
-  emission.crvAmount = weeklyEmissions.div(BIG_DECIMAL_1E18)
-  if (event.block.number.toI32() > 10928474) {
-    emission.value = emission.crvAmount.times(getUsdRate(CRV_ADDRESS))
-  }
-  emission.gauge = gauge.id
-  emission.save()
 }
 
 export function handleNewGaugeWeight(event: NewGaugeWeight): void {
@@ -129,29 +117,7 @@ export function handleNewGaugeWeight(event: NewGaugeWeight): void {
     totalWeight.weight = gaugeController.points_total(nextWeek).toBigDecimal().div(BIG_DECIMAL_1E18)
     totalWeight.save()
 
-    const emission = new Emission(gauge.id + '-' + nextWeek.toString())
-    emission.timestamp = nextWeek
-    emission.pool = gauge.pool
-    emission.block = event.block.number
-    const crvTokenContract = CRVToken.bind(CRV_ADDRESS)
-    const crvTokenMinted = crvTokenContract.mintable_in_timeframe(nextWeek, nextWeek.plus(WEEK))
-    const gaugeType = GaugeType.load(gauge.type)
-    const gaugeTypeWeight = gaugeType ? gaugeType.weight.div(BIG_DECIMAL_1E18) : BIG_DECIMAL_ONE
-    const fullWeight = gaugeWeight.weight.times(gaugeTypeWeight).div(totalWeight.weight)
-    const weeklyEmissions = crvTokenMinted.toBigDecimal().times(fullWeight)
-    emission.crvAmount = weeklyEmissions.div(BIG_DECIMAL_1E18)
-    if (event.block.number.toI32() > 10928474) {
-      emission.value = emission.crvAmount.times(getUsdRate(CRV_ADDRESS))
-    }
-    emission.gauge = gauge.id
-    emission.save()
-
-    const gaugePool = Address.fromString(gauge.pool)
-    // no registry info before this block
-    if (gaugePool != ADDRESS_ZERO && event.block.number.toI32() >= 12667823) {
-      const pool = getPool(gaugePool)
-      createSnapshot(pool, event.block)
-    }
+    createAllSnapshots(event.block.timestamp, event.block.number)
   }
 }
 
@@ -193,29 +159,6 @@ export function handleVoteForGauge(event: VoteForGauge): void {
     totalWeight.weight = gaugeController.points_total(nextWeek).toBigDecimal().div(BIG_DECIMAL_1E18)
     totalWeight.save()
 
-    const emission = new Emission(gauge.id + '-' + nextWeek.toString())
-    emission.timestamp = nextWeek
-    emission.pool = gauge.pool
-    emission.block = event.block.number
-    const crvTokenContract = CRVToken.bind(CRV_ADDRESS)
-    const crvTokenMinted = crvTokenContract.mintable_in_timeframe(nextWeek, nextWeek.plus(WEEK))
-    const gaugeType = GaugeType.load(gauge.type)
-    const gaugeTypeWeight = gaugeType ? gaugeType.weight.div(BIG_DECIMAL_1E18) : BIG_DECIMAL_ONE
-    const fullWeight = gaugeWeight.weight.times(gaugeTypeWeight).div(totalWeight.weight)
-    const weeklyEmissions = crvTokenMinted.toBigDecimal().times(fullWeight)
-    emission.crvAmount = weeklyEmissions.div(BIG_DECIMAL_1E18)
-    // ETH-CRV SLP creation block
-    if (event.block.number.toI32() > 10928474) {
-      emission.value = emission.crvAmount.times(getUsdRate(CRV_ADDRESS))
-    }
-    emission.gauge = gauge.id
-    emission.save()
-
-    const gaugePool = Address.fromString(gauge.pool)
-    // no registry info before this block
-    if (gaugePool != ADDRESS_ZERO && event.block.number.toI32() >= 12667823) {
-      const pool = getPool(gaugePool)
-      createSnapshot(pool, event.block)
-    }
+    createAllSnapshots(event.block.timestamp, event.block.number)
   }
 }

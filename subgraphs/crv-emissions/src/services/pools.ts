@@ -2,14 +2,14 @@ import { Address, BigDecimal, BigInt, ethereum } from '@graphprotocol/graph-ts'
 import { Pool, PoolSnapshot } from '../../generated/schema'
 import { CurveRegistry } from '../../../curve-pools/generated/Booster/CurveRegistry'
 import {
-  ADDRESS_ZERO,
   ASSET_TYPES,
   BIG_DECIMAL_1E18,
   BIG_DECIMAL_ZERO,
+  CURVE_PLATFORM_ID,
   CURVE_REGISTRY,
 } from '../../../../packages/constants'
 import { ERC20 } from '../../../curve-pools/generated/Booster/ERC20'
-import { getIntervalFromTimestamp, HOUR, WEEK } from 'utils/time'
+import { getIntervalFromTimestamp, WEEK } from 'utils/time'
 import { getLpTokenVirtualPrice, getLpTokenPriceUSD } from './lppricing'
 import { CurvePool } from '../../../curve-pools/generated/Booster/CurvePool'
 import { bytesToAddress } from '../../../../packages/utils'
@@ -42,6 +42,7 @@ export function getPool(lpToken: Address): Pool {
     }
     getPoolCoins(pool)
     pool.name = name
+    pool.platform = CURVE_PLATFORM_ID
     pool.assetType = ASSET_TYPES.has(swap.toHexString()) ? ASSET_TYPES.get(swap.toHexString()) : 0
     pool.save()
   }
