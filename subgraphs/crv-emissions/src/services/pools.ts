@@ -73,21 +73,3 @@ export function getGrowthRate(pool: Pool, currentVirtualPrice: BigDecimal, times
       : currentVirtualPrice.minus(previousSnapshotVPrice).div(previousSnapshotVPrice)
   return rate
 }
-
-export function createSnapshot(pool: Pool, block: ethereum.Block): void {
-  const thisWeek = getIntervalFromTimestamp(block.timestamp, WEEK)
-  const snapshot = new PoolSnapshot(pool.id + '-' + thisWeek.toString())
-  snapshot.pool = pool.id
-  snapshot.timestamp = thisWeek
-  snapshot.block = block.number
-  snapshot.virtualPrice = getLpTokenVirtualPrice(pool.lpToken)
-  const lpTokenContract = ERC20.bind(bytesToAddress(pool.lpToken))
-  snapshot.lpTokenSupply = lpTokenContract.totalSupply()
-  const lpPrice = getLpTokenPriceUSD(pool)
-  snapshot.tvl = snapshot.lpTokenSupply.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice)
-  const rate = getGrowthRate(pool, snapshot.virtualPrice, block.timestamp)
-  snapshot.fees = snapshot.tvl.times(rate).times(BigDecimal.fromString('2'))
-  snapshot.save()
-  pool.tvl = snapshot.tvl
-  pool.save()
-}
