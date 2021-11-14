@@ -59,6 +59,7 @@ export function createAllSnapshots(timestamp: BigInt, block: BigInt): void {
     const gaugeId = platform.gaugeIds[i]
     const gauge = Gauge.load(gaugeId)
     if (!gauge) {
+      log.warning('Unable to load gauge {}:', [gaugeId.toString()])
       continue
     }
     let gaugeWeight = GaugeWeight.load(gauge.id + '-' + thisWeek.toString())
@@ -67,6 +68,13 @@ export function createAllSnapshots(timestamp: BigInt, block: BigInt): void {
     // the weight will still be equal to that of the week before
     if (!gaugeWeight) {
       gaugeWeight = GaugeWeight.load(gauge.id + '-' + previousWeek.toString())
+      // We also create an entry for that missing gauge weight
+      const missingUnvotedGaugeWeight = new GaugeWeight(gauge.id + '-' + thisWeek)
+      missingUnvotedGaugeWeight.weight = gaugeWeight.weight
+      missingUnvotedGaugeWeight.timestamp = thisWeek
+      missingUnvotedGaugeWeight.block = block
+      missingUnvotedGaugeWeight.gauge = gaugeWeight.gauge
+      missingUnvotedGaugeWeight.save()
     }
     let emission = Emission.load(gauge.id + '-' + thisWeek.toString())
     if (!emission) {
