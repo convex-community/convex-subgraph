@@ -67,14 +67,17 @@ export function createAllSnapshots(timestamp: BigInt, block: BigInt): void {
     // will not have a weight entry for that week as no event was triggered
     // the weight will still be equal to that of the week before
     if (!gaugeWeight) {
+      log.debug('Missing gauge weight for {} at time {}', [gauge.id, thisWeek.toString()])
       gaugeWeight = GaugeWeight.load(gauge.id + '-' + previousWeek.toString())
       // We also create an entry for that missing gauge weight
-      const missingUnvotedGaugeWeight = new GaugeWeight(gauge.id + '-' + thisWeek)
-      missingUnvotedGaugeWeight.weight = gaugeWeight.weight
-      missingUnvotedGaugeWeight.timestamp = thisWeek
-      missingUnvotedGaugeWeight.block = block
-      missingUnvotedGaugeWeight.gauge = gaugeWeight.gauge
-      missingUnvotedGaugeWeight.save()
+      if (gaugeWeight) {
+        const missingUnvotedGaugeWeight = new GaugeWeight(gauge.id + '-' + thisWeek.toString())
+        missingUnvotedGaugeWeight.weight = gaugeWeight.weight
+        missingUnvotedGaugeWeight.timestamp = thisWeek
+        missingUnvotedGaugeWeight.block = block
+        missingUnvotedGaugeWeight.gauge = gauge.id
+        missingUnvotedGaugeWeight.save()
+      }
     }
     let emission = Emission.load(gauge.id + '-' + thisWeek.toString())
     if (!emission) {
