@@ -43,6 +43,8 @@ export function handleAddPool(call: AddPoolCall): void {
   const pool = new Pool(pid.toString())
   let stash = ADDRESS_ZERO
   if (!poolInfo.reverted) {
+    pool.token = poolInfo.value.value1
+
     pool.crvRewardsPool = poolInfo.value.value3
     const context = new DataSourceContext()
     context.setString('pid', pid.toString())
