@@ -2,6 +2,7 @@ import { Address, BigDecimal, BigInt, ethereum } from '@graphprotocol/graph-ts'
 import { Pool, PoolSnapshot } from '../../generated/schema'
 import { CurveRegistry } from '../../../curve-pools/generated/Booster/CurveRegistry'
 import {
+  ADDRESS_ZERO,
   ASSET_TYPES,
   BIG_DECIMAL_1E18,
   BIG_DECIMAL_ZERO,
@@ -28,7 +29,7 @@ export function getPool(lpToken: Address): Pool {
     let swap = lpToken
     if (swapResult.reverted) {
       log.warning('Could not find pool for lp token {}', [lpToken.toHexString()])
-    } else {
+    } else if (swapResult.value != ADDRESS_ZERO) {
       swap = swapResult.value
     }
 
