@@ -6,31 +6,31 @@ type TricryptoSnapshot @entity {
     timestamp: BigInt!
     usdtBalance: BigInt!
     ethBalance: BigInt!
-    wbtcBalace: BigInt!
+    wbtcBalance: BigInt!
     virtualPrice: BigInt!
     ethOraclePrice: BigInt!
     btcOraclePrice: BigInt!
     ethScalePrice: BigInt!
     btcScalePrice: BigInt!
     fee: BigInt!
-    swapRates: SwapRates!
+    swapRates: SwapRate!
 }
 
 
 # handleGetDy to get usd <-> btc/eth rates:
-type SwapRates @entity {
+type SwapRate @entity {
     id: ID!
     block: BigInt!
     timestamp: BigInt!
-    USDETHSwap: SwapValues!
-    ETHUSDSwap: SwapValues!
-    USDBTCSwap: SwapValues!
-    BTCUSDSwap: SwapValues!
+    USDETHSwap: SwapValue!
+    ETHUSDSwap: SwapValue!
+    USDBTCSwap: SwapValue!
+    BTCUSDSwap: SwapValue!
 }
 
 
 # dollar value of swaps:
-type SwapValuesDollars @entity {
+type SwapValue @entity {
     id: ID!
     block: BigInt!
     timestamp: BigInt!
@@ -42,7 +42,7 @@ type SwapValuesDollars @entity {
 }
 
 
-type AddLiquidityEvents @entity {
+type AddLiquidityEvent @entity {
     id: ID!
     timestamp: BigInt!
     blockNumber: BigInt!
@@ -54,7 +54,7 @@ type AddLiquidityEvents @entity {
 }
 
 
-type RemoveLiquidityEvents @entity {
+type RemoveLiquidityEvent @entity {
     id: ID!
     blockNumber: BigInt!
     timestamp: BigInt!
@@ -66,7 +66,7 @@ type RemoveLiquidityEvents @entity {
 }
 
 
-type ExchangeEvents @entity {
+type ExchangeEvent @entity {
     id: ID!
     blockNumber: BigInt!
     timestamp: BigInt!
@@ -79,7 +79,7 @@ type ExchangeEvents @entity {
 }
 
 
-type ClaimAdminFeeEvents @entity {
+type ClaimAdminFeeEvent @entity {
     id: ID!
     blockNumber: BigInt!
     timestamp: BigInt!
@@ -92,8 +92,8 @@ type ClaimAdminFeeEvents @entity {
 type User @entity {
     id: ID!
     address: Bytes!
-    deposits: [AddLiquidityEvents!] @derivedFrom(field: "user")
-    withdrawls: [RemoveLiquidityEvents!] @derivedFrom(field: "user")
-    exchanges: [ExchangeEvents!] @derivedFrom(field: "user")
+    deposits: [AddLiquidityEvent!] @derivedFrom(field: "user")
+    withdrawals: [RemoveLiquidityEvent!] @derivedFrom(field: "user")
+    exchanges: [ExchangeEvent!] @derivedFrom(field: "user")
 }
 

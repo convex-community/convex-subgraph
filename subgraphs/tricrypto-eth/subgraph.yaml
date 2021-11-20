@@ -15,27 +15,27 @@ dataSources:
       language: wasm/assemblyscript
       entities:
         - TricryptoSnapshot
-        - AddLiquidityEvents
-        - RemoveLiquidityEvents
-        - ExchangeEvents
-        - ClaimAdminFeeEvents
-        - SwapRates
-        - SwapValuesDollars
+        - AddLiquidityEvent
+        - RemoveLiquidityEvent
+        - ExchangeEvent
+        - ClaimAdminFeeEvent
+        - SwapRate
+        - SwapValue
         - User
       abis:
-        - name: Tricrypto2
+        - name: tricrypto2
           file: ./abis/tricrypto2.json
         - name: crv3Crypto
           file: ./abis/crv3Crypto.json
-
-    eventHandlers:
-      - event: TokenExchange(indexed address, uint256, uint256, uint256, uint256)
-        handler: handleTokenExchange
-      - event: AddLiquidity(indexed address, uint256[3], uint256, uint256)
-        handler: handleAddLiquidity
-      - event: RemoveLiquidity(indexed address, uint256[3], uint256, uint256)
-        handler: handleRemoveLiquidity
-      - event: ClaimAdminFee(indexed address, unit256)
-        handler: handleClaimAdminFee
-
-    file: ./src/mapping.ts
+      eventHandlers:
+        - event: TokenExchange(indexed address,uint256,uint256,uint256,uint256)
+          handler: handleTokenExchange
+        - event: AddLiquidity(indexed address,uint256[3],uint256,uint256)
+          handler: handleAddLiquidity
+        - event: RemoveLiquidity(indexed address,uint256[3],uint256)
+          handler: handleRemoveLiquidity
+        - event: RemoveLiquidityOne(indexed address,uint256,uint256,uint256)
+          handler: handleRemoveLiquidityOne
+        - event: ClaimAdminFee(indexed address,uint256)
+          handler: handleClaimAdminFee
+      file: ./src/mapping.ts

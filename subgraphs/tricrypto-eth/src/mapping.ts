@@ -5,7 +5,6 @@ import {
 } from "../../../packages/constants";
 
 
-// get pool parameters each time a token exchange takes place
 export function handleTokenExchange(event: TokenExchange): void {
 
     // get event values
@@ -31,7 +30,6 @@ export function handleTokenExchange(event: TokenExchange): void {
 }
 
 
-// get pool parameters each time a token exchange takes place
 export function handleAddLiquidity(event: TokenExchange): void {
 
     // get event values
@@ -57,7 +55,6 @@ export function handleAddLiquidity(event: TokenExchange): void {
 }
 
 
-// get pool parameters each time a token exchange takes place
 export function handleRemoveLiquidity(event: TokenExchange): void {
 
     // get event values
@@ -83,7 +80,6 @@ export function handleRemoveLiquidity(event: TokenExchange): void {
 }
 
 
-// get pool parameters each time a token exchange takes place
 export function handleClaimAdminFee(event: TokenExchange): void {
 
     // get event values
