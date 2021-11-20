@@ -66,6 +66,7 @@ export const CURVE_REGISTRY = Address.fromString('0x90e00ace148ca3b23ac1bc8c240c
 export const TRICRYPTO_LP_ADDRESS = Address.fromString('0xca3d75ac011bf5ad07a98d02f18225f9bd9a6bdf')
 export const TRICRYPTO2_LP_ADDRESS = Address.fromString('0xc4ad29ba4b3c580e6d59105fff484999997675ff')
 export const V2_POOL_ADDRESSES = [TRICRYPTO_LP_ADDRESS, TRICRYPTO2_LP_ADDRESS]
+export const TRICRYPTO2_ETH_POOL_ADDRESS = Address.fromString("0xd51a44d3fae010294c616388b506acda1bfaae46")
 
 export const CVX_CLIFF_SIZE = BigDecimal.fromString('100000') // * 1e18; //new cliff every 100,000 tokens
 export const CVX_CLIFF_COUNT =BigDecimal.fromString('1000') // 1,000 cliffs
