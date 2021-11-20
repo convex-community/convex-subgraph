@@ -1,14 +1,12 @@
 # Curve.fi tricrypto2 subgraph Schema - Convex Community
 
-type Tricrypto2 @entity {
+type TricryptoSnapshot @entity {
     id: ID!
     blockNumber: BigInt!
     timestamp: BigInt!
     usdtBalance: BigInt!
     ethBalance: BigInt!
     wbtcBalace: BigInt!
-    xcpProfit: BigInt!
-    xcpProfitA: BigInt!
     virtualPrice: BigInt!
     ethOraclePrice: BigInt!
     btcOraclePrice: BigInt!
@@ -81,12 +79,12 @@ type ExchangeEvents @entity {
 }
 
 
-# crv3crypto
-type LPTokenTransferEvents @entity {
+type ClaimAdminFeeEvents @entity {
     id: ID!
-    from: Bytes!  # address
-    to: Bytes!  # address
-    value: BigDecimal!
+    blockNumber: BigInt!
+    timestamp: BigInt!
+    amountClaimed: BigInt!
+    claimDollarValue: BigInt!
 }
 
 
