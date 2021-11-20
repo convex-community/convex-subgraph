@@ -1,0 +1,101 @@
+# Curve.fi tricrypto2 subgraph Schema - Convex Community
+
+type Tricrypto2 @entity {
+    id: ID!
+    blockNumber: BigInt!
+    timestamp: BigInt!
+    usdtBalance: BigInt!
+    ethBalance: BigInt!
+    wbtcBalace: BigInt!
+    xcpProfit: BigInt!
+    xcpProfitA: BigInt!
+    virtualPrice: BigInt!
+    ethOraclePrice: BigInt!
+    btcOraclePrice: BigInt!
+    ethScalePrice: BigInt!
+    btcScalePrice: BigInt!
+    fee: BigInt!
+    swapRates: SwapRates!
+}
+
+
+# handleGetDy to get usd <-> btc/eth rates:
+type SwapRates @entity {
+    id: ID!
+    block: BigInt!
+    timestamp: BigInt!
+    USDETHSwap: SwapValues!
+    ETHUSDSwap: SwapValues!
+    USDBTCSwap: SwapValues!
+    BTCUSDSwap: SwapValues!
+}
+
+
+# dollar value of swaps:
+type SwapValuesDollars @entity {
+    id: ID!
+    block: BigInt!
+    timestamp: BigInt!
+    qt1000: BigInt!
+    qt10000: BigInt!
+    qt100000: BigInt!
+    qt1000000: BigInt!
+    qt10000000: BigInt!
+}
+
+
+type AddLiquidityEvents @entity {
+    id: ID!
+    timestamp: BigInt!
+    blockNumber: BigInt!
+    user: User! # address
+    amountUSD: BigInt! # uint256
+    amountETH: BigInt! # uint256
+    amountBTC: BigInt! # uint256
+    crv3CryptoSupply: BigInt!
+}
+
+
+type RemoveLiquidityEvents @entity {
+    id: ID!
+    blockNumber: BigInt!
+    timestamp: BigInt!
+    user: User!
+    amountUSD: BigInt!
+    amountETH: BigInt!
+    amountBTC: BigInt!
+    crv3CryptoSupply: BigInt!
+}
+
+
+type ExchangeEvents @entity {
+    id: ID!
+    blockNumber: BigInt!
+    timestamp: BigInt!
+    user: User!
+    assetIn: BigInt!
+    amountIn: BigInt!
+    assetOut: BigInt!
+    amountOut: BigInt!
+    crv3CryptoSupply: BigInt!
+}
+
+
+# crv3crypto
+type LPTokenTransferEvents @entity {
+    id: ID!
+    from: Bytes!  # address
+    to: Bytes!  # address
+    value: BigDecimal!
+}
+
+
+# user stats
+type User @entity {
+    id: ID!
+    address: Bytes!
+    deposits: [AddLiquidityEvents!] @derivedFrom(field: "user")
+    withdrawls: [RemoveLiquidityEvents!] @derivedFrom(field: "user")
+    exchanges: [ExchangeEvents!] @derivedFrom(field: "user")
+}
+

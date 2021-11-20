@@ -1,0 +1,84 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Tricrypto2
+    network: mainnet
+    source:
+      address: "0xd51a44d3fae010294c616388b506acda1bfaae46"
+      abi: tricrypto2
+      startBlock: 12821148
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - AddLiquidity
+        - RemoveLiquidity
+        - Exchange
+        - User
+      abis:
+        - name: Tricrypto2
+          file: ./abis/tricrypto2.json
+        - name: crv3Crypto
+          file: ./abis/crv3Crypto.json
+
+    eventHandlers:
+      - event: TokenExchange(indexed address, uint256, uint256, uint256, uint256)
+        handler: handleTokenExchange
+      - event: AddLiquidity(indexed address, uint256[3], uint256, uint256)
+        handler: handleAddLiquidity
+      - event: RemoveLiquidity(indexed address, uint256[3], uint256, uint256)
+        handler: handleRemoveLiquidity
+      - event: ClaimAdminFee(indexed address, unit256)
+        handler: handleClaimAdminFee
+
+    callHandlers:
+      - function: xcp_profit(uint256)
+        handler: handleXCPProfit
+      - function: xcp_profit_a(uint256)
+        handler: handleXCPProfitA
+      - function: virtual_price(uint256)
+        handler: handleGetVirtualPrice
+      - function: balances(uint256)
+        handler: handleBalances
+      - function: price_oracle(uint256)
+        handler: handlePriceOracle
+      - function: price_scale(uint256)
+        handler: handlePriceScale
+      - function: last_prices(uint256)
+        handler: handleLastPrices
+      - function: fee()
+        handler: handleFee
+      - function: get_dy(unit256, uint256, uint256)
+        handler: handleGetDy
+    file: ./src/mapping.ts
+
+  - kind: ethereum/contract
+      name: crv3crypto
+      network: mainnet
+      source:
+        address: "0xc4ad29ba4b3c580e6d59105fff484999997675ff"
+        abi: crv3crypto
+        startBlock: 12821118
+      mapping:
+        kind: ethereum/events
+        apiVersion: 0.0.5
+        language: wasm/assemblyscript
+        entities:
+          - Transfer
+        abis:
+          - name: crv3Crypto
+            file: ./abis/crv3Crypto.json
+
+      eventHandlers:
+        - event: Transfer(indexed address, uint256, uint256)
+          handler: handleTransfer
+
+      callHandlers:
+        - function: totalSupply()
+          handler: handlerTotalSupply
+
+      file: ./src/mapping.ts
