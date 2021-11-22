@@ -4,41 +4,15 @@ type TricryptoSnapshot @entity {
     id: ID!
     blockNumber: BigInt!
     timestamp: BigInt!
-    usdtBalance: BigInt!
-    ethBalance: BigInt!
-    wbtcBalance: BigInt!
-    virtualPrice: BigInt!
-    ethOraclePrice: BigInt!
-    btcOraclePrice: BigInt!
-    ethScalePrice: BigInt!
-    btcScalePrice: BigInt!
-    fee: BigInt!
-    swapRates: SwapRate!
-}
-
-
-# handleGetDy to get usd <-> btc/eth rates:
-type SwapRate @entity {
-    id: ID!
-    block: BigInt!
-    timestamp: BigInt!
-    USDETHSwap: SwapValue!
-    ETHUSDSwap: SwapValue!
-    USDBTCSwap: SwapValue!
-    BTCUSDSwap: SwapValue!
-}
-
-
-# dollar value of swaps:
-type SwapValue @entity {
-    id: ID!
-    block: BigInt!
-    timestamp: BigInt!
-    qt1000: BigInt!
-    qt10000: BigInt!
-    qt100000: BigInt!
-    qt1000000: BigInt!
-    qt10000000: BigInt!
+    usdtBalance: BigDecimal!
+    ethBalance: BigDecimal!
+    wbtcBalance: BigDecimal!
+    virtualPrice: BigDecimal!
+    ethOraclePrice: BigDecimal!
+    btcOraclePrice: BigDecimal!
+    ethScalePrice: BigDecimal!
+    btcScalePrice: BigDecimal!
+    fee: BigDecimal!
 }
 
 
@@ -46,11 +20,11 @@ type AddLiquidityEvent @entity {
     id: ID!
     timestamp: BigInt!
     blockNumber: BigInt!
-    user: User! # address
-    amountUSD: BigInt! # uint256
-    amountETH: BigInt! # uint256
-    amountBTC: BigInt! # uint256
-    crv3CryptoSupply: BigInt!
+    user: Bytes! # address
+    amountUSD: BigDecimal! # uint256
+    amountETH: BigDecimal! # uint256
+    amountBTC: BigDecimal! # uint256
+    crv3CryptoSupply: BigDecimal!
 }
 
 
@@ -58,7 +32,7 @@ type RemoveLiquidityEvent @entity {
     id: ID!
     blockNumber: BigInt!
     timestamp: BigInt!
-    user: User!
+    user: Bytes!
     amountUSD: BigInt!
     amountETH: BigInt!
     amountBTC: BigInt!
@@ -70,10 +44,10 @@ type ExchangeEvent @entity {
     id: ID!
     blockNumber: BigInt!
     timestamp: BigInt!
-    user: User!
-    assetIn: BigInt!
+    address: Bytes!
+    assetIn: Bytes!
     amountIn: BigInt!
-    assetOut: BigInt!
+    assetOut: Bytes!
     amountOut: BigInt!
     crv3CryptoSupply: BigInt!
 }
@@ -86,14 +60,3 @@ type ClaimAdminFeeEvent @entity {
     amountClaimed: BigInt!
     claimDollarValue: BigInt!
 }
-
-
-# user stats
-type User @entity {
-    id: ID!
-    address: Bytes!
-    deposits: [AddLiquidityEvent!] @derivedFrom(field: "user")
-    withdrawals: [RemoveLiquidityEvent!] @derivedFrom(field: "user")
-    exchanges: [ExchangeEvent!] @derivedFrom(field: "user")
-}
-
