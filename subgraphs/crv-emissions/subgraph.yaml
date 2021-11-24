@@ -38,6 +38,10 @@ dataSources:
           file: ../../abis/UniswapV2Factory.json
         - name: Pair
           file: ../../abis/UniswapV2Pair.json
+        - name: CurvePoolCoin128
+          file: ../../abis/CurvePoolCoin128.json
+        - name: CurvePoolCoin256
+          file: ../../abis/CurvePoolCoin256.json
       eventHandlers:
         - event: AddType(string,int128)
           handler: handleAddType
@@ -50,4 +54,30 @@ dataSources:
         - event: VoteForGauge(uint256,address,address,uint256)
           handler: handleVoteForGauge
       file: ./src/mapping.ts
-
+templates:
+  - name: CurvePoolV1
+    kind: ethereum/contract
+    network: mainnet
+    source:
+      abi: CurvePoolV1AdminFees
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - AdminClaim
+      abis:
+        - name: CurvePoolV1AdminFees
+          file: ../../abis/CurvePoolV1AdminFees.json
+        - name: CurveRegistry
+          file: ../../abis/CurveRegistry.json
+        - name: Factory
+          file: ../../abis/UniswapV2Factory.json
+        - name: Pair
+          file: ../../abis/UniswapV2Pair.json
+        - name: ERC20
+          file: ../../abis/ERC20.json
+      callHandlers:
+        - function: withdraw_admin_fees()
+          handler: handleAdminFees
+      file: ./src/claims.ts

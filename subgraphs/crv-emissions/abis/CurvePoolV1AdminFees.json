@@ -1,0 +1,10 @@
+[
+  {
+    "name": "withdraw_admin_fees",
+    "outputs": [],
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function",
+    "gas": 11347
+  }
+]
