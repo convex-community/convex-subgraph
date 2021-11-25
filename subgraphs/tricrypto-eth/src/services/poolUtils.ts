@@ -35,7 +35,7 @@ export function poolSnapshot(event: ethereum.Event): TricryptoSnapshot {
     pool.ethOraclePrice = getEthOraclePrice(event)
     pool.btcOraclePrice = getBtcOraclePrice(event)
     pool.ethOraclePrice = TRICRYPTO_ETH.price_scale(BigInt.fromI32(1)).toBigDecimal().div(BIG_DECIMAL_1E18)
-    pool.btcOraclePrice = TRICRYPTO_ETH.price_scale(BigInt.fromI32(2)).toBigDecimal().div(BIG_DECIMAL_1E18)
+    pool.btcOraclePrice = TRICRYPTO_ETH.price_scale(BigInt.fromI32(0)).toBigDecimal().div(BIG_DECIMAL_1E18)
 
     pool.fee = TRICRYPTO_ETH.fee().toBigDecimal().div(BIG_DECIMAL_1E8)
     pool.crv3CryptoSupply = CRV3CRYPTO_ETH.totalSupply().toBigDecimal().div(BIG_DECIMAL_1E18)
@@ -50,7 +50,7 @@ export function getEthOraclePrice(event: ethereum.Event): BigDecimal {
 
 
 export function getBtcOraclePrice(event: ethereum.Event): BigDecimal {
-    return TRICRYPTO_ETH.price_oracle(BigInt.fromI32(2)).toBigDecimal().div(BIG_DECIMAL_1E18)
+    return TRICRYPTO_ETH.price_oracle(BigInt.fromI32(0)).toBigDecimal().div(BIG_DECIMAL_1E18)
 }
 
 
