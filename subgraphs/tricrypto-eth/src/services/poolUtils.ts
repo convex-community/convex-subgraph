@@ -74,22 +74,7 @@ export function getCoinExchangedId(coinID: BigInt): Bytes {
 }
 
 
-export function getCoinExchangeAmounts(coinAmount: BigInt, coinID: BigInt): BigDecimal {
-
-    if ( coinID == USDTID ) {
-        return coinAmount.toBigDecimal().div(BIG_DECIMAL_1E6)
-    }
-    if ( coinID == WBTCID ) {
-        return coinAmount.toBigDecimal().div(BIG_DECIMAL_1E6)
-    }
-    if ( coinID == ETHID ) {
-        return coinAmount.toBigDecimal().div(BIG_DECIMAL_1E18)
-    }
-
-}
-
-
-export function recordAssetPrice(event: ethereum.Event): AssetPrices {
+export function recordAssetPrices(event: ethereum.Event): AssetPrices {
 
     const btcPrice = getBtcOraclePrice(event)
     const ethPrice = getEthOraclePrice(event)
@@ -114,6 +99,8 @@ export function recordAssetPrice(event: ethereum.Event): AssetPrices {
 export function getCrv3CryptoPriceUSD(btcPrice: BigDecimal, ethPrice: BigDecimal, virtualPrice: BigDecimal): BigDecimal {
 
     const mulBtcEthVirtualPrice = btcPrice.times(ethPrice).times(virtualPrice)
-    return Math.cbrt(BigDecimal.fromString('3').times(mulBtcEthVirtualPrice))
+    const toBeCubeRooted = BigDecimal.fromString('3').times(mulBtcEthVirtualPrice).times(BigDecimal.fromString("3"))
+
+    return BigDecimal.fromString(Math.cbrt(Number.parseFloat(toBeCubeRooted.toString())).toString())
 
 }
