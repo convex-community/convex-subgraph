@@ -13,6 +13,7 @@ type TricryptoSnapshot @entity {
     ethScalePrice: BigDecimal!
     btcScalePrice: BigDecimal!
     fee: BigDecimal!
+    crv3CryptoSupply: BigDecimal!
 }
 
 
@@ -20,11 +21,14 @@ type AddLiquidityEvent @entity {
     id: ID!
     timestamp: BigInt!
     blockNumber: BigInt!
-    user: Bytes! # address
+    address: Bytes! # address
+    fee: BigDecimal!
     amountUSD: BigDecimal! # uint256
     amountETH: BigDecimal! # uint256
     amountBTC: BigDecimal! # uint256
-    crv3CryptoSupply: BigDecimal!
+    amountETHUSD: BigDecimal!
+    amountBTCUSD: BigDecimal!
+    totalAddedUSD: BigDecimal!
 }
 
 
@@ -32,11 +36,13 @@ type RemoveLiquidityEvent @entity {
     id: ID!
     blockNumber: BigInt!
     timestamp: BigInt!
-    user: Bytes!
-    amountUSD: BigInt!
-    amountETH: BigInt!
-    amountBTC: BigInt!
-    crv3CryptoSupply: BigInt!
+    address: Bytes!
+    amountUSD: BigDecimal!
+    amountETH: BigDecimal!
+    amountBTC: BigDecimal!
+    amountETHUSD: BigDecimal!
+    amountBTCUSD: BigDecimal!
+    totalRemovedUSD: BigDecimal!
 }
 
 
@@ -45,11 +51,18 @@ type ExchangeEvent @entity {
     blockNumber: BigInt!
     timestamp: BigInt!
     address: Bytes!
-    assetIn: Bytes!
-    amountIn: BigInt!
-    assetOut: Bytes!
-    amountOut: BigInt!
-    crv3CryptoSupply: BigInt!
+    amountUSDSold: BigDecimal!
+    amountUSDBought: BigDecimal!
+    amountETHSold: BigDecimal!
+    amountETHSoldUSD: BigDecimal!
+    amountETHBought: BigDecimal!
+    amountETHBoughtUSD: BigDecimal!
+    amountBTCSold: BigDecimal!
+    amountBTCSoldUSD: BigDecimal!
+    amountBTCBought: BigDecimal!
+    amountBTCBoughtUSD: BigDecimal!
+    totalSoldUSD: BigDecimal!
+    totalBoughtUSD: BigDecimal!
 }
 
 
@@ -57,6 +70,18 @@ type ClaimAdminFeeEvent @entity {
     id: ID!
     blockNumber: BigInt!
     timestamp: BigInt!
-    amountClaimed: BigInt!
-    claimDollarValue: BigInt!
+    amountClaimed: BigDecimal!
+    claimDollarValue: BigDecimal!
+}
+
+
+type AssetPrices @entity {
+    id: ID!
+    blockNumber: BigInt!
+    timestamp: BigInt!
+    crv3cryptoUSD: BigDecimal!
+    crv3cryptoBTC: BigDecimal!
+    crv3cryptoETH: BigDecimal!
+    btcPrice: BigDecimal!
+    ethPrice: BigDecimal!
 }

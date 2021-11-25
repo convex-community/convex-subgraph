@@ -4,140 +4,179 @@ import {
     RemoveLiquidityEvent,
     ExchangeEvent,
     ClaimAdminFeeEvent,
-    User
 } from '../generated/schema'
 import {
-    tricrypto2,
+    ClaimAdminFee,
+    RemoveLiquidity, RemoveLiquidityOne,
     TokenExchange
 } from "../generated/Tricrypto2/tricrypto2";
-import { crv3Crypto } from "../generated/Tricrypto2/crv3Crypto";
+
 import {
-    BIG_DECIMAL_1E18,
-    BIG_DECIMAL_1E6,
-    BIG_DECIMAL_1E8,
-    TRICRYPTO2_ETH_POOL_ADDRESS
-} from "../../../packages/constants";
-import {BigInt} from "@graphprotocol/graph-ts/index";
+    ETHID,
+    WBTCID,
+    USDTID,
+    getCoinExchangeAmounts,
+    getCoinExchangedId,
+    poolSnapshot,
+    recordAssetPrice,
+} from "./services/poolUtils";
+import {BIG_DECIMAL_1E18, BIG_DECIMAL_1E6} from "../../../packages/constants";
+import {AddLiquidity} from "../../curve-pools/generated/Booster/CurvePool";
+import {BigDecimal} from "@graphprotocol/graph-ts";
 
-
-export const USDTID = BigInt.fromI32(0)
-export const WBTCID = BigInt.fromI32(1)
-export const ETHID = BigInt.fromI32(2)
-export const TRICRYPTO_ETH = tricrypto2.bind(TRICRYPTO2_ETH_POOL_ADDRESS)
 
 export function handleTokenExchange(event: TokenExchange): void {
 
-    let pool = new TricryptoSnapshot(event.block.timestamp.toString())
-
-    pool.blockNumber = event.block.number
-    pool.timestamp = event.block.timestamp
-
-    // get pool properties after swap
-    pool.usdtBalance = TRICRYPTO_ETH.balances(USDTID).toBigDecimal().div(BIG_DECIMAL_1E6)
-    pool.wbtcBalance = TRICRYPTO_ETH.balances(WBTCID).toBigDecimal().div(BIG_DECIMAL_1E6)
-    pool.ethBalance = TRICRYPTO_ETH.balances(ETHID).toBigDecimal().div(BIG_DECIMAL_1E18)
-    pool.virtualPrice = TRICRYPTO_ETH.get_virtual_price().toBigDecimal().div(BIG_DECIMAL_1E18)
-    pool.fee = TRICRYPTO_ETH.fee().toBigDecimal().div(BIG_DECIMAL_1E8)
-
-    // price oracle & price scale values for btc, eth
-    pool.ethOraclePrice = TRICRYPTO_ETH.price_oracle(BigInt.fromI32(1)).toBigDecimal().div(BIG_DECIMAL_1E18)
-    pool.btcOraclePrice = TRICRYPTO_ETH.price_oracle(BigInt.fromI32(2)).toBigDecimal().div(BIG_DECIMAL_1E18)
-    pool.ethOraclePrice = TRICRYPTO_ETH.price_scale(BigInt.fromI32(1)).toBigDecimal().div(BIG_DECIMAL_1E18)
-    pool.btcOraclePrice = TRICRYPTO_ETH.price_scale(BigInt.fromI32(2)).toBigDecimal().div(BIG_DECIMAL_1E18)
-
-    pool.save()
+    poolSnapshot(event).save()
+    const assetPrices = recordAssetPrice(event)
+    assetPrices.save()
 
     // parse event:
-    let exchange = new ExchangeEvent(event.block.timestamp.toString())
-    exchange.blockNumber = event.block.number
-    exchange.timestamp = event.block.timestamp
-    exchange.user = event.params.buyer.toString()
+    const data = new ExchangeEvent(event.block.timestamp.toString())
+    data.blockNumber = event.block.number
+    data.timestamp = event.block.timestamp
+    data.address = event.params.buyer
 
-    if ( event.params.sold_id == USDTID ) {
-        exchange.assetIn = "USDT"
+    const soldID = event.params.sold_id
+    const boughtID = event.params.bought_id
+    const amountSold = event.params.tokens_sold
+    const amountBought = event.params.tokens_bought
+
+    data.amountUSDBought = BigDecimal.fromString("0")
+    data.amountBTCBought = BigDecimal.fromString("0")
+    data.amountETHBought = BigDecimal.fromString("0")
+    data.amountETHBoughtUSD = BigDecimal.fromString("0")
+    data.amountBTCBoughtUSD = BigDecimal.fromString("0")
+
+    data.amountUSDSold = BigDecimal.fromString("0")
+    data.amountBTCSold = BigDecimal.fromString("0")
+    data.amountETHSold = BigDecimal.fromString("0")
+    data.amountETHSoldUSD = BigDecimal.fromString("0")
+    data.amountBTCSoldUSD = BigDecimal.fromString("0")
+
+
+    if (soldID == USDTID) {
+        data.amountUSDSold = amountSold.toBigDecimal().div(BIG_DECIMAL_1E6)
     }
-    if ( event.params.sold_id == WBTCID ) {
-        exchange.assetIn = "WBTC"
+    if (soldID == WBTCID) {
+        data.amountBTCSold = amountSold.toBigDecimal().div(BIG_DECIMAL_1E6)
+        data.amountBTCSoldUSD = data.amountBTCSold.times(assetPrices.btcPrice)
     }
-    if ( event.params.sold_id == ETHID ) {
-        exchange.assetIn = "ETH"
+    if (soldID == ETHID) {
+        data.amountETHSold = amountSold.toBigDecimal().div(BIG_DECIMAL_1E18)
+        data.amountETHSoldUSD = data.amountETHSold.times(assetPrices.ethPrice)
     }
 
-    exchange.save()
+    if (boughtID == USDTID) {
+        data.amountUSDBought = amountBought.toBigDecimal().div(BIG_DECIMAL_1E6)
+    }
+    if (boughtID == WBTCID) {
+        data.amountBTCBought = amountBought.toBigDecimal().div(BIG_DECIMAL_1E6)
+        data.amountBTCBoughtUSD = data.amountBTCBought.times(assetPrices.btcPrice)
+    }
+    if (boughtID == ETHID) {
+        data.amountETHBought = amountBought.toBigDecimal().div(BIG_DECIMAL_1E18)
+        data.amountETHBoughtUSD = data.amountETHBought.times(assetPrices.ethPrice)
+    }
+
+    data.totalBoughtUSD = data.amountUSDBought.plus(data.amountBTCBoughtUSD).plus(data.amountETHBoughtUSD)
+    data.totalSoldUSD = data.amountUSDSold.plus(data.amountBTCSoldUSD).plus(data.amountETHSoldUSD)
+    data.save()
 
 }
 
 
-export function handleAddLiquidity(event: TokenExchange): void {
+export function handleAddLiquidity(event: AddLiquidity): void {
 
-    // get event values
+    poolSnapshot(event).save()
+    const assetPrices = recordAssetPrice(event)
+    assetPrices.save()
 
+    // parse event:
+    const data = new AddLiquidityEvent(event.block.timestamp.toString())
+    data.blockNumber = event.block.number
+    data.timestamp = event.block.timestamp
+    data.address = event.params.provider
 
-    // get pool coin balances
+    const tokenAmounts = event.params.token_amounts
 
-
-    // get virtual price
-
-
-    // get price oracle values for btc, eth
-
-
-    // get price scale values for btc, eth
-
-
-    // get swap fee
-
-
-    // get swap rates
-
-}
-
-
-export function handleRemoveLiquidity(event: TokenExchange): void {
-
-    // get event values
-
-
-    // get pool coin balances
-
-
-    // get virtual price
-
-
-    // get price oracle values for btc, eth
-
-
-    // get price scale values for btc, eth
-
-
-    // get swap fee
-
-
-    // get swap rates
+    data.amountUSD = tokenAmounts[0].toBigDecimal().div(BIG_DECIMAL_1E6)
+    data.amountBTC = tokenAmounts[1].toBigDecimal().div(BIG_DECIMAL_1E6)
+    data.amountETH = tokenAmounts[2].toBigDecimal().div(BIG_DECIMAL_1E18)
+    data.amountBTCUSD = data.amountBTC.times(assetPrices.btcPrice)
+    data.amountETHUSD = data.amountETH.times(assetPrices.ethPrice)
+    data.totalAddedUSD = data.amountUSD.plus(data.amountETHUSD).plus(data.amountBTCUSD)
+    data.save()
 
 }
 
 
-export function handleClaimAdminFee(event: TokenExchange): void {
+export function handleRemoveLiquidity(event: RemoveLiquidity|RemoveLiquidityOne): void {
 
-    // get event values
+    poolSnapshot(event).save()
+    const assetPrices = recordAssetPrice(event)
+    assetPrices.save()
+
+    // parse event:
+    const data = new RemoveLiquidityEvent(event.block.timestamp.toString())
+    data.blockNumber = event.block.number
+    data.timestamp = event.block.timestamp
+    data.address = event.params.provider
+
+    if (event instanceof RemoveLiquidity) {
+
+        const tokenAmounts = event.params.token_amounts
+        data.amountUSD = tokenAmounts[USDTID.toString()].toBigDecimal().div(BIG_DECIMAL_1E6)
+        data.amountBTC = tokenAmounts[WBTCID.toString()].toBigDecimal().div(BIG_DECIMAL_1E6)
+        data.amountETH = tokenAmounts[ETHID.toString()].toBigDecimal().div(BIG_DECIMAL_1E18)
+        data.amountBTCUSD = data.amountBTC.times(assetPrices.btcPrice)
+        data.amountETHUSD = data.amountETH.times(assetPrices.ethPrice)
+
+    }
+
+    if (event instanceof RemoveLiquidityOne) {
+
+        data.amountUSD = BigDecimal.fromString("0")
+        data.amountBTC = BigDecimal.fromString("0")
+        data.amountBTCUSD = BigDecimal.fromString("0")
+        data.amountETH = BigDecimal.fromString("0")
+        data.amountETHUSD = BigDecimal.fromString("0")
+
+        const coinAmount = event.params.coin_amount
+        const coinID = event.params.coin_index
+
+        if (coinID == USDTID) {
+            data.amountUSD = coinAmount.toBigDecimal().div(BIG_DECIMAL_1E6)
+        }
+        if (coinID == WBTCID) {
+            data.amountBTC = coinAmount.toBigDecimal().div(BIG_DECIMAL_1E6)
+            data.amountBTCUSD = data.amountBTC.times(assetPrices.btcPrice)
+        }
+        if (coinID == ETHID) {
+            data.amountETH = coinAmount.toBigDecimal().div(BIG_DECIMAL_1E18)
+            data.amountETHUSD = data.amountETH.times(assetPrices.ethPrice)
+        }
+
+    }
+
+    data.totalRemovedUSD = data.amountUSD.plus(data.amountBTCUSD).plus(data.amountETHUSD)
+    data.save()
+
+}
 
 
-    // get pool coin balances
+export function handleClaimAdminFee(event: ClaimAdminFee): void {
 
+    poolSnapshot(event).save()
+    const assetPrices = recordAssetPrice(event)
+    assetPrices.save()
 
-    // get virtual price
-
-
-    // get price oracle values for btc, eth
-
-
-    // get price scale values for btc, eth
-
-
-    // get swap fee
-
-
-    // get swap rates
+    // parse event:
+    const data = new ClaimAdminFeeEvent(event.block.timestamp.toString())
+    data.blockNumber = event.block.number
+    data.timestamp = event.block.timestamp
+    data.amountClaimed = event.params.tokens.toBigDecimal()
+    data.claimDollarValue = assetPrices.crv3cryptoUSD.times(data.amountClaimed)
+    data.save()
 
 }

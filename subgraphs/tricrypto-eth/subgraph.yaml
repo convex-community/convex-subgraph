@@ -19,9 +19,7 @@ dataSources:
         - RemoveLiquidityEvent
         - ExchangeEvent
         - ClaimAdminFeeEvent
-        - SwapRate
-        - SwapValue
-        - User
+        - AssetPrices
       abis:
         - name: tricrypto2
           file: ./abis/tricrypto2.json
