@@ -16,7 +16,7 @@ import {
     WBTCID,
     USDTID,
     poolSnapshot,
-    recordAssetPrices,
+    getAssetPrices,
 } from "./services/poolUtils";
 import {BIG_DECIMAL_1E18, BIG_DECIMAL_1E6} from "../../../packages/constants";
 import {AddLiquidity} from "../../curve-pools/generated/Booster/CurvePool";
@@ -26,11 +26,11 @@ import {BigDecimal} from "@graphprotocol/graph-ts";
 export function handleTokenExchange(event: TokenExchange): void {
 
     poolSnapshot(event).save()
-    const assetPrices = recordAssetPrices(event)
+    const assetPrices = getAssetPrices(event)
     assetPrices.save()
 
     // parse event:
-    const data = new ExchangeEvent(event.block.timestamp.toString())
+    const data = new ExchangeEvent(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
     data.blockNumber = event.block.number
     data.timestamp = event.block.timestamp
     data.address = event.params.buyer
@@ -87,11 +87,11 @@ export function handleTokenExchange(event: TokenExchange): void {
 export function handleAddLiquidity(event: AddLiquidity): void {
 
     poolSnapshot(event).save()
-    const assetPrices = recordAssetPrices(event)
+    const assetPrices = getAssetPrices(event)
     assetPrices.save()
 
     // parse event:
-    const data = new AddLiquidityEvent(event.block.timestamp.toString())
+    const data = new AddLiquidityEvent(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
     data.blockNumber = event.block.number
     data.timestamp = event.block.timestamp
     data.address = event.params.provider
@@ -112,11 +112,11 @@ export function handleAddLiquidity(event: AddLiquidity): void {
 export function handleRemoveLiquidity(event: RemoveLiquidity): void {
 
     poolSnapshot(event).save()
-    const assetPrices = recordAssetPrices(event)
+    const assetPrices = getAssetPrices(event)
     assetPrices.save()
 
     // parse event:
-    const data = new RemoveLiquidityEvent(event.block.timestamp.toString())
+    const data = new RemoveLiquidityEvent(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
     data.blockNumber = event.block.number
     data.timestamp = event.block.timestamp
     data.address = event.params.provider
@@ -137,11 +137,11 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
 export function handleRemoveLiquidityOne(event: RemoveLiquidityOne): void {
 
     poolSnapshot(event).save()
-    const assetPrices = recordAssetPrices(event)
+    const assetPrices = getAssetPrices(event)
     assetPrices.save()
 
     // parse event:
-    const data = new RemoveLiquidityEvent(event.block.timestamp.toString())
+    const data = new RemoveLiquidityEvent(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
     data.blockNumber = event.block.number
     data.timestamp = event.block.timestamp
     data.address = event.params.provider
@@ -175,11 +175,11 @@ export function handleRemoveLiquidityOne(event: RemoveLiquidityOne): void {
 export function handleClaimAdminFee(event: ClaimAdminFee): void {
 
     poolSnapshot(event).save()
-    const assetPrices = recordAssetPrices(event)
+    const assetPrices = getAssetPrices(event)
     assetPrices.save()
 
     // parse event:
-    const data = new ClaimAdminFeeEvent(event.block.timestamp.toString())
+    const data = new ClaimAdminFeeEvent(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
     data.blockNumber = event.block.number
     data.timestamp = event.block.timestamp
     data.amountClaimed = event.params.tokens.toBigDecimal()

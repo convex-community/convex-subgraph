@@ -20,7 +20,7 @@ export const CRV3CRYPTO_ETH = crv3Crypto.bind(TRICRYPTO2_LP_ADDRESS)
 
 export function poolSnapshot(event: ethereum.Event): TricryptoSnapshot {
 
-    const pool = new TricryptoSnapshot(event.block.timestamp.toString())
+    const pool = new TricryptoSnapshot(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
 
     pool.blockNumber = event.block.number
     pool.timestamp = event.block.timestamp
@@ -74,14 +74,14 @@ export function getCoinExchangedId(coinID: BigInt): Bytes {
 }
 
 
-export function recordAssetPrices(event: ethereum.Event): AssetPrices {
+export function getAssetPrices(event: ethereum.Event): AssetPrices {
 
     const btcPrice = getBtcOraclePrice(event)
     const ethPrice = getEthOraclePrice(event)
     const virtualPrice = getVirtualPrice(event)
     const tokenPrice = getCrv3CryptoPriceUSD(btcPrice, ethPrice, virtualPrice)
 
-    const assetPricesEntity = new AssetPrices(event.block.timestamp.toString())
+    const assetPricesEntity = new AssetPrices(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
 
     assetPricesEntity.blockNumber = event.block.number
     assetPricesEntity.timestamp = event.block.timestamp
