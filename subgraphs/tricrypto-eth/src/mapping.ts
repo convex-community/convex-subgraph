@@ -16,7 +16,7 @@ import {
     WBTCID,
     USDTID,
     poolSnapshot,
-    getAssetPrices,
+    priceSnapshot,
 } from "./services/poolUtils";
 import {BIG_DECIMAL_1E18, BIG_DECIMAL_1E6} from "../../../packages/constants";
 import {AddLiquidity} from "../../curve-pools/generated/Booster/CurvePool";
@@ -26,14 +26,15 @@ import {BigDecimal} from "@graphprotocol/graph-ts";
 export function handleTokenExchange(event: TokenExchange): void {
 
     poolSnapshot(event).save()
-    const assetPrices = getAssetPrices(event)
-    assetPrices.save()
+    const assetPriceSnapshot = priceSnapshot(event)
+    assetPriceSnapshot.save()
 
     // parse event:
     const data = new ExchangeEvent(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
     data.blockNumber = event.block.number
     data.timestamp = event.block.timestamp
     data.address = event.params.buyer
+    data.txHash = event.transaction.hash
 
     const soldID = event.params.sold_id
     const boughtID = event.params.bought_id
@@ -58,11 +59,11 @@ export function handleTokenExchange(event: TokenExchange): void {
     }
     if (soldID == WBTCID) {
         data.amountBTCSold = amountSold.toBigDecimal().div(BIG_DECIMAL_1E6)
-        data.amountBTCSoldUSD = data.amountBTCSold.times(assetPrices.btcPrice)
+        data.amountBTCSoldUSD = data.amountBTCSold.times(assetPriceSnapshot.btcPrice)
     }
     if (soldID == ETHID) {
         data.amountETHSold = amountSold.toBigDecimal().div(BIG_DECIMAL_1E18)
-        data.amountETHSoldUSD = data.amountETHSold.times(assetPrices.ethPrice)
+        data.amountETHSoldUSD = data.amountETHSold.times(assetPriceSnapshot.ethPrice)
     }
 
     if (boughtID == USDTID) {
@@ -70,11 +71,11 @@ export function handleTokenExchange(event: TokenExchange): void {
     }
     if (boughtID == WBTCID) {
         data.amountBTCBought = amountBought.toBigDecimal().div(BIG_DECIMAL_1E6)
-        data.amountBTCBoughtUSD = data.amountBTCBought.times(assetPrices.btcPrice)
+        data.amountBTCBoughtUSD = data.amountBTCBought.times(assetPriceSnapshot.btcPrice)
     }
     if (boughtID == ETHID) {
         data.amountETHBought = amountBought.toBigDecimal().div(BIG_DECIMAL_1E18)
-        data.amountETHBoughtUSD = data.amountETHBought.times(assetPrices.ethPrice)
+        data.amountETHBoughtUSD = data.amountETHBought.times(assetPriceSnapshot.ethPrice)
     }
 
     data.totalBoughtUSD = data.amountUSDBought.plus(data.amountBTCBoughtUSD).plus(data.amountETHBoughtUSD)
@@ -87,22 +88,23 @@ export function handleTokenExchange(event: TokenExchange): void {
 export function handleAddLiquidity(event: AddLiquidity): void {
 
     poolSnapshot(event).save()
-    const assetPrices = getAssetPrices(event)
-    assetPrices.save()
+    const assetPriceSnapshot = priceSnapshot(event)
+    assetPriceSnapshot.save()
 
     // parse event:
     const data = new AddLiquidityEvent(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
     data.blockNumber = event.block.number
     data.timestamp = event.block.timestamp
     data.address = event.params.provider
+    data.txHash = event.transaction.hash
 
     const tokenAmounts = event.params.token_amounts
 
     data.amountUSD = tokenAmounts[0].toBigDecimal().div(BIG_DECIMAL_1E6)
     data.amountBTC = tokenAmounts[1].toBigDecimal().div(BIG_DECIMAL_1E6)
     data.amountETH = tokenAmounts[2].toBigDecimal().div(BIG_DECIMAL_1E18)
-    data.amountBTCUSD = data.amountBTC.times(assetPrices.btcPrice)
-    data.amountETHUSD = data.amountETH.times(assetPrices.ethPrice)
+    data.amountBTCUSD = data.amountBTC.times(assetPriceSnapshot.btcPrice)
+    data.amountETHUSD = data.amountETH.times(assetPriceSnapshot.ethPrice)
     data.totalAddedUSD = data.amountUSD.plus(data.amountETHUSD).plus(data.amountBTCUSD)
     data.save()
 
@@ -112,21 +114,22 @@ export function handleAddLiquidity(event: AddLiquidity): void {
 export function handleRemoveLiquidity(event: RemoveLiquidity): void {
 
     poolSnapshot(event).save()
-    const assetPrices = getAssetPrices(event)
-    assetPrices.save()
+    const assetPriceSnapshot = priceSnapshot(event)
+    assetPriceSnapshot.save()
 
     // parse event:
     const data = new RemoveLiquidityEvent(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
     data.blockNumber = event.block.number
     data.timestamp = event.block.timestamp
     data.address = event.params.provider
+    data.txHash = event.transaction.hash
 
     const tokenAmounts = event.params.token_amounts
     data.amountUSD = tokenAmounts[USDTID.toI32()].toBigDecimal().div(BIG_DECIMAL_1E6)
     data.amountBTC = tokenAmounts[WBTCID.toI32()].toBigDecimal().div(BIG_DECIMAL_1E6)
     data.amountETH = tokenAmounts[ETHID.toI32()].toBigDecimal().div(BIG_DECIMAL_1E18)
-    data.amountBTCUSD = data.amountBTC.times(assetPrices.btcPrice)
-    data.amountETHUSD = data.amountETH.times(assetPrices.ethPrice)
+    data.amountBTCUSD = data.amountBTC.times(assetPriceSnapshot.btcPrice)
+    data.amountETHUSD = data.amountETH.times(assetPriceSnapshot.ethPrice)
 
     data.totalRemovedUSD = data.amountUSD.plus(data.amountBTCUSD).plus(data.amountETHUSD)
     data.save()
@@ -137,14 +140,15 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
 export function handleRemoveLiquidityOne(event: RemoveLiquidityOne): void {
 
     poolSnapshot(event).save()
-    const assetPrices = getAssetPrices(event)
-    assetPrices.save()
+    const assetPriceSnapshot = priceSnapshot(event)
+    assetPriceSnapshot.save()
 
     // parse event:
     const data = new RemoveLiquidityEvent(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
     data.blockNumber = event.block.number
     data.timestamp = event.block.timestamp
     data.address = event.params.provider
+    data.txHash = event.transaction.hash
 
     data.amountUSD = BigDecimal.fromString("0")
     data.amountBTC = BigDecimal.fromString("0")
@@ -160,11 +164,11 @@ export function handleRemoveLiquidityOne(event: RemoveLiquidityOne): void {
     }
     if (coinID == WBTCID) {
         data.amountBTC = coinAmount.toBigDecimal().div(BIG_DECIMAL_1E6)
-        data.amountBTCUSD = data.amountBTC.times(assetPrices.btcPrice)
+        data.amountBTCUSD = data.amountBTC.times(assetPriceSnapshot.btcPrice)
     }
     if (coinID == ETHID) {
         data.amountETH = coinAmount.toBigDecimal().div(BIG_DECIMAL_1E18)
-        data.amountETHUSD = data.amountETH.times(assetPrices.ethPrice)
+        data.amountETHUSD = data.amountETH.times(assetPriceSnapshot.ethPrice)
     }
     data.totalRemovedUSD = data.amountUSD.plus(data.amountBTCUSD).plus(data.amountETHUSD)
     data.save()
@@ -175,15 +179,16 @@ export function handleRemoveLiquidityOne(event: RemoveLiquidityOne): void {
 export function handleClaimAdminFee(event: ClaimAdminFee): void {
 
     poolSnapshot(event).save()
-    const assetPrices = getAssetPrices(event)
-    assetPrices.save()
+    const assetPriceSnapshot = priceSnapshot(event)
+    assetPriceSnapshot.save()
 
     // parse event:
     const data = new ClaimAdminFeeEvent(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
     data.blockNumber = event.block.number
     data.timestamp = event.block.timestamp
-    data.amountClaimed = event.params.tokens.toBigDecimal()
-    data.claimDollarValue = assetPrices.crv3cryptoUSD.times(data.amountClaimed)
+    data.txHash = event.transaction.hash
+    data.amountClaimed = event.params.tokens.toBigDecimal().div(BIG_DECIMAL_1E18)
+    data.claimDollarValue = assetPriceSnapshot.crv3cryptoUSD.times(data.amountClaimed)
     data.save()
 
 }

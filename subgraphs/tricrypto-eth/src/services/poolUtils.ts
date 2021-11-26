@@ -1,4 +1,4 @@
-import {AssetPrices, TricryptoSnapshot} from "../../generated/schema";
+import {AssetPrice, TricryptoSnapshot} from "../../generated/schema";
 import {
     BIG_DECIMAL_1E18,
     BIG_DECIMAL_1E6,
@@ -44,6 +44,33 @@ export function poolSnapshot(event: ethereum.Event): TricryptoSnapshot {
 }
 
 
+export function priceSnapshot(event: ethereum.Event): AssetPrice {
+
+    const btcPrice = getBtcOraclePrice(event)
+    const ethPrice = getEthOraclePrice(event)
+    const virtualPrice = getVirtualPrice(event)
+    const tokenPrice = getCrv3CryptoPriceUSD(btcPrice, ethPrice, virtualPrice)
+
+    const data = new AssetPrice(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
+
+    data.blockNumber = event.block.number
+    data.timestamp = event.block.timestamp
+    data.crv3cryptoUSD = tokenPrice
+    data.crv3cryptoBTC = tokenPrice.div(btcPrice)
+    data.crv3cryptoETH = tokenPrice.div(ethPrice)
+    data.btcPrice = btcPrice
+    data.ethPrice = ethPrice
+
+    // index constituents: 33% USD, 33% BTC, 33% ETH
+    data.indexNumUSD = data.crv3cryptoUSD.div(BigDecimal.fromString("3"))
+    data.indexNumETH = data.crv3cryptoUSD.div(BigDecimal.fromString("3")).div(data.ethPrice)
+    data.indexNumBTC = data.crv3cryptoUSD.div(BigDecimal.fromString("3")).div(data.btcPrice)
+
+    return data
+
+}
+
+
 export function getEthOraclePrice(event: ethereum.Event): BigDecimal {
     return TRICRYPTO_ETH.price_oracle(BigInt.fromI32(1)).toBigDecimal().div(BIG_DECIMAL_1E18)
 }
@@ -70,28 +97,6 @@ export function getCoinExchangedId(coinID: BigInt): Bytes {
     if ( coinID == ETHID ) {
         return Bytes.fromUTF8("ETH")
     }
-
-}
-
-
-export function getAssetPrices(event: ethereum.Event): AssetPrices {
-
-    const btcPrice = getBtcOraclePrice(event)
-    const ethPrice = getEthOraclePrice(event)
-    const virtualPrice = getVirtualPrice(event)
-    const tokenPrice = getCrv3CryptoPriceUSD(btcPrice, ethPrice, virtualPrice)
-
-    const assetPricesEntity = new AssetPrices(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
-
-    assetPricesEntity.blockNumber = event.block.number
-    assetPricesEntity.timestamp = event.block.timestamp
-    assetPricesEntity.crv3cryptoUSD = tokenPrice
-    assetPricesEntity.crv3cryptoBTC = tokenPrice.div(btcPrice)
-    assetPricesEntity.crv3cryptoETH = tokenPrice.div(ethPrice)
-    assetPricesEntity.btcPrice = btcPrice
-    assetPricesEntity.ethPrice = ethPrice
-
-    return assetPricesEntity
 
 }
 

@@ -21,6 +21,7 @@ type AddLiquidityEvent @entity {
     id: ID!
     timestamp: BigInt!
     blockNumber: BigInt!
+    txHash: Bytes!
     address: Bytes! # address
     fee: BigDecimal!
     amountUSD: BigDecimal! # uint256
@@ -36,6 +37,7 @@ type RemoveLiquidityEvent @entity {
     id: ID!
     blockNumber: BigInt!
     timestamp: BigInt!
+    txHash: Bytes!
     address: Bytes!
     amountUSD: BigDecimal!
     amountETH: BigDecimal!
@@ -50,6 +52,7 @@ type ExchangeEvent @entity {
     id: ID!
     blockNumber: BigInt!
     timestamp: BigInt!
+    txHash: Bytes!
     address: Bytes!
     amountUSDSold: BigDecimal!
     amountUSDBought: BigDecimal!
@@ -70,12 +73,13 @@ type ClaimAdminFeeEvent @entity {
     id: ID!
     blockNumber: BigInt!
     timestamp: BigInt!
+    txHash: Bytes!
     amountClaimed: BigDecimal!
     claimDollarValue: BigDecimal!
 }
 
 
-type AssetPrices @entity {
+type AssetPrice @entity {
     id: ID!
     blockNumber: BigInt!
     timestamp: BigInt!
@@ -84,4 +88,7 @@ type AssetPrices @entity {
     crv3cryptoETH: BigDecimal!
     btcPrice: BigDecimal!
     ethPrice: BigDecimal!
+    indexNumUSD: BigDecimal!
+    indexNumETH: BigDecimal!
+    indexNumBTC: BigDecimal!
 }
