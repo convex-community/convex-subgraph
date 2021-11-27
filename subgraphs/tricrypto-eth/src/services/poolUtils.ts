@@ -103,9 +103,13 @@ export function getCoinExchangedId(coinID: BigInt): Bytes {
 
 export function getCrv3CryptoPriceUSD(btcPrice: BigDecimal, ethPrice: BigDecimal, virtualPrice: BigDecimal): BigDecimal {
 
-    const mulBtcEthVirtualPrice = btcPrice.times(ethPrice).times(virtualPrice)
-    const toBeCubeRooted = BigDecimal.fromString('3').times(mulBtcEthVirtualPrice).times(BigDecimal.fromString("3"))
+    // formula is: 3 * virtual_price * (eth_price * btc_price)**(1/3)
+    // the following gives (eth_price * btc_price) ** (1/3)
+    const cubeRootEthBtcPrices: BigDecimal = BigDecimal.fromString(Math.cbrt(Number.parseFloat(btcPrice.times(ethPrice).toString())).toString())
 
-    return BigDecimal.fromString(Math.cbrt(Number.parseFloat(toBeCubeRooted.toString())).toString())
+    // the following gives 3 * virtual_priec
+    const threeTimesVirtualPrice = BigDecimal.fromString('3').times(virtualPrice)
+
+    return threeTimesVirtualPrice.times(cubeRootEthBtcPrices)
 
 }
