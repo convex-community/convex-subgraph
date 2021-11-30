@@ -19,7 +19,11 @@ import {
     poolSnapshot,
     priceSnapshot,
 } from "./services/poolUtils";
-import {BIG_DECIMAL_1E18, BIG_DECIMAL_1E6} from "../../../packages/constants";
+import {
+    BIG_DECIMAL_1E18,
+    BIG_DECIMAL_1E6,
+    BIG_DECIMAL_1E8
+} from "../../../packages/constants";
 import {BigDecimal} from "@graphprotocol/graph-ts";
 
 
@@ -58,7 +62,7 @@ export function handleTokenExchange(event: TokenExchange): void {
         data.amountUSDSold = amountSold.toBigDecimal().div(BIG_DECIMAL_1E6)
     }
     if (soldID == WBTCID) {
-        data.amountBTCSold = amountSold.toBigDecimal().div(BIG_DECIMAL_1E6)
+        data.amountBTCSold = amountSold.toBigDecimal().div(BIG_DECIMAL_1E8)
         data.amountBTCSoldUSD = data.amountBTCSold.times(assetPriceSnapshot.btcPrice)
     }
     if (soldID == ETHID) {
@@ -70,7 +74,7 @@ export function handleTokenExchange(event: TokenExchange): void {
         data.amountUSDBought = amountBought.toBigDecimal().div(BIG_DECIMAL_1E6)
     }
     if (boughtID == WBTCID) {
-        data.amountBTCBought = amountBought.toBigDecimal().div(BIG_DECIMAL_1E6)
+        data.amountBTCBought = amountBought.toBigDecimal().div(BIG_DECIMAL_1E8)
         data.amountBTCBoughtUSD = data.amountBTCBought.times(assetPriceSnapshot.btcPrice)
     }
     if (boughtID == ETHID) {
@@ -101,7 +105,7 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     const tokenAmounts = event.params.token_amounts
 
     data.amountUSD = tokenAmounts[0].toBigDecimal().div(BIG_DECIMAL_1E6)
-    data.amountBTC = tokenAmounts[1].toBigDecimal().div(BIG_DECIMAL_1E6)
+    data.amountBTC = tokenAmounts[1].toBigDecimal().div(BIG_DECIMAL_1E8)
     data.amountETH = tokenAmounts[2].toBigDecimal().div(BIG_DECIMAL_1E18)
     data.amountBTCUSD = data.amountBTC.times(assetPriceSnapshot.btcPrice)
     data.amountETHUSD = data.amountETH.times(assetPriceSnapshot.ethPrice)

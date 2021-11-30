@@ -11,7 +11,7 @@ import {tricrypto2} from "../../generated/Tricrypto2/tricrypto2";
 import {crv3Crypto} from "../../generated/Tricrypto2/crv3Crypto";
 
 
-export const USDTID = BigInt.fromI32(0)s
+export const USDTID = BigInt.fromI32(0)
 export const WBTCID = BigInt.fromI32(1)
 export const ETHID = BigInt.fromI32(2)
 
@@ -27,7 +27,7 @@ export function poolSnapshot(event: ethereum.Event): TricryptoSnapshot {
 
     // get pool balances
     pool.usdtBalance = TRICRYPTO_ETH.balances(USDTID).toBigDecimal().div(BIG_DECIMAL_1E6)
-    pool.btcBalance = TRICRYPTO_ETH.balances(WBTCID).toBigDecimal().div(BIG_DECIMAL_1E6)
+    pool.btcBalance = TRICRYPTO_ETH.balances(WBTCID).toBigDecimal().div(BIG_DECIMAL_1E8)
     pool.ethBalance = TRICRYPTO_ETH.balances(ETHID).toBigDecimal().div(BIG_DECIMAL_1E18)
 
     // price oracle & price scale values for btc, eth
@@ -94,7 +94,11 @@ export function getCrv3CryptoPriceUSD(btcPrice: BigDecimal, ethPrice: BigDecimal
 
     // formula is: 3 * virtual_price * (eth_price * btc_price)**(1/3)
     // the following gives (eth_price * btc_price) ** (1/3)
-    const cubeRootEthBtcPrices: BigDecimal = BigDecimal.fromString(Math.cbrt(Number.parseFloat(btcPrice.times(ethPrice).toString())).toString())
+    const cubeRootEthBtcPrices: BigDecimal = BigDecimal.fromString(
+        Math.cbrt(
+            Number.parseFloat(btcPrice.times(ethPrice).toString())
+        ).toString()
+    )
 
     // the following gives 3 * virtual_priec
     const threeTimesVirtualPrice = BigDecimal.fromString('3').times(virtualPrice)
