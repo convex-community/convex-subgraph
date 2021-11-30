@@ -25,17 +25,21 @@ export function poolSnapshot(event: ethereum.Event): TricryptoSnapshot {
     pool.blockNumber = event.block.number
     pool.timestamp = event.block.timestamp
 
-    // get pool properties after swap
+    // get pool balances
     pool.usdtBalance = TRICRYPTO_ETH.balances(USDTID).toBigDecimal().div(BIG_DECIMAL_1E6)
-    pool.wbtcBalance = TRICRYPTO_ETH.balances(WBTCID).toBigDecimal().div(BIG_DECIMAL_1E6)
+    pool.btcBalance = TRICRYPTO_ETH.balances(WBTCID).toBigDecimal().div(BIG_DECIMAL_1E6)
     pool.ethBalance = TRICRYPTO_ETH.balances(ETHID).toBigDecimal().div(BIG_DECIMAL_1E18)
 
     // price oracle & price scale values for btc, eth
-    pool.virtualPrice = getVirtualPrice(event)
-    pool.ethOraclePrice = getEthOraclePrice(event)
-    pool.btcOraclePrice = getBtcOraclePrice(event)
-    pool.ethOraclePrice = TRICRYPTO_ETH.price_scale(BigInt.fromI32(1)).toBigDecimal().div(BIG_DECIMAL_1E18)
-    pool.btcOraclePrice = TRICRYPTO_ETH.price_scale(BigInt.fromI32(0)).toBigDecimal().div(BIG_DECIMAL_1E18)
+    pool.virtualPrice = getVirtualPrice()
+    pool.ethOraclePrice = getEthOraclePrice()
+    pool.btcOraclePrice = getBtcOraclePrice()
+    pool.ethScalePrice = TRICRYPTO_ETH.price_scale(BigInt.fromI32(1)).toBigDecimal().div(BIG_DECIMAL_1E18)
+    pool.btcScalePrice = TRICRYPTO_ETH.price_scale(BigInt.fromI32(0)).toBigDecimal().div(BIG_DECIMAL_1E18)
+
+    // continue tvl calcs:
+    pool.ethBalanceUSD = pool.ethBalance.times(pool.ethOraclePrice)
+    pool.btcBalanceUSD = pool.btcBalance.times(pool.btcOraclePrice)
 
     pool.fee = TRICRYPTO_ETH.fee().toBigDecimal().div(BIG_DECIMAL_1E8)
     pool.crv3CryptoSupply = CRV3CRYPTO_ETH.totalSupply().toBigDecimal().div(BIG_DECIMAL_1E18)
@@ -46,9 +50,9 @@ export function poolSnapshot(event: ethereum.Event): TricryptoSnapshot {
 
 export function priceSnapshot(event: ethereum.Event): AssetPrice {
 
-    const btcPrice = getBtcOraclePrice(event)
-    const ethPrice = getEthOraclePrice(event)
-    const virtualPrice = getVirtualPrice(event)
+    const btcPrice = getBtcOraclePrice()
+    const ethPrice = getEthOraclePrice()
+    const virtualPrice = getVirtualPrice()
     const tokenPrice = getCrv3CryptoPriceUSD(btcPrice, ethPrice, virtualPrice)
 
     const data = new AssetPrice(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
@@ -71,33 +75,18 @@ export function priceSnapshot(event: ethereum.Event): AssetPrice {
 }
 
 
-export function getEthOraclePrice(event: ethereum.Event): BigDecimal {
+export function getEthOraclePrice(): BigDecimal {
     return TRICRYPTO_ETH.price_oracle(BigInt.fromI32(1)).toBigDecimal().div(BIG_DECIMAL_1E18)
 }
 
 
-export function getBtcOraclePrice(event: ethereum.Event): BigDecimal {
+export function getBtcOraclePrice(): BigDecimal {
     return TRICRYPTO_ETH.price_oracle(BigInt.fromI32(0)).toBigDecimal().div(BIG_DECIMAL_1E18)
 }
 
 
-export function getVirtualPrice(event: ethereum.Event): BigDecimal {
+export function getVirtualPrice(): BigDecimal {
     return TRICRYPTO_ETH.get_virtual_price().toBigDecimal().div(BIG_DECIMAL_1E18)
-}
-
-
-export function getCoinExchangedId(coinID: BigInt): Bytes {
-
-    if ( coinID == USDTID ) {
-        return Bytes.fromUTF8("USDT")
-    }
-    if ( coinID == WBTCID ) {
-        return Bytes.fromUTF8("WBTC")
-    }
-    if ( coinID == ETHID ) {
-        return Bytes.fromUTF8("ETH")
-    }
-
 }
 
 

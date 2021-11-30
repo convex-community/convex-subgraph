@@ -6,7 +6,10 @@ type TricryptoSnapshot @entity {
     timestamp: BigInt!
     usdtBalance: BigDecimal!
     ethBalance: BigDecimal!
-    wbtcBalance: BigDecimal!
+    btcBalance: BigDecimal!
+    ethBalanceUSD: BigDecimal!
+    btcBalanceUSD: BigDecimal!
+    totalBalanceUSD: BigDecimal!
     virtualPrice: BigDecimal!
     ethOraclePrice: BigDecimal!
     btcOraclePrice: BigDecimal!
