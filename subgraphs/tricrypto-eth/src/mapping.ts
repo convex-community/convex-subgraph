@@ -1,5 +1,4 @@
 import {
-    TricryptoSnapshot,
     AddLiquidityEvent,
     RemoveLiquidityEvent,
     ExchangeEvent,

@@ -5,13 +5,13 @@ import {
     BIG_DECIMAL_1E8,
     TRICRYPTO2_ETH_POOL_ADDRESS, TRICRYPTO2_LP_ADDRESS
 } from "../../../../packages/constants";
-import {BigInt, Bytes} from "@graphprotocol/graph-ts/index";
+import {BigInt} from "@graphprotocol/graph-ts/index";
 import {BigDecimal, ethereum} from "@graphprotocol/graph-ts";
 import {tricrypto2} from "../../generated/Tricrypto2/tricrypto2";
 import {crv3Crypto} from "../../generated/Tricrypto2/crv3Crypto";
 
 
-export const USDTID = BigInt.fromI32(0)
+export const USDTID = BigInt.fromI32(0)s
 export const WBTCID = BigInt.fromI32(1)
 export const ETHID = BigInt.fromI32(2)
 
