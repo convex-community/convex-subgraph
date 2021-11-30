@@ -6,7 +6,9 @@ import {
 } from '../generated/schema'
 import {
     ClaimAdminFee,
-    RemoveLiquidity, RemoveLiquidityOne,
+    AddLiquidity,
+    RemoveLiquidity,
+    RemoveLiquidityOne,
     TokenExchange
 } from "../generated/Tricrypto2/tricrypto2";
 
@@ -18,7 +20,6 @@ import {
     priceSnapshot,
 } from "./services/poolUtils";
 import {BIG_DECIMAL_1E18, BIG_DECIMAL_1E6} from "../../../packages/constants";
-import {AddLiquidity} from "../../curve-pools/generated/Booster/CurvePool";
 import {BigDecimal} from "@graphprotocol/graph-ts";
 
 
