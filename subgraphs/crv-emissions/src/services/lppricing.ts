@@ -104,6 +104,29 @@ export function getLpTokenVirtualPrice(lpToken: Bytes): BigDecimal {
   return vPrice
 }
 
+// TODO: refactor to share pricing logic with getLpTokenPriceUSD
+export function getPoolTokenPrice(pool: Pool): BigDecimal {
+  const lpTokenAddress = bytesToAddress(pool.lpToken)
+  const price = BIG_DECIMAL_ONE
+  if (V2_POOL_ADDRESSES.includes(lpTokenAddress)) {
+    return price
+  }
+  if (FOREX_ORACLES.has(pool.lpToken.toHexString())) {
+    return getForexUsdRate(pool.lpToken)
+  }
+  switch (pool.assetType) {
+    default:
+      // USD
+      return price
+    case 1: // ETH
+      return getUsdRate(WETH_ADDRESS)
+    case 2: // BTC
+      return getUsdRate(WBTC_ADDRESS)
+    case 3:
+      return getLpUnderlyingTokenValueInOtherToken(lpTokenAddress, USDT_ADDRESS)
+  }
+}
+
 export function getLpTokenPriceUSD(pool: Pool): BigDecimal {
   const lpTokenAddress = bytesToAddress(pool.lpToken)
   const vPrice = getLpTokenVirtualPrice(pool.lpToken)

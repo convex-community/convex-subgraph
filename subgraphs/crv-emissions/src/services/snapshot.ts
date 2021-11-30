@@ -6,6 +6,9 @@ import {
   BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
   CRV_ADDRESS,
+  LINK_ADDRESS,
+  WBTC_ADDRESS,
+  WETH_ADDRESS,
 } from '../../../../packages/constants'
 import { CRVToken } from '../../generated/GaugeController/CRVToken'
 import { getUsdRate } from '../../../../packages/utils/pricing'
@@ -20,7 +23,7 @@ import {
   SnapshotTime,
 } from '../../generated/schema'
 import { getGrowthRate, getPool } from './pools'
-import { getLpTokenPriceUSD, getLpTokenVirtualPrice } from './lppricing'
+import { getLpTokenPriceUSD, getLpTokenVirtualPrice, getPoolTokenPrice } from './lppricing'
 import { bytesToAddress } from '../../../../packages/utils'
 import { ERC20 } from '../../generated/GaugeController/ERC20'
 import { log } from '@graphprotocol/graph-ts/index'
@@ -113,6 +116,7 @@ export function createAllSnapshots(timestamp: BigInt, block: BigInt): void {
       snapshot.virtualPrice = getLpTokenVirtualPrice(pool.lpToken)
       const lpTokenContract = ERC20.bind(bytesToAddress(pool.lpToken))
       snapshot.lpTokenSupply = lpTokenContract.totalSupply()
+      snapshot.poolTokenPrice = getPoolTokenPrice(pool)
       const lpPrice = getLpTokenPriceUSD(pool)
       snapshot.tvl = snapshot.lpTokenSupply.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice)
       const rate = getGrowthRate(pool, snapshot.virtualPrice, timestamp)

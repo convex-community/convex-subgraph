@@ -46,9 +46,12 @@ type PoolSnapshot @entity {
   id: ID!
   pool: Pool!
   virtualPrice: BigDecimal!
+  # rough estimate
   fees: BigDecimal!
   lpTokenSupply: BigInt!
   tvl: BigDecimal!
+  # not very clean - but needed for backend calcs
+  poolTokenPrice: BigDecimal!
   timestamp: BigInt!
   block: BigInt!
 }
