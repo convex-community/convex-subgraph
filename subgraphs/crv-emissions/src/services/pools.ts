@@ -8,13 +8,16 @@ import {
   BIG_DECIMAL_ZERO,
   CURVE_PLATFORM_ID,
   CURVE_REGISTRY,
+  TRICRYPTO_LP_ADDRESS,
+  V2_POOL_ADDRESSES,
 } from '../../../../packages/constants'
 import { ERC20 } from '../../../curve-pools/generated/Booster/ERC20'
 import { getIntervalFromTimestamp, WEEK } from 'utils/time'
-import { getLpTokenVirtualPrice, getLpTokenPriceUSD } from './lppricing'
-import { CurvePool } from '../../../curve-pools/generated/Booster/CurvePool'
 import { bytesToAddress } from '../../../../packages/utils'
 import { log } from '@graphprotocol/graph-ts/index'
+import { CurvePoolCoin256 } from '../../generated/GaugeController/CurvePoolCoin256'
+import { CurvePoolCoin128 } from '../../generated/GaugeController/CurvePoolCoin128'
+import { CurvePoolV1 } from '../../generated/templates'
 
 // TODO: DRY this with Booster pool creation logic
 export function getPool(lpToken: Address): Pool {
@@ -34,6 +37,10 @@ export function getPool(lpToken: Address): Pool {
     }
 
     pool.swap = swap
+    if (!V2_POOL_ADDRESSES.includes(swap)) {
+      log.debug('Starting to track admin fee withdrawal calls for {}', [pool.swap.toHexString()])
+      CurvePoolV1.create(swap)
+    }
     const nameResult = curveRegistry.try_get_pool_name(swap)
     let name = nameResult.reverted ? '' : nameResult.value
     if (name == '') {
@@ -50,11 +57,35 @@ export function getPool(lpToken: Address): Pool {
   return pool
 }
 
-export function getPoolCoins(pool: Pool): void {
-  const curvePool = CurvePool.bind(bytesToAddress(pool.swap))
+export function getPoolCoins128(pool: Pool): void {
+  const curvePool = CurvePoolCoin128.bind(bytesToAddress(pool.swap))
   let i = 0
   const coins = pool.coins
   let coinResult = curvePool.try_coins(BigInt.fromI32(i))
+  if (coinResult.reverted) {
+    log.warning('Call to int128 coins failed for {} ({})', [pool.name, pool.id])
+  }
+  while (!coinResult.reverted) {
+    coins.push(coinResult.value)
+    i += 1
+    coinResult = curvePool.try_coins(BigInt.fromI32(i))
+  }
+  pool.coins = coins
+  pool.save()
+}
+
+export function getPoolCoins(pool: Pool): void {
+  const curvePool = CurvePoolCoin256.bind(bytesToAddress(pool.swap))
+  let i = 0
+  const coins = pool.coins
+  let coinResult = curvePool.try_coins(BigInt.fromI32(i))
+  if (coinResult.reverted) {
+    // some pools require an int128 for coins and will revert with the
+    // regular abi. e.g. 0x7fc77b5c7614e1533320ea6ddc2eb61fa00a9714
+    log.debug('Call to coins reverted for pool ({}: {}), attempting 128 bytes call', [pool.name, pool.id])
+    getPoolCoins128(pool)
+    return
+  }
   while (!coinResult.reverted) {
     coins.push(coinResult.value)
     i += 1

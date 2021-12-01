@@ -38,6 +38,10 @@ dataSources:
           file: ../../abis/UniswapV2Factory.json
         - name: Pair
           file: ../../abis/UniswapV2Pair.json
+        - name: CurvePoolCoin128
+          file: ../../abis/CurvePoolCoin128.json
+        - name: CurvePoolCoin256
+          file: ../../abis/CurvePoolCoin256.json
       eventHandlers:
         - event: AddType(string,int128)
           handler: handleAddType
