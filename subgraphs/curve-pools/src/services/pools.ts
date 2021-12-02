@@ -1,5 +1,5 @@
 import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
-import { Pool, HourlyPoolSnapshot, ExtraReward } from '../../generated/schema'
+import { Pool, DailyPoolSnapshot, ExtraReward } from '../../generated/schema'
 import { BaseRewardPool } from '../../generated/Booster/BaseRewardPool'
 import { bytesToAddress } from 'utils'
 import {
@@ -15,7 +15,7 @@ import {
   V2_POOL_ADDRESSES,
 } from 'const'
 import { getBtcRate, getEthRate, getUsdRate } from 'utils/pricing'
-import { getIntervalFromTimestamp, HOUR } from 'utils/time'
+import { getIntervalFromTimestamp, DAY } from 'utils/time'
 import { CurvePool } from '../../generated/Booster/CurvePool'
 import { getForexUsdRate, getLpTokenVirtualPrice, getTokenValueInLpUnderlyingToken, getV2LpTokenPrice } from './apr'
 import { getCvxMintAmount } from '../../../../packages/utils/convex'
@@ -48,17 +48,17 @@ export function getPoolCoins(pool: Pool): void {
   pool.save()
 }
 
-export function getHourlyPoolSnapshot(poolid: BigInt, name: string, timestamp: BigInt): HourlyPoolSnapshot {
-  const time = getIntervalFromTimestamp(timestamp, HOUR)
+export function getDailyPoolSnapshot(poolid: BigInt, name: string, timestamp: BigInt): DailyPoolSnapshot {
+  const time = getIntervalFromTimestamp(timestamp, DAY)
   const snapId = name + '-' + poolid.toString() + '-' + time.toString()
-  let hourlySnapshot = HourlyPoolSnapshot.load(snapId)
-  if (!hourlySnapshot) {
-    hourlySnapshot = new HourlyPoolSnapshot(snapId)
-    hourlySnapshot.poolid = poolid.toString()
-    hourlySnapshot.poolName = name.toString()
-    hourlySnapshot.timestamp = time
+  let dailySnapshot = DailyPoolSnapshot.load(snapId)
+  if (!dailySnapshot) {
+    dailySnapshot = new DailyPoolSnapshot(snapId)
+    dailySnapshot.poolid = poolid.toString()
+    dailySnapshot.poolName = name.toString()
+    dailySnapshot.timestamp = time
   }
-  return hourlySnapshot
+  return dailySnapshot
 }
 
 export function getExtraReward(id: string): ExtraReward {
