@@ -5,6 +5,7 @@ import { bytesToAddress } from 'utils'
 import {
   ADDRESS_ZERO,
   BIG_DECIMAL_1E18,
+  BIG_DECIMAL_1E6,
   BIG_DECIMAL_ZERO,
   BIG_INT_MINUS_ONE,
   BIG_INT_ONE,
@@ -12,6 +13,7 @@ import {
   CRV_ADDRESS,
   CVX_ADDRESS,
   FOREX_ORACLES,
+  RKP3R_ADDRESS,
   V2_POOL_ADDRESSES,
 } from 'const'
 import { getBtcRate, getEthRate, getUsdRate } from 'utils/pricing'
@@ -25,6 +27,7 @@ import { VirtualBalanceRewardPool } from '../../generated/Booster/VirtualBalance
 import { ExtraRewardStashV32 } from '../../generated/Booster/ExtraRewardStashV32'
 import { ExtraRewardStashV30 } from '../../generated/Booster/ExtraRewardStashV30'
 import { ERC20 } from '../../generated/Booster/ERC20'
+import { RedeemableKeep3r } from '../../generated/Booster/RedeemableKeep3r'
 
 export function getPool(pid: string): Pool {
   let pool = Pool.load(pid)
@@ -217,7 +220,20 @@ export function getPoolExtrasV3(pool: Pool): void {
   }
 }
 
+function getRKp3rPrice(): BigDecimal {
+  const RKp3rContract = RedeemableKeep3r.bind(RKP3R_ADDRESS)
+  const discount = RKp3rContract.discount()
+  const priceResult = RKp3rContract.try_price()
+  if (priceResult.reverted) {
+    return BIG_DECIMAL_ZERO
+  }
+  return priceResult.value.times(discount).div(BigInt.fromI32(100)).toBigDecimal().div(BIG_DECIMAL_1E6)
+}
+
 export function getTokenPriceForAssetType(token: Address, pool: Pool): BigDecimal {
+  if (token == RKP3R_ADDRESS) {
+    return getRKp3rPrice()
+  }
   if (pool.assetType == 0 || pool.assetType == 4) {
     // USD
     return getUsdRate(token)
