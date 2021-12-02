@@ -26,8 +26,22 @@ dataSources:
           file: ./abis/LiquidityGauge.json
         - name: ERC20
           file: ../../abis/ERC20.json
+        - name: CurveRegistry
+          file: ../../abis/CurveRegistry.json
+        - name: CurvePool
+          file: ../../abis/CurvePool.json
+        - name: ChainlinkAggregator
+          file: ../../abis/CLAggregator.json
         - name: CRVToken
           file: ./abis/CRVToken.json
+        - name: Factory
+          file: ../../abis/UniswapV2Factory.json
+        - name: Pair
+          file: ../../abis/UniswapV2Pair.json
+        - name: CurvePoolCoin128
+          file: ../../abis/CurvePoolCoin128.json
+        - name: CurvePoolCoin256
+          file: ../../abis/CurvePoolCoin256.json
       eventHandlers:
         - event: AddType(string,int128)
           handler: handleAddType

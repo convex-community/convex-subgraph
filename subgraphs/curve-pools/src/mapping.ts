@@ -12,7 +12,7 @@ import { Deposit, Withdrawal } from '../generated/schema'
 import { getLpTokenSupply, getPool, getPoolApr, getPoolCoins, getPoolExtras } from './services/pools'
 import {
   ADDRESS_ZERO,
-  PLATFORM_ID,
+  CONVEX_PLATFORM_ID,
   ASSET_TYPES,
   BIG_DECIMAL_1E18,
   BIG_INT_MINUS_ONE,
@@ -56,7 +56,7 @@ export function handleAddPool(call: AddPoolCall): void {
   const lpToken = call.inputs._lptoken
   pool.poolid = pid
   pool.lpToken = lpToken
-  pool.platform = PLATFORM_ID
+  pool.platform = CONVEX_PLATFORM_ID
 
   let swap = curveRegistry.get_pool_from_lp_token(call.inputs._lptoken)
   // factory pools not in the registry

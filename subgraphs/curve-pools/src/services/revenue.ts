@@ -6,7 +6,7 @@ import {
   CVXCRV_REWARDS_ADDRESS,
   LOCK_FEES_ADDRESS,
   DENOMINATOR,
-  PLATFORM_ID,
+  CONVEX_PLATFORM_ID,
   CRV_ADDRESS,
   BIG_DECIMAL_ZERO,
 } from '../../../../packages/constants'
@@ -50,7 +50,7 @@ export function takeWeeklyRevenueSnapshot(timestamp: BigInt): void {
     const prevCrvPrice = previousWeekRevenue ? previousWeekRevenue.crvPrice : BIG_DECIMAL_ZERO
 
     crvRevenue = new RevenueWeeklySnapshot(week.toString())
-    crvRevenue.platform = PLATFORM_ID
+    crvRevenue.platform = CONVEX_PLATFORM_ID
     const contract = Booster.bind(BOOSTER_ADDRESS)
     const historicalCvxCrvStakerRewards = getHistoricalRewards(CVXCRV_REWARDS_ADDRESS)
     const weeklyCvxCrvStakerRewards = historicalCvxCrvStakerRewards.minus(prevCvxCrvStakerRewards)
@@ -98,7 +98,7 @@ export function takeWeeklyRevenueSnapshot(timestamp: BigInt): void {
 
 export function recordFeeRevenue(timestamp: BigInt): void {
   const revenue = new FeeRevenue(timestamp.toString())
-  revenue.platform = PLATFORM_ID
+  revenue.platform = CONVEX_PLATFORM_ID
   revenue.amount = getHistoricalRewards(LOCK_FEES_ADDRESS)
   revenue.timestamp = timestamp
   revenue.save()

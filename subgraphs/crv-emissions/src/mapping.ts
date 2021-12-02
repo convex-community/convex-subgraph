@@ -2,13 +2,7 @@
 // https://github.com/curvefi/curve-subgraph/blob/main/src/mappings/dao/gauge-controller.ts
 
 import { getIntervalFromTimestamp, WEEK } from 'utils/time'
-import {
-    Emission,
-    Gauge,
-    GaugeTotalWeight,
-    GaugeType,
-    GaugeWeight
-} from '../generated/schema'
+import { Gauge, GaugeTotalWeight, GaugeType, GaugeWeight } from '../generated/schema'
 import {
   AddType,
   GaugeController,
@@ -17,38 +11,35 @@ import {
   NewTypeWeight,
   VoteForGauge,
 } from '../generated/GaugeController/GaugeController'
-import {
-  BIG_DECIMAL_1E18, BIG_DECIMAL_ONE,
-  BIG_INT_ONE,
-  CRV_ADDRESS
-} from '../../../packages/constants'
+import { ADDRESS_ZERO, BIG_DECIMAL_1E18, BIG_INT_ONE } from '../../../packages/constants'
 import { LiquidityGauge } from '../generated/GaugeController/LiquidityGauge'
 import { registerGaugeType } from './services/gauges'
-import { CRVToken } from '../generated/GaugeController/CRVToken'
-import { BigDecimal } from '@graphprotocol/graph-ts'
+import { getPlatform } from './services/platform'
+import { createAllSnapshots } from './services/snapshot'
 
 export function handleAddType(event: AddType): void {
-  let gaugeController = GaugeController.bind(event.address)
+  const gaugeController = GaugeController.bind(event.address)
 
-  let nextWeek = getIntervalFromTimestamp(event.block.timestamp.plus(WEEK), WEEK)
+  const nextWeek = getIntervalFromTimestamp(event.block.timestamp.plus(WEEK), WEEK)
 
   // Add gauge type
-  let gaugeType = registerGaugeType(event.params.type_id.toString(), event.params.name)
+  const gaugeType = registerGaugeType(event.params.type_id.toString(), event.params.name)
   gaugeType.weight = gaugeController.points_type_weight(event.params.type_id, nextWeek).toBigDecimal()
   gaugeType.save()
 
   // Save total weight
-  let totalWeight = new GaugeTotalWeight(nextWeek.toString())
+  const totalWeight = new GaugeTotalWeight(nextWeek.toString())
   totalWeight.timestamp = nextWeek
+  totalWeight.block = event.block.number
   totalWeight.weight = gaugeController.points_total(nextWeek).toBigDecimal().div(BIG_DECIMAL_1E18)
   totalWeight.save()
 }
 
 export function handleNewGauge(event: NewGauge): void {
-  let gaugeController = GaugeController.bind(event.address)
+  const gaugeController = GaugeController.bind(event.address)
+  const platform = getPlatform()
 
-  let nextWeek = getIntervalFromTimestamp(event.block.timestamp.plus(WEEK), WEEK)
-
+  const nextWeek = getIntervalFromTimestamp(event.block.timestamp.plus(WEEK), WEEK)
   // Get or register gauge type
   let gaugeType = GaugeType.load(event.params.gauge_type.toString())
 
@@ -63,130 +54,111 @@ export function handleNewGauge(event: NewGauge): void {
   gaugeType.save()
 
   // Add gauge instance
-  let gauge = new Gauge(event.params.addr.toHexString())
+  const gauge = new Gauge(event.params.addr.toHexString())
   gauge.address = event.params.addr
   gauge.type = gaugeType.id
+  gauge.platform = platform.id
+  const gaugeIds = platform.gaugeIds
+  gaugeIds.push(event.params.addr.toHexString())
+  platform.gaugeIds = gaugeIds
 
   gauge.created = event.block.timestamp
   gauge.createdAtBlock = event.block.number
   gauge.createdAtTransaction = event.transaction.hash
 
   // Associate gauge to an LP token
-  let lpToken = LiquidityGauge.bind(event.params.addr).try_lp_token()
+  const lpToken = LiquidityGauge.bind(event.params.addr).try_lp_token()
 
   if (!lpToken.reverted) {
-    gauge.lpToken = lpToken.value
+    gauge.pool = lpToken.value.toHexString()
+  } else {
+    gauge.pool = ADDRESS_ZERO.toHexString()
   }
 
+  platform.save()
   gauge.save()
 
   // Save gauge weight
-  let gaugeWeight = new GaugeWeight(gauge.id + '-' + nextWeek.toString())
+  const gaugeWeight = new GaugeWeight(gauge.id + '-' + nextWeek.toString())
   gaugeWeight.gauge = gauge.id
   gaugeWeight.timestamp = nextWeek
+  gaugeWeight.block = event.block.number
   gaugeWeight.weight = event.params.weight.toBigDecimal()
   gaugeWeight.save()
 
   // Save total weight
-  let totalWeight = new GaugeTotalWeight(nextWeek.toString())
+  const totalWeight = new GaugeTotalWeight(nextWeek.toString())
   totalWeight.timestamp = nextWeek
+  totalWeight.block = event.block.number
   totalWeight.weight = gaugeController.points_total(nextWeek).toBigDecimal().div(BIG_DECIMAL_1E18)
   totalWeight.save()
-
-
-  let emission = new Emission(gauge.id + '-' + nextWeek.toString())
-  emission.timestamp = nextWeek
-  let crvTokenContract = CRVToken.bind(CRV_ADDRESS)
-  let crvTokenMinted = crvTokenContract.mintable_in_timeframe(nextWeek, nextWeek.plus(WEEK))
-  let gaugeTypeWeight = gaugeType ? gaugeType.weight.div(BIG_DECIMAL_1E18) : BIG_DECIMAL_ONE
-  let fullWeight = gaugeWeight.weight.times(gaugeTypeWeight).div(totalWeight.weight)
-  let weeklyEmissions = crvTokenMinted.toBigDecimal().times(fullWeight)
-  emission.crvAmount = weeklyEmissions.div(BIG_DECIMAL_1E18)
-  emission.gauge = gauge.id
-  emission.save()
 }
 
 export function handleNewGaugeWeight(event: NewGaugeWeight): void {
-  let gauge = Gauge.load(event.params.gauge_address.toHexString())
+  const gauge = Gauge.load(event.params.gauge_address.toHexString())
 
   if (gauge != null) {
-    let gaugeController = GaugeController.bind(event.address)
+    const gaugeController = GaugeController.bind(event.address)
 
-    let nextWeek = getIntervalFromTimestamp(event.block.timestamp.plus(WEEK), WEEK)
+    const nextWeek = getIntervalFromTimestamp(event.block.timestamp.plus(WEEK), WEEK)
 
     // Save gauge weight
-    let gaugeWeight = new GaugeWeight(gauge.id + '-' + nextWeek.toString())
+    const gaugeWeight = new GaugeWeight(gauge.id + '-' + nextWeek.toString())
     gaugeWeight.gauge = gauge.id
     gaugeWeight.timestamp = nextWeek
+    gaugeWeight.block = event.block.number
     gaugeWeight.weight = event.params.weight.toBigDecimal()
     gaugeWeight.save()
 
     // Save total weight
-    let totalWeight = new GaugeTotalWeight(nextWeek.toString())
+    const totalWeight = new GaugeTotalWeight(nextWeek.toString())
     totalWeight.timestamp = nextWeek
+    totalWeight.block = event.block.number
     totalWeight.weight = gaugeController.points_total(nextWeek).toBigDecimal().div(BIG_DECIMAL_1E18)
     totalWeight.save()
 
-
-    let emission = new Emission(gauge.id + '-' + nextWeek.toString())
-    emission.timestamp = nextWeek
-    let crvTokenContract = CRVToken.bind(CRV_ADDRESS)
-    let crvTokenMinted = crvTokenContract.mintable_in_timeframe(nextWeek, nextWeek.plus(WEEK))
-    let gaugeType = GaugeType.load(gauge.type)
-    let gaugeTypeWeight = gaugeType ? gaugeType.weight.div(BIG_DECIMAL_1E18) : BIG_DECIMAL_ONE
-    let fullWeight = gaugeWeight.weight.times(gaugeTypeWeight).div(totalWeight.weight)
-    let weeklyEmissions = crvTokenMinted.toBigDecimal().times(fullWeight)
-    emission.crvAmount = weeklyEmissions.div(BIG_DECIMAL_1E18)
-    emission.gauge = gauge.id
-    emission.save()
+    createAllSnapshots(event.block.timestamp, event.block.number)
   }
 }
 
 export function handleNewTypeWeight(event: NewTypeWeight): void {
-  let gaugeType = GaugeType.load(event.params.type_id.toString())
+  const gaugeType = GaugeType.load(event.params.type_id.toString())
 
   if (gaugeType != null) {
     gaugeType.weight = event.params.weight.toBigDecimal()
     gaugeType.save()
 
-    let totalWeight = new GaugeTotalWeight(event.params.time.toString())
+    const totalWeight = new GaugeTotalWeight(event.params.time.toString())
     totalWeight.timestamp = event.params.time
+    totalWeight.block = event.block.number
     totalWeight.weight = event.params.total_weight.toBigDecimal().div(BIG_DECIMAL_1E18)
     totalWeight.save()
   }
 }
 
 export function handleVoteForGauge(event: VoteForGauge): void {
-  let gauge = Gauge.load(event.params.gauge_addr.toHexString())
+  const gauge = Gauge.load(event.params.gauge_addr.toHexString())
 
   if (gauge != null) {
-    let gaugeController = GaugeController.bind(event.address)
+    const gaugeController = GaugeController.bind(event.address)
 
-    let nextWeek = getIntervalFromTimestamp(event.block.timestamp.plus(WEEK), WEEK)
+    const nextWeek = getIntervalFromTimestamp(event.block.timestamp.plus(WEEK), WEEK)
 
     // Save gauge weight
-    let gaugeWeight = new GaugeWeight(gauge.id + '-' + nextWeek.toString())
+    const gaugeWeight = new GaugeWeight(gauge.id + '-' + nextWeek.toString())
     gaugeWeight.gauge = gauge.id
     gaugeWeight.timestamp = nextWeek
+    gaugeWeight.block = event.block.number
     gaugeWeight.weight = gaugeController.points_weight(event.params.gauge_addr, nextWeek).value0.toBigDecimal()
     gaugeWeight.save()
 
     // Save total weight
-    let totalWeight = new GaugeTotalWeight(nextWeek.toString())
+    const totalWeight = new GaugeTotalWeight(nextWeek.toString())
     totalWeight.timestamp = nextWeek
+    totalWeight.block = event.block.number
     totalWeight.weight = gaugeController.points_total(nextWeek).toBigDecimal().div(BIG_DECIMAL_1E18)
     totalWeight.save()
 
-    let emission = new Emission(gauge.id + '-' + nextWeek.toString())
-    emission.timestamp = nextWeek
-    let crvTokenContract = CRVToken.bind(CRV_ADDRESS)
-    let crvTokenMinted = crvTokenContract.mintable_in_timeframe(nextWeek, nextWeek.plus(WEEK))
-    let gaugeType = GaugeType.load(gauge.type)
-    let gaugeTypeWeight = gaugeType ? gaugeType.weight.div(BIG_DECIMAL_1E18) : BIG_DECIMAL_ONE
-    let fullWeight = gaugeWeight.weight.times(gaugeTypeWeight).div(totalWeight.weight)
-    let weeklyEmissions = crvTokenMinted.toBigDecimal().times(fullWeight)
-    emission.crvAmount = weeklyEmissions.div(BIG_DECIMAL_1E18)
-    emission.gauge = gauge.id
-    emission.save()
+    createAllSnapshots(event.block.timestamp, event.block.number)
   }
 }
