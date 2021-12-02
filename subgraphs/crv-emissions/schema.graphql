@@ -46,7 +46,8 @@ type PoolSnapshot @entity {
   id: ID!
   pool: Pool!
   virtualPrice: BigDecimal!
-  # fees are only a rough estimate
+  # fees are only an estimate refer to
+  # llama.airforce for accurate figures
   fees: BigDecimal!
   lpTokenSupply: BigInt!
   tvl: BigDecimal!

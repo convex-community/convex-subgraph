@@ -1,14 +1,12 @@
-import { Address, BigDecimal, BigInt, ethereum } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 import { Pool, PoolSnapshot } from '../../generated/schema'
 import { CurveRegistry } from '../../../curve-pools/generated/Booster/CurveRegistry'
 import {
   ADDRESS_ZERO,
   ASSET_TYPES,
-  BIG_DECIMAL_1E18,
   BIG_DECIMAL_ZERO,
   CURVE_PLATFORM_ID,
   CURVE_REGISTRY,
-  TRICRYPTO_LP_ADDRESS,
   V2_POOL_ADDRESSES,
 } from '../../../../packages/constants'
 import { ERC20 } from '../../../curve-pools/generated/Booster/ERC20'
@@ -17,7 +15,6 @@ import { bytesToAddress } from '../../../../packages/utils'
 import { log } from '@graphprotocol/graph-ts/index'
 import { CurvePoolCoin256 } from '../../generated/GaugeController/CurvePoolCoin256'
 import { CurvePoolCoin128 } from '../../generated/GaugeController/CurvePoolCoin128'
-import { CurvePoolV1 } from '../../generated/templates'
 
 // TODO: DRY this with Booster pool creation logic
 export function getPool(lpToken: Address): Pool {
@@ -37,10 +34,6 @@ export function getPool(lpToken: Address): Pool {
     }
 
     pool.swap = swap
-    if (!V2_POOL_ADDRESSES.includes(swap)) {
-      log.debug('Starting to track admin fee withdrawal calls for {}', [pool.swap.toHexString()])
-      CurvePoolV1.create(swap)
-    }
     const nameResult = curveRegistry.try_get_pool_name(swap)
     let name = nameResult.reverted ? '' : nameResult.value
     if (name == '') {
