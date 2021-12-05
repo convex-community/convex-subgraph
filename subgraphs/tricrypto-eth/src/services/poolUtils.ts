@@ -45,7 +45,7 @@ export function poolSnapshot(event: ethereum.Event): TricryptoSnapshot {
     pool.ethBalanceUSD = pool.ethBalance.times(pool.ethOraclePrice)
     pool.btcBalanceUSD = pool.btcBalance.times(pool.btcOraclePrice)
 
-    pool.feeFraction = TRICRYPTO_ETH.fee().toBigDecimal().div(BIG_DECIMAL_1E8).div(BIG_DECIMAL_1E10)
+    pool.feeFraction = TRICRYPTO_ETH.fee().toBigDecimal().div(BIG_DECIMAL_1E10)
     pool.crv3CryptoSupply = CRV3CRYPTO_ETH.totalSupply().toBigDecimal().div(BIG_DECIMAL_1E18)
 
     return pool
