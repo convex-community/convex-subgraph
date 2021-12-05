@@ -2,7 +2,7 @@ import {
     AddLiquidityEvent,
     RemoveLiquidityEvent,
     ExchangeEvent,
-    ClaimAdminFeeEvent,
+    ClaimAdminFeeEvent, TricryptoSnapshot,
 } from '../generated/schema'
 import {
     ClaimAdminFee,
@@ -42,6 +42,8 @@ export function handleTokenExchange(event: TokenExchange): void {
     data.txHash = event.transaction.hash
     data.gasPriceETH = event.transaction.gasPrice.toBigDecimal().div(BIG_DECIMAL_1E18)
     data.gasPriceUSD = data.gasPriceETH.times(assetPriceSnapshot.ethPrice)
+    data.assetPrices = assetPriceSnapshot.id
+    data.poolSnapshot = tricrypto2Snapshot.id
 
     const soldID = event.params.sold_id
     const boughtID = event.params.bought_id
@@ -85,6 +87,7 @@ export function handleTokenExchange(event: TokenExchange): void {
         data.amountETHBoughtUSD = data.amountETHBought.times(assetPriceSnapshot.ethPrice)
     }
 
+    // get totals but in dollar-value:
     data.totalBoughtUSD = data.amountUSDBought.plus(data.amountBTCBoughtUSD).plus(data.amountETHBoughtUSD)
     data.totalSoldUSD = data.amountUSDSold.plus(data.amountBTCSoldUSD).plus(data.amountETHSoldUSD)
 
@@ -93,9 +96,9 @@ export function handleTokenExchange(event: TokenExchange): void {
     // while the contract uses self._fee(xp): calculating xp is a bit more complex. we approximate
     // by just using the feeFraction. This means, dy (without fees subtracted is):
     // tokenOutUSD / (1-feeFraction)
-    // so fee: outWithoutFees * feeFraction
+    // so fee: outWithoutFees - outWithFees
     const totalOutUSDnoFee = data.totalBoughtUSD.div(BIG_DECIMAL_ONE.minus(tricrypto2Snapshot.feeFraction))
-    data.traderFeesUSD = totalOutUSDnoFee.times(tricrypto2Snapshot.feeFraction)
+    data.traderFeesUSD = totalOutUSDnoFee.minus(data.totalBoughtUSD)
 
     data.save()
 
@@ -104,7 +107,8 @@ export function handleTokenExchange(event: TokenExchange): void {
 
 export function handleAddLiquidity(event: AddLiquidity): void {
 
-    poolSnapshot(event).save()
+    const tricrypto2Snapshot = poolSnapshot(event)
+    tricrypto2Snapshot.save()
     const assetPriceSnapshot = priceSnapshot(event)
     assetPriceSnapshot.save()
 
@@ -114,6 +118,8 @@ export function handleAddLiquidity(event: AddLiquidity): void {
     data.timestamp = event.block.timestamp
     data.address = event.params.provider
     data.txHash = event.transaction.hash
+    data.assetPrices = assetPriceSnapshot.id
+    data.poolSnapshot = tricrypto2Snapshot.id
 
     const tokenAmounts = event.params.token_amounts
 
@@ -130,7 +136,8 @@ export function handleAddLiquidity(event: AddLiquidity): void {
 
 export function handleRemoveLiquidity(event: RemoveLiquidity): void {
 
-    poolSnapshot(event).save()
+    const tricrypto2Snapshot = poolSnapshot(event)
+    tricrypto2Snapshot.save()
     const assetPriceSnapshot = priceSnapshot(event)
     assetPriceSnapshot.save()
 
@@ -140,6 +147,8 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     data.timestamp = event.block.timestamp
     data.address = event.params.provider
     data.txHash = event.transaction.hash
+    data.assetPrices = assetPriceSnapshot.id
+    data.poolSnapshot = tricrypto2Snapshot.id
 
     const tokenAmounts = event.params.token_amounts
     data.amountUSD = tokenAmounts[USDTID.toI32()].toBigDecimal().div(BIG_DECIMAL_1E6)
@@ -156,7 +165,8 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
 
 export function handleRemoveLiquidityOne(event: RemoveLiquidityOne): void {
 
-    poolSnapshot(event).save()
+    const tricrypto2Snapshot = poolSnapshot(event)
+    tricrypto2Snapshot.save()
     const assetPriceSnapshot = priceSnapshot(event)
     assetPriceSnapshot.save()
 
@@ -166,6 +176,8 @@ export function handleRemoveLiquidityOne(event: RemoveLiquidityOne): void {
     data.timestamp = event.block.timestamp
     data.address = event.params.provider
     data.txHash = event.transaction.hash
+    data.assetPrices = assetPriceSnapshot.id
+    data.poolSnapshot = tricrypto2Snapshot.id
 
     data.amountUSD = BigDecimal.fromString("0")
     data.amountBTC = BigDecimal.fromString("0")
@@ -195,12 +207,15 @@ export function handleRemoveLiquidityOne(event: RemoveLiquidityOne): void {
 
 export function handleClaimAdminFee(event: ClaimAdminFee): void {
 
-    poolSnapshot(event).save()
+    const tricrypto2Snapshot = poolSnapshot(event)
+    tricrypto2Snapshot.save()
     const assetPriceSnapshot = priceSnapshot(event)
     assetPriceSnapshot.save()
 
     // parse event:
     const data = new ClaimAdminFeeEvent(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
+    data.assetPrices = assetPriceSnapshot.id
+    data.poolSnapshot = tricrypto2Snapshot.id
     data.blockNumber = event.block.number
     data.timestamp = event.block.timestamp
     data.txHash = event.transaction.hash

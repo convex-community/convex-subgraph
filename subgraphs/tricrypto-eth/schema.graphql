@@ -35,6 +35,8 @@ type AddLiquidityEvent @entity {
     amountETHUSD: BigDecimal!
     amountBTCUSD: BigDecimal!
     totalAddedUSD: BigDecimal!
+    poolSnapshot: TricryptoSnapshot!
+    assetPrices: AssetPrice!
 }
 
 
@@ -50,6 +52,8 @@ type RemoveLiquidityEvent @entity {
     amountETHUSD: BigDecimal!
     amountBTCUSD: BigDecimal!
     totalRemovedUSD: BigDecimal!
+    poolSnapshot: TricryptoSnapshot!
+    assetPrices: AssetPrice!
 }
 
 
@@ -74,6 +78,8 @@ type ExchangeEvent @entity {
     traderFeesUSD: BigDecimal!
     gasPriceETH: BigDecimal!
     gasPriceUSD: BigDecimal!
+    poolSnapshot: TricryptoSnapshot!
+    assetPrices: AssetPrice!
 }
 
 
@@ -84,6 +90,8 @@ type ClaimAdminFeeEvent @entity {
     txHash: Bytes!
     amountClaimed: BigDecimal!
     claimDollarValue: BigDecimal!
+    poolSnapshot: TricryptoSnapshot!
+    assetPrices: AssetPrice!
 }
 
 
