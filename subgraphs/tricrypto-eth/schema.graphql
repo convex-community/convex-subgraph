@@ -11,6 +11,8 @@ type TricryptoSnapshot @entity {
     btcBalanceUSD: BigDecimal!
     totalBalanceUSD: BigDecimal!
     virtualPrice: BigDecimal!
+    xcpProfit: BigDecimal!
+    xcpProfitA: BigDecimal!
     ethOraclePrice: BigDecimal!
     btcOraclePrice: BigDecimal!
     ethScalePrice: BigDecimal!
@@ -26,7 +28,7 @@ type AddLiquidityEvent @entity {
     blockNumber: BigInt!
     txHash: Bytes!
     address: Bytes! # address
-    fee: BigDecimal!
+    feeFraction: BigDecimal!
     amountUSD: BigDecimal! # uint256
     amountETH: BigDecimal! # uint256
     amountBTC: BigDecimal! # uint256
@@ -69,6 +71,9 @@ type ExchangeEvent @entity {
     amountBTCBoughtUSD: BigDecimal!
     totalSoldUSD: BigDecimal!
     totalBoughtUSD: BigDecimal!
+    traderFeesUSD: BigDecimal!
+    gasPriceETH: BigDecimal!
+    gasPriceUSD: BigDecimal!
 }
 
 

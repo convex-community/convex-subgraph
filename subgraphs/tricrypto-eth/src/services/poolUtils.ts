@@ -3,6 +3,7 @@ import {
     BIG_DECIMAL_1E18,
     BIG_DECIMAL_1E6,
     BIG_DECIMAL_1E8,
+    BIG_DECIMAL_1E10,
     TRICRYPTO2_ETH_POOL_ADDRESS, TRICRYPTO2_LP_ADDRESS
 } from "../../../../packages/constants";
 import {BigInt} from "@graphprotocol/graph-ts/index";
@@ -37,11 +38,14 @@ export function poolSnapshot(event: ethereum.Event): TricryptoSnapshot {
     pool.ethScalePrice = TRICRYPTO_ETH.price_scale(BigInt.fromI32(1)).toBigDecimal().div(BIG_DECIMAL_1E18)
     pool.btcScalePrice = TRICRYPTO_ETH.price_scale(BigInt.fromI32(0)).toBigDecimal().div(BIG_DECIMAL_1E18)
 
+    pool.xcpProfit = TRICRYPTO_ETH.xcp_profit().toBigDecimal().div(BIG_DECIMAL_1E18)
+    pool.xcpProfitA = TRICRYPTO_ETH.xcp_profit_a().toBigDecimal().div(BIG_DECIMAL_1E18)
+
     // continue tvl calcs:
     pool.ethBalanceUSD = pool.ethBalance.times(pool.ethOraclePrice)
     pool.btcBalanceUSD = pool.btcBalance.times(pool.btcOraclePrice)
 
-    pool.fee = TRICRYPTO_ETH.fee().toBigDecimal().div(BIG_DECIMAL_1E8)
+    pool.feeFraction = TRICRYPTO_ETH.fee().toBigDecimal().div(BIG_DECIMAL_1E8).div(BIG_DECIMAL_1E10)
     pool.crv3CryptoSupply = CRV3CRYPTO_ETH.totalSupply().toBigDecimal().div(BIG_DECIMAL_1E18)
 
     return pool

@@ -22,14 +22,15 @@ import {
 import {
     BIG_DECIMAL_1E18,
     BIG_DECIMAL_1E6,
-    BIG_DECIMAL_1E8
+    BIG_DECIMAL_1E8, BIG_DECIMAL_ONE
 } from "../../../packages/constants";
 import {BigDecimal} from "@graphprotocol/graph-ts";
 
 
 export function handleTokenExchange(event: TokenExchange): void {
 
-    poolSnapshot(event).save()
+    const tricrypto2Snapshot = poolSnapshot(event)
+    tricrypto2Snapshot.save()
     const assetPriceSnapshot = priceSnapshot(event)
     assetPriceSnapshot.save()
 
@@ -39,6 +40,8 @@ export function handleTokenExchange(event: TokenExchange): void {
     data.timestamp = event.block.timestamp
     data.address = event.params.buyer
     data.txHash = event.transaction.hash
+    data.gasPriceETH = event.transaction.gasPrice.toBigDecimal().div(BIG_DECIMAL_1E18)
+    data.gasPriceUSD = data.gasPriceETH.times(assetPriceSnapshot.ethPrice)
 
     const soldID = event.params.sold_id
     const boughtID = event.params.bought_id
@@ -84,6 +87,16 @@ export function handleTokenExchange(event: TokenExchange): void {
 
     data.totalBoughtUSD = data.amountUSDBought.plus(data.amountBTCBoughtUSD).plus(data.amountETHBoughtUSD)
     data.totalSoldUSD = data.amountUSDSold.plus(data.amountBTCSoldUSD).plus(data.amountETHSoldUSD)
+
+    // get trader fees and lp fees:
+    // trader fees: in line 658 of tricrypto2 contract: dy -= self._fee(xp) * dy / 10**10
+    // while the contract uses self._fee(xp): calculating xp is a bit more complex. we approximate
+    // by just using the feeFraction. This means, dy (without fees subtracted is):
+    // tokenOutUSD / (1-feeFraction)
+    // so fee: outWithoutFees * feeFraction
+    const totalOutUSDnoFee = data.totalBoughtUSD.div(BIG_DECIMAL_ONE.minus(tricrypto2Snapshot.feeFraction))
+    data.traderFeesUSD = totalOutUSDnoFee.times(tricrypto2Snapshot.feeFraction)
+
     data.save()
 
 }
