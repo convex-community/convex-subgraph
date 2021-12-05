@@ -17,7 +17,7 @@ type TricryptoSnapshot @entity {
     btcOraclePrice: BigDecimal!
     ethScalePrice: BigDecimal!
     btcScalePrice: BigDecimal!
-    fee: BigDecimal!
+    feeFraction: BigDecimal!
     crv3CryptoSupply: BigDecimal!
 }
 
@@ -28,7 +28,7 @@ type AddLiquidityEvent @entity {
     blockNumber: BigInt!
     txHash: Bytes!
     address: Bytes! # address
-    feeFraction: BigDecimal!
+    fee: BigDecimal!
     amountUSD: BigDecimal! # uint256
     amountETH: BigDecimal! # uint256
     amountBTC: BigDecimal! # uint256
