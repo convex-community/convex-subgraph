@@ -1,10 +1,19 @@
+type Platform @entity {
+  id: ID!
+  poolCount: BigInt!
+  pools: [Pool!]! @derivedFrom(field: "platform")
+  gauges: [Gauge!] @derivedFrom(field: "platform")
+  gaugeIds: [String!]!
+  snapshotTimes: [SnapshotTime!] @derivedFrom(field: "platform")
+}
+
+
 type Gauge @entity {
   id: ID!
   address: Bytes!
   type: GaugeType!
-
-  lpToken: Bytes!
-
+  platform: Platform!
+  pool: Pool!
   created: BigInt!
   createdAtBlock: BigInt!
   createdAtTransaction: Bytes!
@@ -13,17 +22,55 @@ type Gauge @entity {
   emissions: [Emission!] @derivedFrom(field: "gauge")
 }
 
+type Pool @entity {
+  id: ID!
+  lpToken: Bytes!
+  name: String!
+  swap: Bytes!
+  platform: Platform!
+  assetType: Int!
+  tvl: BigDecimal!
+  coins: [Bytes!]! #address
+  gauges: [Gauge!] @derivedFrom(field: "pool")
+  snapshots: [PoolSnapshot!] @derivedFrom(field: "pool")
+  emissions: [Emission!] @derivedFrom(field: "pool")
+
+}
+
+type SnapshotTime @entity {
+  id: ID!
+  platform: Platform!
+}
+
+type PoolSnapshot @entity {
+  id: ID!
+  pool: Pool!
+  virtualPrice: BigDecimal!
+  # fees are only an estimate refer to
+  # llama.airforce for accurate figures
+  fees: BigDecimal!
+  lpTokenSupply: BigInt!
+  tvl: BigDecimal!
+  # not very clean - but needed for backend calcs
+  poolTokenPrice: BigDecimal!
+  timestamp: BigInt!
+  block: BigInt!
+}
+
 type GaugeWeight @entity {
   id: ID!
   gauge: Gauge!
   timestamp: BigInt!
+  block: BigInt!
   weight: BigDecimal!
 }
 
 type Emission @entity {
   id: ID!
   gauge: Gauge!
+  pool: Pool!
   timestamp: BigInt!
+  block: BigInt!
   crvAmount: BigDecimal!
   value: BigDecimal!
 }
@@ -39,5 +86,6 @@ type GaugeType @entity {
 type GaugeTotalWeight @entity {
   id: ID!
   timestamp: BigInt!
+  block: BigInt!
   weight: BigDecimal!
 }

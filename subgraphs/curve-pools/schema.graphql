@@ -108,10 +108,10 @@ type Pool @entity {
   extras: [String!]!
   extraRewards: [ExtraReward!] @derivedFrom(field: "poolid")
   coins: [Bytes!]! #address
-  snapshots: [HourlyPoolSnapshot!] @derivedFrom(field: "poolid")
+  snapshots: [DailyPoolSnapshot!] @derivedFrom(field: "poolid")
 }
 
-type HourlyPoolSnapshot @entity {
+type DailyPoolSnapshot @entity {
   id: ID!
   poolid: Pool!
   poolName: String!

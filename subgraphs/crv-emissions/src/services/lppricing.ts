@@ -1,31 +1,28 @@
-import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
+import { Pool } from '../../generated/schema'
+import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts/index'
 import { bytesToAddress } from 'utils'
-import { CurveRegistry } from '../../generated/Booster/CurveRegistry'
+import { ERC20 } from '../../../curve-pools/generated/Booster/ERC20'
 import {
   BIG_DECIMAL_1E18,
+  BIG_DECIMAL_1E8,
+  BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
+  CRV_ADDRESS,
   CURVE_REGISTRY,
+  CVX_CRV_LP_TOKEN,
   FOREX_ORACLES,
   LINK_ADDRESS,
   LINK_LP_TOKEN_ADDRESS,
+  USDT_ADDRESS,
+  V2_POOL_ADDRESSES,
   WBTC_ADDRESS,
   WETH_ADDRESS,
-  BIG_DECIMAL_1E8,
-  V2_POOL_ADDRESSES,
-  BIG_DECIMAL_ONE,
-  USDT_ADDRESS,
-  CVX_CRV_LP_TOKEN,
-  CRV_ADDRESS,
 } from 'const'
-
-import { ERC20 } from '../../generated/Booster/ERC20'
-import { getBtcRate, getEthRate, getTokenAValueInTokenB, getUsdRate } from '../../../../packages/utils/pricing'
-import { ChainlinkAggregator } from '../../generated/Booster/ChainlinkAggregator'
-import { Pool } from '../../generated/schema'
-import { exponentToBigDecimal } from '../../../../packages/utils/maths'
-import { getDailyPoolSnapshot } from './pools'
-import { DAY } from '../../../../packages/utils/time'
-import { CurvePool } from '../../generated/Booster/CurvePool'
+import { exponentToBigDecimal } from 'utils/maths'
+import { getBtcRate, getEthRate, getTokenAValueInTokenB, getUsdRate } from 'utils/pricing'
+import { ChainlinkAggregator } from '../../../curve-pools/generated/Booster/ChainlinkAggregator'
+import { CurveRegistry } from '../../../curve-pools/generated/Booster/CurveRegistry'
+import { CurvePool } from '../../../curve-pools/generated/Booster/CurvePool'
 
 export function getV2LpTokenPrice(pool: Pool): BigDecimal {
   const lpToken = bytesToAddress(pool.lpToken)
@@ -33,6 +30,7 @@ export function getV2LpTokenPrice(pool: Pool): BigDecimal {
   const supplyResult = tokenContract.try_totalSupply()
   const supply = supplyResult.reverted ? BIG_DECIMAL_ZERO : supplyResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
   let total = BIG_DECIMAL_ZERO
+
   for (let i = 0; i < pool.coins.length; ++i) {
     const currentCoin = bytesToAddress(pool.coins[i])
     const coinContract = ERC20.bind(currentCoin)
@@ -93,10 +91,12 @@ export function getLpTokenVirtualPrice(lpToken: Bytes): BigDecimal {
   let vPriceCallResult = curveRegistry.try_get_virtual_price_from_lp_token(lpTokenAddress)
   let vPrice = BIG_DECIMAL_ZERO
   if (!vPriceCallResult.reverted) {
+    log.debug('Virtual price from registry for {} : {}', [lpToken.toHexString(), vPriceCallResult.value.toString()])
     vPrice = vPriceCallResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
   }
   // most likely for when factory pools are not included in the registry
   else {
+    log.debug('Failed to fetch virtual price from registry for {}', [lpToken.toHexString()])
     const lpTokenContract = CurvePool.bind(lpTokenAddress)
     vPriceCallResult = lpTokenContract.try_get_virtual_price()
     vPrice = !vPriceCallResult.reverted ? vPriceCallResult.value.toBigDecimal().div(BIG_DECIMAL_1E18) : vPrice
@@ -104,14 +104,27 @@ export function getLpTokenVirtualPrice(lpToken: Bytes): BigDecimal {
   return vPrice
 }
 
-export function getPoolBaseApr(pool: Pool, currentVirtualPrice: BigDecimal, timestamp: BigInt): BigDecimal {
-  const previousDaySnapshot = getDailyPoolSnapshot(BigInt.fromString(pool.id), pool.name, timestamp.minus(DAY))
-  const previousDayVPrice = previousDaySnapshot.lpTokenVirtualPrice
-  const baseApr =
-    previousDayVPrice == BIG_DECIMAL_ZERO
-      ? BIG_DECIMAL_ZERO
-      : currentVirtualPrice.minus(previousDayVPrice).div(previousDayVPrice).times(BigDecimal.fromString('365')) // 365 days
-  return baseApr
+// TODO: refactor to share pricing logic with getLpTokenPriceUSD
+export function getPoolTokenPrice(pool: Pool): BigDecimal {
+  const lpTokenAddress = bytesToAddress(pool.lpToken)
+  const price = BIG_DECIMAL_ONE
+  if (V2_POOL_ADDRESSES.includes(lpTokenAddress)) {
+    return price
+  }
+  if (FOREX_ORACLES.has(pool.lpToken.toHexString())) {
+    return getForexUsdRate(pool.lpToken)
+  }
+  switch (pool.assetType) {
+    default:
+      // USD
+      return price
+    case 1: // ETH
+      return getUsdRate(WETH_ADDRESS)
+    case 2: // BTC
+      return getUsdRate(WBTC_ADDRESS)
+    case 3:
+      return getLpUnderlyingTokenValueInOtherToken(lpTokenAddress, USDT_ADDRESS)
+  }
 }
 
 export function getLpTokenPriceUSD(pool: Pool): BigDecimal {

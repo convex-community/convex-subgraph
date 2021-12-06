@@ -48,6 +48,8 @@ dataSources:
           file: ../../abis/VirtualBalanceRewardPool.json
         - name: BaseRewardPool
           file: ../../abis/BaseRewardPool.json
+        - name: RedeemableKeep3r
+          file: ../../abis/RedeemableKeep3r.json
 
       eventHandlers:
         - event: Deposited(indexed address,indexed uint256,uint256)

@@ -1,6 +1,7 @@
 import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 
-export const PLATFORM_ID = "Convex"
+export const CONVEX_PLATFORM_ID = 'Convex'
+export const CURVE_PLATFORM_ID = 'Curve'
 
 export const BIG_DECIMAL_1E6 = BigDecimal.fromString('1e6')
 export const BIG_DECIMAL_1E8 = BigDecimal.fromString('1e8')
@@ -13,11 +14,13 @@ export const BIG_INT_MINUS_ONE = BigInt.fromI32(-1)
 export const BIG_INT_ZERO = BigInt.fromString('0')
 export const BIG_INT_ONE = BigInt.fromString('1')
 
-export const SECONDS_PER_YEAR = BigDecimal.fromString("31536000")
+export const SECONDS_PER_YEAR = BigDecimal.fromString('31536000')
 
-export const CVX_TOKEN = "0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B"
+export const RKP3R_TOKEN = '0xEdB67Ee1B171c4eC66E6c10EC43EDBbA20FaE8e9'
+export const RKP3R_ADDRESS = Address.fromString(RKP3R_TOKEN)
+export const CVX_TOKEN = '0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B'
 export const CVX_ADDRESS = Address.fromString(CVX_TOKEN)
-export const CRV_TOKEN = "0xD533a949740bb3306d119CC777fa900bA034cd52"
+export const CRV_TOKEN = '0xD533a949740bb3306d119CC777fa900bA034cd52'
 export const CRV_ADDRESS = Address.fromString(CRV_TOKEN)
 export const ADDRESS_ZERO = Address.fromString('0x0000000000000000000000000000000000000000')
 export const WETH_ADDRESS = Address.fromString('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2')
@@ -68,29 +71,30 @@ export const V2_POOL_ADDRESSES = [TRICRYPTO_LP_ADDRESS, TRICRYPTO2_LP_ADDRESS]
 export const TRICRYPTO2_POOL_ADDRESS = Address.fromString("0xd51a44d3fae010294c616388b506acda1bfaae46")
 
 export const CVX_CLIFF_SIZE = BigDecimal.fromString('100000') // * 1e18; //new cliff every 100,000 tokens
-export const CVX_CLIFF_COUNT =BigDecimal.fromString('1000') // 1,000 cliffs
+export const CVX_CLIFF_COUNT = BigDecimal.fromString('1000') // 1,000 cliffs
 export const CVX_MAX_SUPPLY = BigDecimal.fromString('100000000') // * 1e18; //100 mil max supply
 
 export const DENOMINATOR = BigInt.fromI32(10000)
-export const CVX_REWARDS = "0xcf50b810e57ac33b91dcf525c6ddd9881b139332"
+export const CVX_REWARDS = '0xcf50b810e57ac33b91dcf525c6ddd9881b139332'
 export const CVX_REWARDS_ADDRESS = Address.fromString(CVX_REWARDS)
-export const CVXCRV_REWARDS = "0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e"
+export const CVXCRV_REWARDS = '0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e'
 export const CVXCRV_REWARDS_ADDRESS = Address.fromString(CVXCRV_REWARDS)
-export const LOCK_FEES_ADDRESS = Address.fromString("0x7091dbb7fcbA54569eF1387Ac89Eb2a5C9F6d2EA")
-export const THREEPOOL_ADDRESS = Address.fromString("0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7")
+export const LOCK_FEES_ADDRESS = Address.fromString('0x7091dbb7fcbA54569eF1387Ac89Eb2a5C9F6d2EA')
+export const THREEPOOL_ADDRESS = Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
 
-export const VOTIUM_BRIBE_CONTRACT = "0x19bbc3463dd8d07f55438014b021fb457ebd4595"
+export const VOTIUM_BRIBE_CONTRACT = '0x19bbc3463dd8d07f55438014b021fb457ebd4595'
 export const VOTIUM_BRIBE_CONTRACT_ADDRESS = Address.fromString(VOTIUM_BRIBE_CONTRACT)
 
-export const THREE_CRV_TOKEN = "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490"
+export const THREE_CRV_TOKEN = '0x6c3f90f043a72fa612cbac8115ee7e52bde6e490'
 
 export const STAKING_CONTRACTS = new Map<string, string>()
-STAKING_CONTRACTS.set("0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e", 'cvxCrv')
-STAKING_CONTRACTS.set("0xcf50b810e57ac33b91dcf525c6ddd9881b139332", 'cvx')
+STAKING_CONTRACTS.set('0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e', 'cvxCrv')
+STAKING_CONTRACTS.set('0xcf50b810e57ac33b91dcf525c6ddd9881b139332', 'cvx')
 
 export const STAKING_TOKENS = new Map<string, string>()
-STAKING_TOKENS.set("0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e", CRV_TOKEN)
-STAKING_TOKENS.set("0xcf50b810e57ac33b91dcf525c6ddd9881b139332", CVX_TOKEN)
+STAKING_TOKENS.set('0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e', CRV_TOKEN)
+STAKING_TOKENS.set('0xcf50b810e57ac33b91dcf525c6ddd9881b139332', CVX_TOKEN)
+
 
 // The arrays are to map the asset types for the various curve pools
 // It's necessary because pools are often instantiated with the wrong asset type
@@ -144,3 +148,4 @@ ASSET_TYPES.set('0xf9440930043eb3997fc70e1339dbb11f341de7a8', 1)
 ASSET_TYPES.set('0xfd5db7463a3ab53fd211b4af195c5bccc1a03890', 3)
 ASSET_TYPES.set('0x9d0464996170c6b9e75eed71c68b99ddedf279e8', 3)
 ASSET_TYPES.set('0xc4c319e2d4d66cca4464c0c2b32c9bd23ebe784e', 1)
+ASSET_TYPES.set('0xfbdca68601f835b27790d98bbb8ec7f05fdeaa9b', 2)

@@ -7,12 +7,12 @@ import {
   EarmarkRewardsCall,
   EarmarkFeesCall,
 } from '../generated/Booster/Booster'
-import { HourlyPoolSnapshot, Pool } from '../generated/schema'
+import { DailyPoolSnapshot, Pool } from '../generated/schema'
 import { Deposit, Withdrawal } from '../generated/schema'
 import { getLpTokenSupply, getPool, getPoolApr, getPoolCoins, getPoolExtras } from './services/pools'
 import {
   ADDRESS_ZERO,
-  PLATFORM_ID,
+  CONVEX_PLATFORM_ID,
   ASSET_TYPES,
   BIG_DECIMAL_1E18,
   BIG_INT_MINUS_ONE,
@@ -26,7 +26,7 @@ import { CurveRegistry } from '../generated/Booster/CurveRegistry'
 import { ERC20 } from '../generated/Booster/ERC20'
 import { getLpTokenPriceUSD, getLpTokenVirtualPrice, getPoolBaseApr } from './services/apr'
 import { DataSourceContext, log } from '@graphprotocol/graph-ts'
-import { getIntervalFromTimestamp, HOUR } from '../../../packages/utils/time'
+import { getIntervalFromTimestamp, DAY } from '../../../packages/utils/time'
 import { getPlatform } from './services/platform'
 import { recordFeeRevenue, takeWeeklyRevenueSnapshot } from './services/revenue'
 import { PoolCrvRewards } from '../generated/templates'
@@ -56,7 +56,7 @@ export function handleAddPool(call: AddPoolCall): void {
   const lpToken = call.inputs._lptoken
   pool.poolid = pid
   pool.lpToken = lpToken
-  pool.platform = PLATFORM_ID
+  pool.platform = CONVEX_PLATFORM_ID
 
   let swap = curveRegistry.get_pool_from_lp_token(call.inputs._lptoken)
   // factory pools not in the registry
@@ -114,15 +114,15 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
     lpSupply == BIG_INT_ZERO ? BIG_DECIMAL_ONE : pool.lpTokenBalance.toBigDecimal().div(lpSupply.toBigDecimal())
   pool.tvl = pool.lpTokenBalance.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice)
 
-  // TODO: can be replaced by getHourlyPoolSnapshot to DRY once AssemblyScript
+  // TODO: can be replaced by getDailyPoolSnapshot to DRY once AssemblyScript
   // supports tuples as return values
-  const time = getIntervalFromTimestamp(event.block.timestamp, HOUR)
+  const time = getIntervalFromTimestamp(event.block.timestamp, DAY)
   const snapId = pool.name + '-' + withdrawal.poolid.toString() + '-' + time.toString()
-  let snapshot = HourlyPoolSnapshot.load(snapId)
+  let snapshot = DailyPoolSnapshot.load(snapId)
 
   // we only do call-heavy calculations once upon snapshot creation
   if (!snapshot) {
-    snapshot = new HourlyPoolSnapshot(snapId)
+    snapshot = new DailyPoolSnapshot(snapId)
     snapshot.poolid = event.params.poolid.toString()
     snapshot.poolName = pool.name
     snapshot.timestamp = event.block.timestamp
@@ -167,15 +167,15 @@ export function handleDeposited(event: DepositedEvent): void {
   log.debug('LP Token price USD for pool {}: {}', [pool.name, lpPrice.toString()])
   pool.tvl = pool.lpTokenBalance.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice)
 
-  // TODO: can be replaced by getHourlyPoolSnapshot to DRY once AssemblyScript
+  // TODO: can be replaced by getDailyPoolSnapshot to DRY once AssemblyScript
   // supports tuples as return values
-  const time = getIntervalFromTimestamp(event.block.timestamp, HOUR)
+  const time = getIntervalFromTimestamp(event.block.timestamp, DAY)
   const snapId = pool.name + '-' + deposit.poolid.toString() + '-' + time.toString()
-  let snapshot = HourlyPoolSnapshot.load(snapId)
+  let snapshot = DailyPoolSnapshot.load(snapId)
 
   // we only do call-heavy calculations once upon snapshot creation
   if (!snapshot) {
-    snapshot = new HourlyPoolSnapshot(snapId)
+    snapshot = new DailyPoolSnapshot(snapId)
     snapshot.poolid = event.params.poolid.toString()
     snapshot.poolName = pool.name
     snapshot.timestamp = event.block.timestamp
