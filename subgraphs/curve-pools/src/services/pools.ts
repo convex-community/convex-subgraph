@@ -6,6 +6,7 @@ import {
   ADDRESS_ZERO,
   BIG_DECIMAL_1E18,
   BIG_DECIMAL_1E6,
+  BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
   BIG_INT_MINUS_ONE,
   BIG_INT_ONE,
@@ -284,8 +285,9 @@ export function getPoolApr(pool: Pool, timestamp: BigInt): Array<BigDecimal> {
   const cvxPerYear = getCvxMintAmount(crvPerYear)
 
   let cvxPrice: BigDecimal, crvPrice: BigDecimal
+  let exchangeRate = BIG_DECIMAL_ONE
   if (FOREX_ORACLES.has(pool.lpToken.toHexString())) {
-    const exchangeRate = getForexUsdRate(pool.lpToken)
+    exchangeRate = getForexUsdRate(pool.lpToken)
     cvxPrice = exchangeRate != BIG_DECIMAL_ZERO ? getUsdRate(CVX_ADDRESS).div(exchangeRate) : getUsdRate(CVX_ADDRESS)
     crvPrice = exchangeRate != BIG_DECIMAL_ZERO ? getUsdRate(CRV_ADDRESS).div(exchangeRate) : getUsdRate(CRV_ADDRESS)
     log.debug('Forex CRV {} Price {}', [pool.name, crvPrice.toString()])
@@ -324,7 +326,7 @@ export function getPoolApr(pool: Pool, timestamp: BigInt): Array<BigDecimal> {
         rewardRate.toString(),
         virtualSupply.toString(),
       ])
-      const rewardTokenPrice = getTokenPriceForAssetType(rewardTokenAddress, pool)
+      const rewardTokenPrice = getTokenPriceForAssetType(rewardTokenAddress, pool).div(exchangeRate)
       extraRewardsApr = extraRewardsApr.plus(rewardTokenPrice.times(perYear))
       log.debug('Extra rewards APR for token {}: {}', [rewardTokenAddress.toHexString(), rewardTokenPrice.toString()])
     }
