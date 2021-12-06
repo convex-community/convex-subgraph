@@ -76,8 +76,6 @@ type ExchangeEvent @entity {
     totalSoldUSD: BigDecimal!
     totalBoughtUSD: BigDecimal!
     traderFeesUSD: BigDecimal!
-    gasPriceETH: BigDecimal!
-    gasPriceUSD: BigDecimal!
     poolSnapshot: TricryptoSnapshot!
     assetPrices: AssetPrice!
 }
