@@ -6,6 +6,7 @@ export const CURVE_PLATFORM_ID = 'Curve'
 export const BIG_DECIMAL_1E6 = BigDecimal.fromString('1e6')
 export const BIG_DECIMAL_1E8 = BigDecimal.fromString('1e8')
 export const BIG_DECIMAL_1E18 = BigDecimal.fromString('1e18')
+export const BIG_DECIMAL_1E10 = BigDecimal.fromString('1e10')
 export const BIG_DECIMAL_ZERO = BigDecimal.fromString('0')
 export const BIG_DECIMAL_ONE = BigDecimal.fromString('1')
 
@@ -17,7 +18,6 @@ export const SECONDS_PER_YEAR = BigDecimal.fromString('31536000')
 
 export const RKP3R_TOKEN = '0xEdB67Ee1B171c4eC66E6c10EC43EDBbA20FaE8e9'
 export const RKP3R_ADDRESS = Address.fromString(RKP3R_TOKEN)
-export const CVXCRV_TOKEN = ''
 export const CVX_TOKEN = '0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B'
 export const CVX_ADDRESS = Address.fromString(CVX_TOKEN)
 export const CRV_TOKEN = '0xD533a949740bb3306d119CC777fa900bA034cd52'
@@ -43,7 +43,6 @@ export const AUD_LP_TOKEN = '0x3f1b0278a9ee595635b61817630cc19de792f506'
 export const CHF_LP_TOKEN = '0x9c2c8910f113181783c249d8f6aa41b51cde0f0c'
 
 export const CVX_CRV_LP_TOKEN = '0x9d0464996170c6b9e75eed71c68b99ddedf279e8'
-export const MIM_LP_TOKEN = '0x5a6a4d54456819380173272a5e8e9b9904bdf41b'
 
 // export const FACTORY_POOLS = [EUR_LP_TOKEN, JPY_LP_TOKEN, KRW_LP_TOKEN, GBP_LP_TOKEN, AUD_LP_TOKEN, CHF_LP_TOKEN, CVX_CRV_LP_TOKEN, EURT_LP_TOKEN, MIM_LP_TOKEN]
 
@@ -69,6 +68,7 @@ export const CURVE_REGISTRY = Address.fromString('0x90e00ace148ca3b23ac1bc8c240c
 export const TRICRYPTO_LP_ADDRESS = Address.fromString('0xca3d75ac011bf5ad07a98d02f18225f9bd9a6bdf')
 export const TRICRYPTO2_LP_ADDRESS = Address.fromString('0xc4ad29ba4b3c580e6d59105fff484999997675ff')
 export const V2_POOL_ADDRESSES = [TRICRYPTO_LP_ADDRESS, TRICRYPTO2_LP_ADDRESS]
+export const TRICRYPTO2_POOL_ADDRESS = Address.fromString("0xd51a44d3fae010294c616388b506acda1bfaae46")
 
 export const CVX_CLIFF_SIZE = BigDecimal.fromString('100000') // * 1e18; //new cliff every 100,000 tokens
 export const CVX_CLIFF_COUNT = BigDecimal.fromString('1000') // 1,000 cliffs
@@ -94,6 +94,7 @@ STAKING_CONTRACTS.set('0xcf50b810e57ac33b91dcf525c6ddd9881b139332', 'cvx')
 export const STAKING_TOKENS = new Map<string, string>()
 STAKING_TOKENS.set('0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e', CRV_TOKEN)
 STAKING_TOKENS.set('0xcf50b810e57ac33b91dcf525c6ddd9881b139332', CVX_TOKEN)
+
 
 // The arrays are to map the asset types for the various curve pools
 // It's necessary because pools are often instantiated with the wrong asset type
