@@ -22,8 +22,6 @@ export function handleTokenExchange(event: TokenExchange): void {
   exchangeEvent.timestamp = event.block.timestamp
   exchangeEvent.address = event.params.buyer
   exchangeEvent.txHash = event.transaction.hash
-  exchangeEvent.gasPriceETH = event.transaction.gasPrice.toBigDecimal().div(BIG_DECIMAL_1E18)
-  exchangeEvent.gasPriceUSD = exchangeEvent.gasPriceETH.times(assetPriceSnapshot.ethPrice)
   exchangeEvent.assetPrices = assetPriceSnapshot.id
   exchangeEvent.poolSnapshot = tricrypto2Snapshot.id
 
