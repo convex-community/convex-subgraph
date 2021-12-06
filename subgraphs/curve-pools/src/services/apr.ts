@@ -23,8 +23,8 @@ import { getBtcRate, getEthRate, getTokenAValueInTokenB, getUsdRate } from '../.
 import { ChainlinkAggregator } from '../../generated/Booster/ChainlinkAggregator'
 import { Pool } from '../../generated/schema'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
-import { getHourlyPoolSnapshot } from './pools'
-import { HOUR } from '../../../../packages/utils/time'
+import { getDailyPoolSnapshot } from './pools'
+import { DAY } from '../../../../packages/utils/time'
 import { CurvePool } from '../../generated/Booster/CurvePool'
 
 export function getV2LpTokenPrice(pool: Pool): BigDecimal {
@@ -105,12 +105,12 @@ export function getLpTokenVirtualPrice(lpToken: Bytes): BigDecimal {
 }
 
 export function getPoolBaseApr(pool: Pool, currentVirtualPrice: BigDecimal, timestamp: BigInt): BigDecimal {
-  const previousHourSnapshot = getHourlyPoolSnapshot(BigInt.fromString(pool.id), pool.name, timestamp.minus(HOUR))
-  const previousHourVPrice = previousHourSnapshot.lpTokenVirtualPrice
+  const previousDaySnapshot = getDailyPoolSnapshot(BigInt.fromString(pool.id), pool.name, timestamp.minus(DAY))
+  const previousDayVPrice = previousDaySnapshot.lpTokenVirtualPrice
   const baseApr =
-    previousHourVPrice == BIG_DECIMAL_ZERO
+    previousDayVPrice == BIG_DECIMAL_ZERO
       ? BIG_DECIMAL_ZERO
-      : currentVirtualPrice.minus(previousHourVPrice).div(previousHourVPrice).times(BigDecimal.fromString('8760')) // 365 days * 24 hours
+      : currentVirtualPrice.minus(previousDayVPrice).div(previousDayVPrice).times(BigDecimal.fromString('365')) // 365 days
   return baseApr
 }
 

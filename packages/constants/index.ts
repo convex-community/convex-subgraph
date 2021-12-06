@@ -15,6 +15,8 @@ export const BIG_INT_ONE = BigInt.fromString('1')
 
 export const SECONDS_PER_YEAR = BigDecimal.fromString('31536000')
 
+export const RKP3R_TOKEN = '0xEdB67Ee1B171c4eC66E6c10EC43EDBbA20FaE8e9'
+export const RKP3R_ADDRESS = Address.fromString(RKP3R_TOKEN)
 export const CVXCRV_TOKEN = ''
 export const CVX_TOKEN = '0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B'
 export const CVX_ADDRESS = Address.fromString(CVX_TOKEN)

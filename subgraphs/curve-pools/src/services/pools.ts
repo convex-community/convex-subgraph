@@ -1,10 +1,12 @@
 import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
-import { Pool, HourlyPoolSnapshot, ExtraReward } from '../../generated/schema'
+import { Pool, DailyPoolSnapshot, ExtraReward } from '../../generated/schema'
 import { BaseRewardPool } from '../../generated/Booster/BaseRewardPool'
 import { bytesToAddress } from 'utils'
 import {
   ADDRESS_ZERO,
   BIG_DECIMAL_1E18,
+  BIG_DECIMAL_1E6,
+  BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
   BIG_INT_MINUS_ONE,
   BIG_INT_ONE,
@@ -12,10 +14,11 @@ import {
   CRV_ADDRESS,
   CVX_ADDRESS,
   FOREX_ORACLES,
+  RKP3R_ADDRESS,
   V2_POOL_ADDRESSES,
 } from 'const'
 import { getBtcRate, getEthRate, getUsdRate } from 'utils/pricing'
-import { getIntervalFromTimestamp, HOUR } from 'utils/time'
+import { getIntervalFromTimestamp, DAY } from 'utils/time'
 import { CurvePool } from '../../generated/Booster/CurvePool'
 import { getForexUsdRate, getLpTokenVirtualPrice, getTokenValueInLpUnderlyingToken, getV2LpTokenPrice } from './apr'
 import { getCvxMintAmount } from '../../../../packages/utils/convex'
@@ -25,6 +28,7 @@ import { VirtualBalanceRewardPool } from '../../generated/Booster/VirtualBalance
 import { ExtraRewardStashV32 } from '../../generated/Booster/ExtraRewardStashV32'
 import { ExtraRewardStashV30 } from '../../generated/Booster/ExtraRewardStashV30'
 import { ERC20 } from '../../generated/Booster/ERC20'
+import { RedeemableKeep3r } from '../../generated/Booster/RedeemableKeep3r'
 
 export function getPool(pid: string): Pool {
   let pool = Pool.load(pid)
@@ -48,17 +52,17 @@ export function getPoolCoins(pool: Pool): void {
   pool.save()
 }
 
-export function getHourlyPoolSnapshot(poolid: BigInt, name: string, timestamp: BigInt): HourlyPoolSnapshot {
-  const time = getIntervalFromTimestamp(timestamp, HOUR)
+export function getDailyPoolSnapshot(poolid: BigInt, name: string, timestamp: BigInt): DailyPoolSnapshot {
+  const time = getIntervalFromTimestamp(timestamp, DAY)
   const snapId = name + '-' + poolid.toString() + '-' + time.toString()
-  let hourlySnapshot = HourlyPoolSnapshot.load(snapId)
-  if (!hourlySnapshot) {
-    hourlySnapshot = new HourlyPoolSnapshot(snapId)
-    hourlySnapshot.poolid = poolid.toString()
-    hourlySnapshot.poolName = name.toString()
-    hourlySnapshot.timestamp = time
+  let dailySnapshot = DailyPoolSnapshot.load(snapId)
+  if (!dailySnapshot) {
+    dailySnapshot = new DailyPoolSnapshot(snapId)
+    dailySnapshot.poolid = poolid.toString()
+    dailySnapshot.poolName = name.toString()
+    dailySnapshot.timestamp = time
   }
-  return hourlySnapshot
+  return dailySnapshot
 }
 
 export function getExtraReward(id: string): ExtraReward {
@@ -217,7 +221,20 @@ export function getPoolExtrasV3(pool: Pool): void {
   }
 }
 
+function getRKp3rPrice(): BigDecimal {
+  const RKp3rContract = RedeemableKeep3r.bind(RKP3R_ADDRESS)
+  const discount = RKp3rContract.discount()
+  const priceResult = RKp3rContract.try_price()
+  if (priceResult.reverted) {
+    return BIG_DECIMAL_ZERO
+  }
+  return priceResult.value.times(discount).div(BigInt.fromI32(100)).toBigDecimal().div(BIG_DECIMAL_1E6)
+}
+
 export function getTokenPriceForAssetType(token: Address, pool: Pool): BigDecimal {
+  if (token == RKP3R_ADDRESS) {
+    return getRKp3rPrice()
+  }
   if (pool.assetType == 0 || pool.assetType == 4) {
     // USD
     return getUsdRate(token)
@@ -268,8 +285,9 @@ export function getPoolApr(pool: Pool, timestamp: BigInt): Array<BigDecimal> {
   const cvxPerYear = getCvxMintAmount(crvPerYear)
 
   let cvxPrice: BigDecimal, crvPrice: BigDecimal
+  let exchangeRate = BIG_DECIMAL_ONE
   if (FOREX_ORACLES.has(pool.lpToken.toHexString())) {
-    const exchangeRate = getForexUsdRate(pool.lpToken)
+    exchangeRate = getForexUsdRate(pool.lpToken)
     cvxPrice = exchangeRate != BIG_DECIMAL_ZERO ? getUsdRate(CVX_ADDRESS).div(exchangeRate) : getUsdRate(CVX_ADDRESS)
     crvPrice = exchangeRate != BIG_DECIMAL_ZERO ? getUsdRate(CRV_ADDRESS).div(exchangeRate) : getUsdRate(CRV_ADDRESS)
     log.debug('Forex CRV {} Price {}', [pool.name, crvPrice.toString()])
@@ -308,7 +326,7 @@ export function getPoolApr(pool: Pool, timestamp: BigInt): Array<BigDecimal> {
         rewardRate.toString(),
         virtualSupply.toString(),
       ])
-      const rewardTokenPrice = getTokenPriceForAssetType(rewardTokenAddress, pool)
+      const rewardTokenPrice = getTokenPriceForAssetType(rewardTokenAddress, pool).div(exchangeRate)
       extraRewardsApr = extraRewardsApr.plus(rewardTokenPrice.times(perYear))
       log.debug('Extra rewards APR for token {}: {}', [rewardTokenAddress.toHexString(), rewardTokenPrice.toString()])
     }
