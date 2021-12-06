@@ -15,7 +15,6 @@ export const BIG_INT_ONE = BigInt.fromString('1')
 
 export const SECONDS_PER_YEAR = BigDecimal.fromString("31536000")
 
-export const CVXCRV_TOKEN = ""
 export const CVX_TOKEN = "0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B"
 export const CVX_ADDRESS = Address.fromString(CVX_TOKEN)
 export const CRV_TOKEN = "0xD533a949740bb3306d119CC777fa900bA034cd52"
@@ -41,13 +40,12 @@ export const AUD_LP_TOKEN = '0x3f1b0278a9ee595635b61817630cc19de792f506'
 export const CHF_LP_TOKEN = '0x9c2c8910f113181783c249d8f6aa41b51cde0f0c'
 
 export const CVX_CRV_LP_TOKEN = '0x9d0464996170c6b9e75eed71c68b99ddedf279e8'
-export const MIM_LP_TOKEN = '0x5a6a4d54456819380173272a5e8e9b9904bdf41b'
 
 // export const FACTORY_POOLS = [EUR_LP_TOKEN, JPY_LP_TOKEN, KRW_LP_TOKEN, GBP_LP_TOKEN, AUD_LP_TOKEN, CHF_LP_TOKEN, CVX_CRV_LP_TOKEN, EURT_LP_TOKEN, MIM_LP_TOKEN]
 
 // https://etherscan.io/address/0x3abce8f1db258fbc64827b0926e14a0f90525cf7#code
 
-export var FOREX_ORACLES = new Map<string, Address>()
+export const FOREX_ORACLES = new Map<string, Address>()
 FOREX_ORACLES.set(EURT_LP_TOKEN, Address.fromString('0xb49f677943BC038e9857d61E7d053CaA2C1734C1'))
 FOREX_ORACLES.set(EURS_LP_TOKEN, Address.fromString('0xb49f677943BC038e9857d61E7d053CaA2C1734C1'))
 FOREX_ORACLES.set(EURN_LP_TOKEN, Address.fromString('0xb49f677943BC038e9857d61E7d053CaA2C1734C1'))
@@ -67,7 +65,7 @@ export const CURVE_REGISTRY = Address.fromString('0x90e00ace148ca3b23ac1bc8c240c
 export const TRICRYPTO_LP_ADDRESS = Address.fromString('0xca3d75ac011bf5ad07a98d02f18225f9bd9a6bdf')
 export const TRICRYPTO2_LP_ADDRESS = Address.fromString('0xc4ad29ba4b3c580e6d59105fff484999997675ff')
 export const V2_POOL_ADDRESSES = [TRICRYPTO_LP_ADDRESS, TRICRYPTO2_LP_ADDRESS]
-export const TRICRYPTO2_ETH_POOL_ADDRESS = Address.fromString("0xd51a44d3fae010294c616388b506acda1bfaae46")
+export const TRICRYPTO2_POOL_ADDRESS = Address.fromString("0xd51a44d3fae010294c616388b506acda1bfaae46")
 
 export const CVX_CLIFF_SIZE = BigDecimal.fromString('100000') // * 1e18; //new cliff every 100,000 tokens
 export const CVX_CLIFF_COUNT =BigDecimal.fromString('1000') // 1,000 cliffs
@@ -86,11 +84,11 @@ export const VOTIUM_BRIBE_CONTRACT_ADDRESS = Address.fromString(VOTIUM_BRIBE_CON
 
 export const THREE_CRV_TOKEN = "0x6c3f90f043a72fa612cbac8115ee7e52bde6e490"
 
-export var STAKING_CONTRACTS = new Map<string, string>()
+export const STAKING_CONTRACTS = new Map<string, string>()
 STAKING_CONTRACTS.set("0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e", 'cvxCrv')
 STAKING_CONTRACTS.set("0xcf50b810e57ac33b91dcf525c6ddd9881b139332", 'cvx')
 
-export var STAKING_TOKENS = new Map<string, string>()
+export const STAKING_TOKENS = new Map<string, string>()
 STAKING_TOKENS.set("0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e", CRV_TOKEN)
 STAKING_TOKENS.set("0xcf50b810e57ac33b91dcf525c6ddd9881b139332", CVX_TOKEN)
 
@@ -103,7 +101,7 @@ STAKING_TOKENS.set("0xcf50b810e57ac33b91dcf525c6ddd9881b139332", CVX_TOKEN)
 // therefore resyncs.
 // cf: https://etherscan.io/tx/0xf8e8d67ec16657ecc707614f733979d105e0b814aa698154c153ba9b44bf779b
 
-export var ASSET_TYPES = new Map<string, i32>()
+export const ASSET_TYPES = new Map<string, i32>()
 ASSET_TYPES.set('0x06364f10b501e868329afbc005b3492902d6c763', 0)
 ASSET_TYPES.set('0x071c661b4deefb59e2a3ddb20db036821eee8f4b', 2)
 ASSET_TYPES.set('0x0ce6a5ff5217e38315f87032cf90686c96627caa', 3)

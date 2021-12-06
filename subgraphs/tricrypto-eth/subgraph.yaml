@@ -7,7 +7,7 @@ dataSources:
     network: mainnet
     source:
       address: "0xd51a44d3fae010294c616388b506acda1bfaae46"
-      abi: tricrypto2
+      abi: Tricrypto2
       startBlock: 12821148
     mapping:
       kind: ethereum/events
@@ -21,10 +21,10 @@ dataSources:
         - ClaimAdminFeeEvent
         - AssetPrice
       abis:
-        - name: tricrypto2
-          file: ./abis/tricrypto2.json
-        - name: crv3Crypto
-          file: ./abis/crv3Crypto.json
+        - name: Tricrypto2
+          file: ./abis/Tricrypto2.json
+        - name: Crv3Crypto
+          file: ./abis/Crv3Crypto.json
       eventHandlers:
         - event: TokenExchange(indexed address,uint256,uint256,uint256,uint256)
           handler: handleTokenExchange
