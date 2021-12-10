@@ -7,7 +7,13 @@ import {
   BIG_DECIMAL_ZERO,
   CURVE_PLATFORM_ID,
   CURVE_REGISTRY,
-  V2_POOL_ADDRESSES,
+  CURVE_REGISTRY_V2,
+  EURS_USDC_LP_ADDRESS,
+  EURT_3CRV_LP_ADDRESS,
+  TRICRYPTO2_LP_ADDRESS,
+  TRICRYPTO_LP_ADDRESS,
+  TRICRYPTO_LP_ADDRESSES,
+  V2_SWAPS,
 } from '../../../../packages/constants'
 import { ERC20 } from '../../../curve-pools/generated/Booster/ERC20'
 import { getIntervalFromTimestamp, WEEK } from 'utils/time'
@@ -15,6 +21,7 @@ import { bytesToAddress } from '../../../../packages/utils'
 import { log } from '@graphprotocol/graph-ts/index'
 import { CurvePoolCoin256 } from '../../generated/GaugeController/CurvePoolCoin256'
 import { CurvePoolCoin128 } from '../../generated/GaugeController/CurvePoolCoin128'
+import { AdminFeeClaimV2 } from '../../generated/templates'
 
 // TODO: DRY this with Booster pool creation logic
 export function getPool(lpToken: Address): Pool {
@@ -23,14 +30,35 @@ export function getPool(lpToken: Address): Pool {
   if (!pool) {
     pool = new Pool(lpToken.toHexString())
     pool.lpToken = lpToken
-    const swapResult = curveRegistry.try_get_pool_from_lp_token(lpToken)
+    let swapResult = curveRegistry.try_get_pool_from_lp_token(lpToken)
 
     // factory pools have lpToken = pool
     let swap = lpToken
-    if (swapResult.reverted) {
-      log.warning('Could not find pool for lp token {}', [lpToken.toHexString()])
-    } else if (swapResult.value != ADDRESS_ZERO) {
+    if (!(swapResult.reverted || swapResult.value == ADDRESS_ZERO)) {
       swap = swapResult.value
+    } else {
+      const curveRegistryV2 = CurveRegistry.bind(CURVE_REGISTRY_V2)
+      swapResult = curveRegistryV2.try_get_pool_from_lp_token(lpToken)
+      if (!(swapResult.reverted || swapResult.value == ADDRESS_ZERO)) {
+        swap = swapResult.value
+        pool.isV2 = true
+      }
+      // these pools predate the v2 registry
+      else if (V2_SWAPS.has(pool.id)) {
+        swap = Address.fromString(V2_SWAPS.get(pool.id))
+        pool.isV2 = true
+      } else {
+        log.warning('Could not find pool for lp token {}', [lpToken.toHexString()])
+      }
+    }
+    // tricrypto is in old registry but still v2
+    if (TRICRYPTO_LP_ADDRESSES.includes(lpToken)) {
+      pool.isV2 = true
+    }
+
+    if (pool.isV2) {
+      log.info('Tracking fee claim events for v2 pool: {}, {}', [pool.name, pool.id])
+      AdminFeeClaimV2.create(swap)
     }
 
     pool.swap = swap

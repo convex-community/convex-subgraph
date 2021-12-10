@@ -11,7 +11,7 @@ import {
   WBTC_ADDRESS,
   WETH_ADDRESS,
   BIG_DECIMAL_1E8,
-  V2_POOL_ADDRESSES,
+  TRICRYPTO_LP_ADDRESSES,
   BIG_DECIMAL_ONE,
   USDT_ADDRESS,
   CVX_CRV_LP_TOKEN,
@@ -118,7 +118,7 @@ export function getLpTokenPriceUSD(pool: Pool): BigDecimal {
   const lpTokenAddress = bytesToAddress(pool.lpToken)
   const vPrice = getLpTokenVirtualPrice(pool.lpToken)
   // TODO : check how to determine v1/v2 pool on-chain
-  if (V2_POOL_ADDRESSES.includes(lpTokenAddress)) {
+  if (TRICRYPTO_LP_ADDRESSES.includes(lpTokenAddress)) {
     // TODO: this will break for v2 pools whose currency is NOT usd
     return getV2LpTokenPrice(pool)
   }

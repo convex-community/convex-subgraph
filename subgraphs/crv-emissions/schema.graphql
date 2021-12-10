@@ -34,7 +34,7 @@ type Pool @entity {
   gauges: [Gauge!] @derivedFrom(field: "pool")
   snapshots: [PoolSnapshot!] @derivedFrom(field: "pool")
   emissions: [Emission!] @derivedFrom(field: "pool")
-
+  isV2: Boolean!
 }
 
 type SnapshotTime @entity {
@@ -46,7 +46,7 @@ type PoolSnapshot @entity {
   id: ID!
   pool: Pool!
   virtualPrice: BigDecimal!
-  # fees are only an estimate refer to
+  # fees are only an estimate for v1 pools refer to
   # llama.airforce for accurate figures
   fees: BigDecimal!
   lpTokenSupply: BigInt!

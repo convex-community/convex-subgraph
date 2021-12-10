@@ -11,11 +11,16 @@ import {
   NewTypeWeight,
   VoteForGauge,
 } from '../generated/GaugeController/GaugeController'
-import { ADDRESS_ZERO, BIG_DECIMAL_1E18, BIG_INT_ONE } from '../../../packages/constants'
+import { ADDRESS_ZERO, BIG_DECIMAL_1E18, BIG_INT_ONE, CRV_ADDRESS } from '../../../packages/constants'
 import { LiquidityGauge } from '../generated/GaugeController/LiquidityGauge'
 import { registerGaugeType } from './services/gauges'
 import { getPlatform } from './services/platform'
-import { createAllSnapshots } from './services/snapshot'
+import { createAllSnapshots, getSnapshot } from './services/snapshot'
+import { AdminFeeClaimV2Pools, ClaimAdminFee } from '../generated/templates/AdminFeeClaimV2/AdminFeeClaimV2Pools'
+import { getUsdRate } from '../../../packages/utils/pricing'
+import { log } from '@graphprotocol/graph-ts'
+import { getPool } from './services/pools'
+import { getLpTokenPriceUSD } from './services/lppricing'
 
 export function handleAddType(event: AddType): void {
   const gaugeController = GaugeController.bind(event.address)
@@ -161,4 +166,20 @@ export function handleVoteForGauge(event: VoteForGauge): void {
 
     createAllSnapshots(event.block.timestamp, event.block.number)
   }
+}
+
+export function handleClaimAdminFee(event: ClaimAdminFee): void {
+  const thisWeek = getIntervalFromTimestamp(event.block.timestamp, WEEK)
+  const poolContract = AdminFeeClaimV2Pools.bind(event.address)
+  const pool = getPool(poolContract.token())
+  const snapshot = getSnapshot(pool.id + '-' + thisWeek.toString())
+  const lpPrice = getLpTokenPriceUSD(pool)
+  log.info('Claim admin fee event at pool: {}, time: {}, amount: {}, lpPrice: {}', [
+    event.address.toHexString(),
+    event.block.timestamp.toString(),
+    event.params.tokens.toString(),
+    lpPrice.toString(),
+  ])
+  snapshot.fees = snapshot.fees.plus(event.params.tokens.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice))
+  snapshot.save()
 }

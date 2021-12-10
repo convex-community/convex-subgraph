@@ -1,5 +1,5 @@
 import { Pool } from '../../generated/schema'
-import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts/index'
+import { Address, BigDecimal, BigInt, ByteArray, Bytes, log } from '@graphprotocol/graph-ts/index'
 import { bytesToAddress } from 'utils'
 import { ERC20 } from '../../../curve-pools/generated/Booster/ERC20'
 import {
@@ -14,9 +14,13 @@ import {
   LINK_ADDRESS,
   LINK_LP_TOKEN_ADDRESS,
   USDT_ADDRESS,
-  V2_POOL_ADDRESSES,
+  TRICRYPTO_LP_ADDRESSES,
   WBTC_ADDRESS,
   WETH_ADDRESS,
+  EURT_TOKEN,
+  EURT_ADDRESS,
+  EUR_LP_TOKEN,
+  BIG_INT_ZERO,
 } from 'const'
 import { exponentToBigDecimal } from 'utils/maths'
 import { getBtcRate, getEthRate, getTokenAValueInTokenB, getUsdRate } from 'utils/pricing'
@@ -30,6 +34,7 @@ export function getV2LpTokenPrice(pool: Pool): BigDecimal {
   const supplyResult = tokenContract.try_totalSupply()
   const supply = supplyResult.reverted ? BIG_DECIMAL_ZERO : supplyResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
   let total = BIG_DECIMAL_ZERO
+  let missingCoins = 0
 
   for (let i = 0; i < pool.coins.length; ++i) {
     const currentCoin = bytesToAddress(pool.coins[i])
@@ -40,20 +45,27 @@ export function getV2LpTokenPrice(pool: Pool): BigDecimal {
     const decimals = decimalsResult.reverted ? BigInt.fromI32(18) : BigInt.fromI32(decimalsResult.value)
     balance = balance.div(exponentToBigDecimal(decimals))
     let price = BIG_DECIMAL_ONE
-    switch (pool.assetType) {
-      default:
-        price = getUsdRate(currentCoin)
-        break
-      case 1:
-        price = getEthRate(currentCoin)
-        break
-      case 2:
-        price = getBtcRate(currentCoin)
-        break
+    // handling edge cases that are not traded on Sushi
+    if (currentCoin == EURT_ADDRESS) {
+      price = getForexUsdRate(ByteArray.fromHexString(EUR_LP_TOKEN) as Bytes)
+    } else {
+      price = getUsdRate(currentCoin)
+    }
+    // Some pools have WETH listed under "coins" but actually use native ETH
+    // In case we encounter similar missing coins, we keep track of all
+    // And will multiply the final result as if the pool was perfectly balanced
+    if (balance == BIG_DECIMAL_ZERO && currentCoin == WETH_ADDRESS) {
+      missingCoins += 1
     }
     total = total.plus(price.times(balance))
   }
-  const value = supply == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : total.div(supply)
+  let value = supply == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : total.div(supply)
+
+  if (missingCoins > 0) {
+    log.warning('Missing {} coins for {}', [missingCoins.toString(), pool.name])
+    const missingProportion = BigDecimal.fromString((pool.coins.length / missingCoins).toString())
+    value = value.times(missingProportion)
+  }
   return value
 }
 
@@ -108,7 +120,7 @@ export function getLpTokenVirtualPrice(lpToken: Bytes): BigDecimal {
 export function getPoolTokenPrice(pool: Pool): BigDecimal {
   const lpTokenAddress = bytesToAddress(pool.lpToken)
   const price = BIG_DECIMAL_ONE
-  if (V2_POOL_ADDRESSES.includes(lpTokenAddress)) {
+  if (TRICRYPTO_LP_ADDRESSES.includes(lpTokenAddress)) {
     return price
   }
   if (FOREX_ORACLES.has(pool.lpToken.toHexString())) {
@@ -131,8 +143,7 @@ export function getLpTokenPriceUSD(pool: Pool): BigDecimal {
   const lpTokenAddress = bytesToAddress(pool.lpToken)
   const vPrice = getLpTokenVirtualPrice(pool.lpToken)
   // TODO : check how to determine v1/v2 pool on-chain
-  if (V2_POOL_ADDRESSES.includes(lpTokenAddress)) {
-    // TODO: this will break for v2 pools whose currency is NOT usd
+  if (pool.isV2) {
     return getV2LpTokenPrice(pool)
   }
   if (FOREX_ORACLES.has(pool.lpToken.toHexString())) {

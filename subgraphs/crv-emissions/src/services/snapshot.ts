@@ -6,6 +6,7 @@ import {
   BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
   CRV_ADDRESS,
+  CURVE_PLATFORM_ID,
   LINK_ADDRESS,
   WBTC_ADDRESS,
   WETH_ADDRESS,
@@ -21,12 +22,21 @@ import {
   GaugeTotalWeight,
   PoolSnapshot,
   SnapshotTime,
+  Platform,
 } from '../../generated/schema'
 import { getGrowthRate, getPool } from './pools'
 import { getLpTokenPriceUSD, getLpTokenVirtualPrice, getPoolTokenPrice } from './lppricing'
 import { bytesToAddress } from '../../../../packages/utils'
 import { ERC20 } from '../../generated/GaugeController/ERC20'
 import { log } from '@graphprotocol/graph-ts/index'
+
+export function getSnapshot(id: string): PoolSnapshot {
+  let snapshot = PoolSnapshot.load(id)
+  if (!snapshot) {
+    snapshot = new PoolSnapshot(id)
+  }
+  return snapshot
+}
 
 export function createAllSnapshots(timestamp: BigInt, block: BigInt): void {
   const thisWeek = getIntervalFromTimestamp(timestamp, WEEK)
@@ -107,7 +117,7 @@ export function createAllSnapshots(timestamp: BigInt, block: BigInt): void {
       }
       const pool = getPool(Address.fromString(gauge.pool))
       emission.pool = gauge.pool
-      const snapshot = new PoolSnapshot(pool.id + '-' + thisWeek.toString())
+      const snapshot = getSnapshot(pool.id + '-' + thisWeek.toString())
       const previousSnapshot = PoolSnapshot.load(pool.id + '-' + previousWeek.toString())
       const previousTvl = previousSnapshot ? previousSnapshot.tvl : BIG_DECIMAL_ZERO
       snapshot.pool = pool.id
@@ -119,8 +129,10 @@ export function createAllSnapshots(timestamp: BigInt, block: BigInt): void {
       snapshot.poolTokenPrice = getPoolTokenPrice(pool)
       const lpPrice = getLpTokenPriceUSD(pool)
       snapshot.tvl = snapshot.lpTokenSupply.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice)
-      const rate = getGrowthRate(pool, snapshot.virtualPrice, timestamp)
-      snapshot.fees = previousTvl.times(rate).times(BigDecimal.fromString('2'))
+      if (!pool.isV2) {
+        const rate = getGrowthRate(pool, snapshot.virtualPrice, timestamp)
+        snapshot.fees = previousTvl.times(rate).times(BigDecimal.fromString('2'))
+      }
       snapshot.save()
       pool.tvl = snapshot.tvl
       pool.save()

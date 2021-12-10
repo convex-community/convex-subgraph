@@ -1,0 +1,32 @@
+[
+  {
+    "name": "ClaimAdminFee",
+    "inputs": [
+      {
+        "name": "admin",
+        "type": "address",
+        "indexed": true
+      },
+      {
+        "name": "tokens",
+        "type": "uint256",
+        "indexed": false
+      }
+    ],
+    "anonymous": false,
+    "type": "event"
+  },
+  {
+    "stateMutability": "view",
+    "type": "function",
+    "name": "token",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "gas": 516
+  }
+]

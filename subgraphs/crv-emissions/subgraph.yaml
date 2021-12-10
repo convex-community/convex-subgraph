@@ -17,8 +17,11 @@ dataSources:
         - Gauge
         - GaugeType
         - GaugeWeight
-        - GaugeWeightVote
-        - SystemState
+        - GaugeTotalWeight
+        - Pool
+        - Platform
+        - PoolSnapshot
+        - Emission
       abis:
         - name: GaugeController
           file: ./abis/GaugeController.json
@@ -54,4 +57,40 @@ dataSources:
         - event: VoteForGauge(uint256,address,address,uint256)
           handler: handleVoteForGauge
       file: ./src/mapping.ts
+templates:
+  - name: AdminFeeClaimV2
+    kind: ethereum/contract
+    network: mainnet
+    source:
+      abi: AdminFeeClaimV2Pools
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - PoolSnapshot
+        - Platform
+      abis:
+        - name: AdminFeeClaimV2Pools
+          file: ./abis/AdminFeeClaimV2Pools.json
+        - name: ERC20
+          file: ../../abis/ERC20.json
+        - name: CurveRegistry
+          file: ../../abis/CurveRegistry.json
+        - name: CurvePool
+          file: ../../abis/CurvePool.json
+        - name: ChainlinkAggregator
+          file: ../../abis/CLAggregator.json
+        - name: CRVToken
+          file: ./abis/CRVToken.json
+        - name: Factory
+          file: ../../abis/UniswapV2Factory.json
+        - name: Pair
+          file: ../../abis/UniswapV2Pair.json
+      eventHandlers:
+        - event: ClaimAdminFee(indexed address,uint256)
+          handler: handleClaimAdminFee
+      file: ./src/mapping.ts
+
 

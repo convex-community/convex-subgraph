@@ -64,11 +64,14 @@ export const SUSHI_FACTORY_ADDRESS = Address.fromString('0xc0aee478e3658e2610c5f
 
 export const BOOSTER_ADDRESS = Address.fromString('0xf403c135812408bfbe8713b5a23a04b3d48aae31')
 export const CURVE_REGISTRY = Address.fromString('0x90e00ace148ca3b23ac1bc8c240c2a7dd9c2d7f5')
+export const CURVE_REGISTRY_V2 = Address.fromString('0x4AacF35761d06Aa7142B9326612A42A2b9170E33')
 
 export const TRICRYPTO_LP_ADDRESS = Address.fromString('0xca3d75ac011bf5ad07a98d02f18225f9bd9a6bdf')
 export const TRICRYPTO2_LP_ADDRESS = Address.fromString('0xc4ad29ba4b3c580e6d59105fff484999997675ff')
-export const V2_POOL_ADDRESSES = [TRICRYPTO_LP_ADDRESS, TRICRYPTO2_LP_ADDRESS]
-export const TRICRYPTO2_POOL_ADDRESS = Address.fromString("0xd51a44d3fae010294c616388b506acda1bfaae46")
+export const EURS_USDC_LP_ADDRESS = Address.fromString('0x3d229e1b4faab62f621ef2f6a610961f7bd7b23b')
+export const EURT_3CRV_LP_ADDRESS = Address.fromString('0x3b6831c0077a1e44ed0a21841c3bc4dc11bce833')
+export const TRICRYPTO_LP_ADDRESSES = [TRICRYPTO_LP_ADDRESS, TRICRYPTO2_LP_ADDRESS]
+export const TRICRYPTO2_POOL_ADDRESS = Address.fromString('0xd51a44d3fae010294c616388b506acda1bfaae46')
 
 export const CVX_CLIFF_SIZE = BigDecimal.fromString('100000') // * 1e18; //new cliff every 100,000 tokens
 export const CVX_CLIFF_COUNT = BigDecimal.fromString('1000') // 1,000 cliffs
@@ -86,6 +89,9 @@ export const VOTIUM_BRIBE_CONTRACT = '0x19bbc3463dd8d07f55438014b021fb457ebd4595
 export const VOTIUM_BRIBE_CONTRACT_ADDRESS = Address.fromString(VOTIUM_BRIBE_CONTRACT)
 
 export const THREE_CRV_TOKEN = '0x6c3f90f043a72fa612cbac8115ee7e52bde6e490'
+export const THREE_CRV_ADDRESS = Address.fromString(THREE_CRV_TOKEN)
+export const EURT_TOKEN = '0xC581b735A1688071A1746c968e0798D642EDE491'
+export const EURT_ADDRESS = Address.fromString(EURT_TOKEN)
 
 export const STAKING_CONTRACTS = new Map<string, string>()
 STAKING_CONTRACTS.set('0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e', 'cvxCrv')
@@ -94,7 +100,6 @@ STAKING_CONTRACTS.set('0xcf50b810e57ac33b91dcf525c6ddd9881b139332', 'cvx')
 export const STAKING_TOKENS = new Map<string, string>()
 STAKING_TOKENS.set('0x3fe65692bfcd0e6cf84cb1e7d24108e434a7587e', CRV_TOKEN)
 STAKING_TOKENS.set('0xcf50b810e57ac33b91dcf525c6ddd9881b139332', CVX_TOKEN)
-
 
 // The arrays are to map the asset types for the various curve pools
 // It's necessary because pools are often instantiated with the wrong asset type
@@ -149,3 +154,7 @@ ASSET_TYPES.set('0xfd5db7463a3ab53fd211b4af195c5bccc1a03890', 3)
 ASSET_TYPES.set('0x9d0464996170c6b9e75eed71c68b99ddedf279e8', 3)
 ASSET_TYPES.set('0xc4c319e2d4d66cca4464c0c2b32c9bd23ebe784e', 1)
 ASSET_TYPES.set('0xfbdca68601f835b27790d98bbb8ec7f05fdeaa9b', 2)
+
+export const V2_SWAPS = new Map<string, string>()
+V2_SWAPS.set('0x3b6831c0077a1e44ed0a21841c3bc4dc11bce833', '0x9838eCcC42659FA8AA7daF2aD134b53984c9427b')
+V2_SWAPS.set('0x3d229e1b4faab62f621ef2f6a610961f7bd7b23b', '0x98a7F18d4E56Cfe84E3D081B40001B3d5bD3eB8B')
