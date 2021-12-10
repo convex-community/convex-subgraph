@@ -15,7 +15,7 @@ import {
   CVX_ADDRESS,
   FOREX_ORACLES,
   RKP3R_ADDRESS,
-  V2_POOL_ADDRESSES,
+  TRICRYPTO_LP_ADDRESSES,
 } from 'const'
 import { getBtcRate, getEthRate, getUsdRate } from 'utils/pricing'
 import { getIntervalFromTimestamp, DAY } from 'utils/time'
@@ -263,7 +263,7 @@ export function getLpTokenSupply(lpToken: Bytes): BigInt {
 }
 
 export function getPoolApr(pool: Pool, timestamp: BigInt): Array<BigDecimal> {
-  const vPrice = V2_POOL_ADDRESSES.includes(bytesToAddress(pool.lpToken))
+  const vPrice = TRICRYPTO_LP_ADDRESSES.includes(bytesToAddress(pool.lpToken))
     ? getV2LpTokenPrice(pool)
     : getLpTokenVirtualPrice(pool.lpToken)
   const rewardContract = BaseRewardPool.bind(bytesToAddress(pool.crvRewardsPool))
