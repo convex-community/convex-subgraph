@@ -1,13 +1,14 @@
 import { BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 import {
-  BIG_DECIMAL_1E18, BIG_DECIMAL_ZERO,
+  BIG_DECIMAL_1E18,
+  BIG_DECIMAL_ZERO,
   CRV_ADDRESS,
   CVX_ADDRESS,
   CVX_REWARDS_ADDRESS,
   CVXCRV_REWARDS_ADDRESS,
   LOCK_FEES_ADDRESS,
   SECONDS_PER_YEAR,
-  THREEPOOL_ADDRESS
+  THREEPOOL_ADDRESS,
 } from '../../../../packages/constants'
 import { getUsdRate } from '../../../../packages/utils/pricing'
 import { getCvxMintAmount } from '../../../../packages/utils/convex'
@@ -16,14 +17,14 @@ import { BaseRewardPool } from '../../generated/CvxCrvStakingRewards/BaseRewardP
 import { CurvePool } from '../../generated/CvxCrvStakingRewards/CurvePool'
 
 export function getRewardRate(rewardContract: BaseRewardPool, timestamp: BigInt): BigDecimal {
-  let periodFinish = rewardContract.periodFinish()
-  if (periodFinish >= timestamp) {
+  const periodFinish = rewardContract.periodFinish()
+  if (timestamp >= periodFinish) {
     return BIG_DECIMAL_ZERO
   }
   return rewardContract.rewardRate().toBigDecimal().div(BIG_DECIMAL_1E18)
 }
 
-export function getCvxApr(timestamp: BigInt): BigDecimal {
+export function getCvxStakingApr(timestamp: BigInt): BigDecimal {
   const rewardContract = BaseRewardPool.bind(CVX_REWARDS_ADDRESS)
   //TODO: move getRewardRate to utils
   let rate = getRewardRate(rewardContract, timestamp)
@@ -37,7 +38,7 @@ export function getCvxApr(timestamp: BigInt): BigDecimal {
   return crvApr
 }
 
-export function getCvxCrvApr(timestamp: BigInt): Array<BigDecimal> {
+export function getCvxCrvStakingApr(timestamp: BigInt): Array<BigDecimal> {
   const rewardContract = BaseRewardPool.bind(CVXCRV_REWARDS_ADDRESS)
   const threePoolStakeContract = VirtualBalanceRewardPool.bind(LOCK_FEES_ADDRESS)
   const threePoolSwapContract = CurvePool.bind(THREEPOOL_ADDRESS)
@@ -62,8 +63,4 @@ export function getCvxCrvApr(timestamp: BigInt): Array<BigDecimal> {
   const threeCrvApr = threePoolPerYear.times(virtualPrice)
 
   return [crvApr, cvxApr, threeCrvApr]
-}
-
-export function getSlpCvxEthApr(timestamp: BigInt): Array<BigDecimal> {
-
 }

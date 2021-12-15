@@ -33,8 +33,6 @@ dataSources:
         - name: Pair
           file: ../../abis/UniswapV2Pair.json
       eventHandlers:
-        - event: RewardAdded(uint256)
-          handler: handleRewardAdded
         - event: Staked(indexed address,uint256)
           handler: handleStaked
         - event: Withdrawn(indexed address,uint256)
@@ -46,7 +44,7 @@ dataSources:
     network: mainnet
     source:
       address: "0xcf50b810e57ac33b91dcf525c6ddd9881b139332"
-      abi: cvxRewardPool
+      abi: CvxRewardPool
       startBlock: 12451040
     mapping:
       kind: ethereum/events
@@ -59,8 +57,8 @@ dataSources:
         - Staked
         - Withdrawn
       abis:
-        - name: cvxRewardPool
-          file: ./abis/cvxRewardPool.json
+        - name: CvxRewardPool
+          file: ./abis/CvxRewardPool.json
         - name: ERC20
           file: ../../abis/ERC20.json
         - name: Factory
@@ -70,8 +68,6 @@ dataSources:
         - name: BaseRewardPool
           file: ../../abis/BaseRewardPool.json
       eventHandlers:
-        - event: RewardAdded(uint256)
-          handler: handleRewardAdded
         - event: Staked(indexed address,uint256)
           handler: handleStaked
         - event: Withdrawn(indexed address,uint256)

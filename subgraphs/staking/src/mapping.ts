@@ -1,15 +1,11 @@
-import { Address, log } from '@graphprotocol/graph-ts'
-import { RewardAdded, RewardPaid, Staked, Withdrawn } from '../generated/CvxCrvStakingRewards/BaseRewardPool'
+import { Address } from '@graphprotocol/graph-ts'
+import { Staked, Withdrawn } from '../generated/CvxCrvStakingRewards/BaseRewardPool'
 import { getStakingContract } from './services/contracts'
 import { Deposit, Withdrawal } from '../generated/schema'
 
 import { getUsdRate } from '../../../packages/utils/pricing'
-import { STAKING_TOKENS } from '../../../packages/constants'
+import { BIG_DECIMAL_1E18, STAKING_TOKENS } from '../../../packages/constants'
 import { createSnapShot } from './services/snapshot'
-
-export function handleRewardAdded(event: RewardAdded): void {}
-
-export function handleRewardPaid(event: RewardPaid): void {}
 
 export function handleStaked(event: Staked): void {
   const contract = getStakingContract(event.address)
@@ -24,7 +20,7 @@ export function handleStaked(event: Staked): void {
   const stakingTokenPrice = getUsdRate(Address.fromString(STAKING_TOKENS.get(event.address.toHexString())))
   contract.tokenBalance = contract.tokenBalance.plus(event.params.amount)
   snapshot.tokenBalance = contract.tokenBalance
-  snapshot.tvl = contract.tokenBalance.toBigDecimal().times(stakingTokenPrice)
+  snapshot.tvl = contract.tokenBalance.toBigDecimal().times(stakingTokenPrice).div(BIG_DECIMAL_1E18)
   snapshot.timestamp = event.block.timestamp
   snapshot.save()
   contract.save()
@@ -43,7 +39,7 @@ export function handleWithdrawn(event: Withdrawn): void {
   const stakingTokenPrice = getUsdRate(Address.fromString(STAKING_TOKENS.get(event.address.toHexString())))
   contract.tokenBalance = contract.tokenBalance.minus(event.params.amount)
   snapshot.tokenBalance = contract.tokenBalance
-  snapshot.tvl = contract.tokenBalance.toBigDecimal().times(stakingTokenPrice)
+  snapshot.tvl = contract.tokenBalance.toBigDecimal().times(stakingTokenPrice).div(BIG_DECIMAL_1E18)
   snapshot.timestamp = event.block.timestamp
   snapshot.save()
   contract.save()
