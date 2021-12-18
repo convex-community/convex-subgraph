@@ -29,6 +29,7 @@ import { getLpTokenPriceUSD, getLpTokenVirtualPrice, getPoolTokenPrice } from '.
 import { bytesToAddress } from '../../../../packages/utils'
 import { ERC20 } from '../../generated/GaugeController/ERC20'
 import { log } from '@graphprotocol/graph-ts/index'
+import { LiquidityGauge } from '../../generated/GaugeController/LiquidityGauge'
 
 export function getSnapshot(id: string): PoolSnapshot {
   let snapshot = PoolSnapshot.load(id)
@@ -73,6 +74,12 @@ export function createAllSnapshots(timestamp: BigInt, block: BigInt): void {
     const gauge = Gauge.load(gaugeId)
     if (!gauge) {
       log.warning('Unable to load gauge {}:', [gaugeId.toString()])
+      continue
+    }
+    const gaugeContract = LiquidityGauge.bind(Address.fromString(gaugeId))
+    const gaugeKilledResult = gaugeContract.try_is_killed()
+    if (!gaugeKilledResult.reverted && gaugeKilledResult.value) {
+      log.info('Killed gauge: {}', [gauge.id])
       continue
     }
     let gaugeWeight = GaugeWeight.load(gauge.id + '-' + thisWeek.toString())
