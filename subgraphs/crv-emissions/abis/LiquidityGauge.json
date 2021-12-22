@@ -477,5 +477,13 @@
     "stateMutability": "view",
     "type": "function",
     "gas": 1931
+  },
+  {
+    "stateMutability": "view",
+    "type": "function",
+    "name": "is_killed",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "bool" }],
+    "gas": 3648
   }
 ]
