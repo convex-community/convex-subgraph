@@ -17,6 +17,9 @@ import {
   CRV_ADDRESS,
   EURT_ADDRESS,
   EUR_LP_TOKEN,
+  EURS_TOKEN,
+  EURS_ADDRESS,
+  MIXED_USD_FOREX_POOLS,
 } from 'const'
 
 import { ERC20 } from '../../generated/Booster/ERC20'
@@ -46,7 +49,7 @@ export function getV2LpTokenPrice(pool: Pool): BigDecimal {
     balance = balance.div(exponentToBigDecimal(decimals))
     let price = BIG_DECIMAL_ONE
     // handling edge cases that are not traded on Sushi
-    if (currentCoin == EURT_ADDRESS) {
+    if (currentCoin == EURT_ADDRESS || currentCoin == EURS_ADDRESS) {
       price = getForexUsdRate(ByteArray.fromHexString(EUR_LP_TOKEN) as Bytes)
     } else {
       price = getUsdRate(currentCoin)
@@ -74,7 +77,7 @@ export function getForexUsdRate(lpToken: Bytes): BigDecimal {
   // returns the amount of USD 1 unit of the foreign currency is worth
   const priceOracle = ChainlinkAggregator.bind(FOREX_ORACLES[lpToken.toHexString()])
   const conversionRateReponse = priceOracle.try_latestAnswer()
-  const conversionRate = conversionRateReponse.reverted
+  let conversionRate = conversionRateReponse.reverted
     ? BIG_DECIMAL_ONE
     : conversionRateReponse.value.toBigDecimal().div(BIG_DECIMAL_1E8)
   log.debug('Answer from Forex oracle {} for token {}: {}', [
@@ -82,6 +85,9 @@ export function getForexUsdRate(lpToken: Bytes): BigDecimal {
     lpToken.toHexString(),
     conversionRate.toString(),
   ])
+  if (MIXED_USD_FOREX_POOLS.includes(lpToken.toHexString())) {
+    conversionRate = conversionRate.plus(BIG_DECIMAL_ONE).div(BigDecimal.fromString('2'))
+  }
   return conversionRate
 }
 
