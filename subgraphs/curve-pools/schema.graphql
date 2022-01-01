@@ -89,6 +89,7 @@ type Pool @entity {
   stashVersion: BigInt!
   stashMinorVersion: BigInt!
   active: Boolean!
+  isV2: Boolean!
   creationDate: BigInt!
   creationBlock: BigInt!
   tvl: BigDecimal!

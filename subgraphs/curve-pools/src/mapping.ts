@@ -21,11 +21,14 @@ import {
   CURVE_REGISTRY,
   BIG_INT_ZERO,
   BIG_DECIMAL_ONE,
+  CURVE_REGISTRY_V2,
+  V2_SWAPS,
+  TRICRYPTO_LP_ADDRESSES,
 } from 'const'
 import { CurveRegistry } from '../generated/Booster/CurveRegistry'
 import { ERC20 } from '../generated/Booster/ERC20'
 import { getLpTokenPriceUSD, getLpTokenVirtualPrice, getPoolBaseApr } from './services/apr'
-import { DataSourceContext, log } from '@graphprotocol/graph-ts'
+import { Address, Bytes, DataSourceContext, log } from '@graphprotocol/graph-ts'
 import { getIntervalFromTimestamp, DAY } from '../../../packages/utils/time'
 import { getPlatform } from './services/platform'
 import { recordFeeRevenue, takeWeeklyRevenueSnapshot } from './services/revenue'
@@ -36,7 +39,7 @@ export function handleAddPool(call: AddPoolCall): void {
   const booster = Booster.bind(BOOSTER_ADDRESS)
   const curveRegistry = CurveRegistry.bind(CURVE_REGISTRY)
 
-  const pid = platform.poolCount
+  const pid = booster.poolLength().minus(BIG_INT_ONE)
   platform.poolCount = platform.poolCount.plus(BIG_INT_ONE)
 
   const poolInfo = booster.try_poolInfo(pid)
@@ -58,9 +61,30 @@ export function handleAddPool(call: AddPoolCall): void {
   pool.lpToken = lpToken
   pool.platform = CONVEX_PLATFORM_ID
 
-  let swap = curveRegistry.get_pool_from_lp_token(call.inputs._lptoken)
-  // factory pools not in the registry
-  swap = swap == ADDRESS_ZERO ? lpToken : swap
+  let swapResult = curveRegistry.try_get_pool_from_lp_token(call.inputs._lptoken)
+
+  let swap = lpToken
+  if (!(swapResult.reverted || swapResult.value == ADDRESS_ZERO)) {
+    swap = swapResult.value
+  } else {
+    const curveRegistryV2 = CurveRegistry.bind(CURVE_REGISTRY_V2)
+    swapResult = curveRegistryV2.try_get_pool_from_lp_token(lpToken)
+    if (!(swapResult.reverted || swapResult.value == ADDRESS_ZERO)) {
+      swap = swapResult.value
+      pool.isV2 = true
+    }
+    // these pools predate the v2 registry
+    else if (V2_SWAPS.has(pool.id)) {
+      swap = Address.fromString(V2_SWAPS.get(pool.id))
+      pool.isV2 = true
+    } else {
+      log.warning('Could not find pool for lp token {}', [lpToken.toHexString()])
+    }
+  }
+  // tricrypto is in old registry but still v2
+  if (TRICRYPTO_LP_ADDRESSES.includes(lpToken)) {
+    pool.isV2 = true
+  }
 
   pool.swap = swap
 
@@ -107,6 +131,9 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
   withdrawal.save()
 
   const pool = getPool(withdrawal.poolid)
+  if (pool.lpToken == Bytes.empty()) {
+    return
+  }
   pool.lpTokenBalance = pool.lpTokenBalance.minus(withdrawal.amount)
   const lpPrice = getLpTokenPriceUSD(pool)
   const lpSupply = getLpTokenSupply(pool.lpToken)
@@ -130,7 +157,7 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
     pool.crvApr = aprs[0]
     pool.cvxApr = aprs[1]
     pool.extraRewardsApr = aprs[2]
-    snapshot.lpTokenVirtualPrice = getLpTokenVirtualPrice(pool.lpToken)
+    snapshot.lpTokenVirtualPrice = getLpTokenVirtualPrice(pool)
     snapshot.crvApr = pool.crvApr
     snapshot.cvxApr = pool.cvxApr
     snapshot.extraRewardsApr = pool.extraRewardsApr
@@ -159,6 +186,9 @@ export function handleDeposited(event: DepositedEvent): void {
   deposit.save()
 
   const pool = getPool(deposit.poolid)
+  if (pool.lpToken == Bytes.empty()) {
+    return
+  }
   pool.lpTokenBalance = pool.lpTokenBalance.plus(deposit.amount)
   const lpSupply = getLpTokenSupply(pool.lpToken)
   pool.curveTvlRatio =
@@ -183,7 +213,7 @@ export function handleDeposited(event: DepositedEvent): void {
     pool.crvApr = aprs[0]
     pool.cvxApr = aprs[1]
     pool.extraRewardsApr = aprs[2]
-    snapshot.lpTokenVirtualPrice = getLpTokenVirtualPrice(pool.lpToken)
+    snapshot.lpTokenVirtualPrice = getLpTokenVirtualPrice(pool)
     snapshot.crvApr = pool.crvApr
     snapshot.cvxApr = pool.cvxApr
     snapshot.extraRewardsApr = pool.extraRewardsApr
