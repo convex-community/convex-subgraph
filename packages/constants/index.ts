@@ -46,8 +46,6 @@ export const CHF_LP_TOKEN = '0x9c2c8910f113181783c249d8f6aa41b51cde0f0c'
 export const EURS_USDC_LP_TOKEN = '0x3d229e1b4faab62f621ef2f6a610961f7bd7b23b'
 export const EURT_USDT_LP_TOKEN = '0x3b6831c0077a1e44ed0a21841c3bc4dc11bce833'
 
-export const MIXED_USD_FOREX_POOLS = [EURS_USDC_LP_TOKEN, EURT_USDT_LP_TOKEN]
-
 export const CVX_CRV_LP_TOKEN = '0x9d0464996170c6b9e75eed71c68b99ddedf279e8'
 
 // export const FACTORY_POOLS = [EUR_LP_TOKEN, JPY_LP_TOKEN, KRW_LP_TOKEN, GBP_LP_TOKEN, AUD_LP_TOKEN, CHF_LP_TOKEN, CVX_CRV_LP_TOKEN, EURT_LP_TOKEN, MIM_LP_TOKEN]
@@ -76,8 +74,8 @@ export const CURVE_REGISTRY_V2 = Address.fromString('0x4AacF35761d06Aa7142B93266
 
 export const TRICRYPTO_LP_ADDRESS = Address.fromString('0xca3d75ac011bf5ad07a98d02f18225f9bd9a6bdf')
 export const TRICRYPTO2_LP_ADDRESS = Address.fromString('0xc4ad29ba4b3c580e6d59105fff484999997675ff')
-export const EURS_USDC_LP_ADDRESS = Address.fromString('0x3d229e1b4faab62f621ef2f6a610961f7bd7b23b')
-export const EURT_3CRV_LP_ADDRESS = Address.fromString('0x3b6831c0077a1e44ed0a21841c3bc4dc11bce833')
+export const EURS_USDC_LP_ADDRESS = Address.fromString(EURS_USDC_LP_TOKEN)
+export const EURT_3CRV_LP_ADDRESS = Address.fromString(EURT_USDT_LP_TOKEN)
 export const TRICRYPTO_LP_ADDRESSES = [TRICRYPTO_LP_ADDRESS, TRICRYPTO2_LP_ADDRESS]
 export const TRICRYPTO2_POOL_ADDRESS = Address.fromString('0xd51a44d3fae010294c616388b506acda1bfaae46')
 

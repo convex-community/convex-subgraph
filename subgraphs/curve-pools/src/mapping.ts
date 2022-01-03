@@ -33,13 +33,18 @@ import { getIntervalFromTimestamp, DAY } from '../../../packages/utils/time'
 import { getPlatform } from './services/platform'
 import { recordFeeRevenue, takeWeeklyRevenueSnapshot } from './services/revenue'
 import { PoolCrvRewards } from '../generated/templates'
+import { CurveToken } from '../generated/Booster/CurveToken'
 
 export function handleAddPool(call: AddPoolCall): void {
   const platform = getPlatform()
   const booster = Booster.bind(BOOSTER_ADDRESS)
   const curveRegistry = CurveRegistry.bind(CURVE_REGISTRY)
 
-  const pid = booster.poolLength().minus(BIG_INT_ONE)
+  // below can be used for testing when changing start block number
+  // but can't rely on it as some pools were created in the same block
+  //const pid = booster.poolLength().minus(BIG_INT_ONE)
+
+  const pid = platform.poolCount
   platform.poolCount = platform.poolCount.plus(BIG_INT_ONE)
 
   const poolInfo = booster.try_poolInfo(pid)
@@ -74,11 +79,19 @@ export function handleAddPool(call: AddPoolCall): void {
       pool.isV2 = true
     }
     // these pools predate the v2 registry
-    else if (V2_SWAPS.has(pool.id)) {
-      swap = Address.fromString(V2_SWAPS.get(pool.id))
+    else if (V2_SWAPS.has(lpToken.toHexString())) {
+      swap = Address.fromString(V2_SWAPS.get(lpToken.toHexString()))
       pool.isV2 = true
     } else {
-      log.warning('Could not find pool for lp token {}', [lpToken.toHexString()])
+      // if still nothing try to get the minter from the LP Token
+      const lpTokenContract = CurveToken.bind(lpToken)
+      swapResult = lpTokenContract.try_minter()
+      if (!(swapResult.reverted || swapResult.value == ADDRESS_ZERO)) {
+        swap = swapResult.value
+        pool.isV2 = true
+      } else {
+        log.warning('Could not find pool for lp token {}', [lpToken.toHexString()])
+      }
     }
   }
   // tricrypto is in old registry but still v2
