@@ -15,7 +15,6 @@ import {
   CVX_ADDRESS,
   FOREX_ORACLES,
   RKP3R_ADDRESS,
-  TRICRYPTO_LP_ADDRESSES,
 } from 'const'
 import { getBtcRate, getEthRate, getUsdRate } from 'utils/pricing'
 import { getIntervalFromTimestamp, DAY } from 'utils/time'
@@ -63,14 +62,6 @@ export function getDailyPoolSnapshot(poolid: BigInt, name: string, timestamp: Bi
     dailySnapshot.timestamp = time
   }
   return dailySnapshot
-}
-
-export function getExtraReward(id: string): ExtraReward {
-  let extraReward = ExtraReward.load(id)
-  if (!extraReward) {
-    extraReward = new ExtraReward(id)
-  }
-  return extraReward
 }
 
 export function getPoolExtras(pool: Pool): void {
@@ -263,9 +254,7 @@ export function getLpTokenSupply(lpToken: Bytes): BigInt {
 }
 
 export function getPoolApr(pool: Pool, timestamp: BigInt): Array<BigDecimal> {
-  const vPrice = TRICRYPTO_LP_ADDRESSES.includes(bytesToAddress(pool.lpToken))
-    ? getV2LpTokenPrice(pool)
-    : getLpTokenVirtualPrice(pool.lpToken)
+  const vPrice = pool.isV2 ? getV2LpTokenPrice(pool) : getLpTokenVirtualPrice(pool)
   const rewardContract = BaseRewardPool.bind(bytesToAddress(pool.crvRewardsPool))
   // TODO: getSupply function also to be used in CVXMint to DRY
   const supplyResult = rewardContract.try_totalSupply()

@@ -26,6 +26,8 @@ dataSources:
           file: ./abis/Booster.json
         - name: CurveRegistry
           file: ../../abis/CurveRegistry.json
+        - name: CurveToken
+          file: ../../abis/CurveToken.json
         - name: ERC20
           file: ../../abis/ERC20.json
         - name: Factory
