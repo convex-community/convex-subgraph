@@ -149,6 +149,8 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
   }
   pool.lpTokenBalance = pool.lpTokenBalance.minus(withdrawal.amount)
   const lpPrice = getLpTokenPriceUSD(pool)
+  log.debug('LP Token price USD for pool {}: {}', [pool.name, lpPrice.toString()])
+  pool.lpTokenUSDPrice = lpPrice
   const lpSupply = getLpTokenSupply(pool.lpToken)
   pool.curveTvlRatio =
     lpSupply == BIG_INT_ZERO ? BIG_DECIMAL_ONE : pool.lpTokenBalance.toBigDecimal().div(lpSupply.toBigDecimal())
@@ -171,6 +173,7 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
     pool.cvxApr = aprs[1]
     pool.extraRewardsApr = aprs[2]
     snapshot.lpTokenVirtualPrice = getLpTokenVirtualPrice(pool)
+    snapshot.lpTokenUSDPrice = pool.lpTokenUSDPrice
     snapshot.crvApr = pool.crvApr
     snapshot.cvxApr = pool.cvxApr
     snapshot.extraRewardsApr = pool.extraRewardsApr
@@ -207,6 +210,7 @@ export function handleDeposited(event: DepositedEvent): void {
   pool.curveTvlRatio =
     lpSupply == BIG_INT_ZERO ? BIG_DECIMAL_ONE : pool.lpTokenBalance.toBigDecimal().div(lpSupply.toBigDecimal())
   const lpPrice = getLpTokenPriceUSD(pool)
+  pool.lpTokenUSDPrice = lpPrice
   log.debug('LP Token price USD for pool {}: {}', [pool.name, lpPrice.toString()])
   pool.tvl = pool.lpTokenBalance.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice)
 
@@ -227,6 +231,7 @@ export function handleDeposited(event: DepositedEvent): void {
     pool.cvxApr = aprs[1]
     pool.extraRewardsApr = aprs[2]
     snapshot.lpTokenVirtualPrice = getLpTokenVirtualPrice(pool)
+    snapshot.lpTokenUSDPrice = pool.lpTokenUSDPrice
     snapshot.crvApr = pool.crvApr
     snapshot.cvxApr = pool.cvxApr
     snapshot.extraRewardsApr = pool.extraRewardsApr

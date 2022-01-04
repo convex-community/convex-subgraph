@@ -82,7 +82,7 @@ type Pool @entity {
   name: String!
   lpToken: Bytes! #address
   lpTokenBalance: BigInt!
-  lpTokenPrice: BigInt!
+  lpTokenUSDPrice: BigDecimal!
   token: Bytes! #address
   gauge: Bytes! #address
   crvRewardsPool: Bytes! #address
@@ -125,6 +125,7 @@ type DailyPoolSnapshot @entity {
   depositValue: BigDecimal!
   lpTokenBalance: BigInt!
   lpTokenVirtualPrice: BigDecimal!
+  lpTokenUSDPrice: BigDecimal!
   tvl: BigDecimal!
   curveTvlRatio: BigDecimal!
   crvApr: BigDecimal!
