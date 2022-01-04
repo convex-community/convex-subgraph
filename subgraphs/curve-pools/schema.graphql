@@ -82,6 +82,7 @@ type Pool @entity {
   name: String!
   lpToken: Bytes! #address
   lpTokenBalance: BigInt!
+  lpTokenPrice: BigInt!
   token: Bytes! #address
   gauge: Bytes! #address
   crvRewardsPool: Bytes! #address

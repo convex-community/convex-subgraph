@@ -41,6 +41,10 @@ dataSources:
           file: ../../abis/UniswapV2Factory.json
         - name: Pair
           file: ../../abis/UniswapV2Pair.json
+        - name: FactoryV3
+          file: ../../abis/UniswapV3Factory.json
+        - name: Quoter
+          file: ../../abis/UniswapV3Quoter.json
         - name: CurvePoolCoin128
           file: ../../abis/CurvePoolCoin128.json
         - name: CurvePoolCoin256
@@ -88,6 +92,10 @@ templates:
           file: ../../abis/UniswapV2Factory.json
         - name: Pair
           file: ../../abis/UniswapV2Pair.json
+        - name: FactoryV3
+          file: ../../abis/UniswapV3Factory.json
+        - name: Quoter
+          file: ../../abis/UniswapV3Quoter.json
       eventHandlers:
         - event: ClaimAdminFee(indexed address,uint256)
           handler: handleClaimAdminFee
