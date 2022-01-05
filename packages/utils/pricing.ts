@@ -1,17 +1,12 @@
-import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import {
   ADDRESS_ZERO,
   BIG_DECIMAL_1E18,
-  BIG_DECIMAL_1E6,
   BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
-  BIG_INT_1E18,
   BIG_INT_ZERO,
-  EURT_ADDRESS,
   SUSHI_FACTORY_ADDRESS,
-  SUSHISWAP_WETH_USDT_PAIR_ADDRESS,
   THREE_CRV_ADDRESS,
-  THREE_CRV_TOKEN,
   UNI_FACTORY_ADDRESS,
   UNI_V3_FACTORY_ADDRESS,
   UNI_V3_QUOTER,
@@ -22,7 +17,7 @@ import {
 import { Factory } from 'curve-pools/generated/Booster/Factory'
 import { Pair } from 'curve-pools/generated/Booster/Pair'
 import { ERC20 } from 'curve-pools/generated/Booster/ERC20'
-import { exponentToBigDecimal } from './maths'
+import { exponentToBigDecimal, exponentToBigInt } from './maths'
 import { FactoryV3 } from 'curve-pools/generated/Booster/FactoryV3'
 import { Quoter } from 'curve-pools/generated/Booster/Quoter'
 
@@ -35,11 +30,13 @@ export function getEthRate(token: Address): BigDecimal {
 
     if (address == ADDRESS_ZERO) {
       // if no pair on sushi, we try uni v2
+      log.debug('No sushi pair found for {}', [token.toHexString()])
       factory = Factory.bind(UNI_FACTORY_ADDRESS)
       address = factory.getPair(token, WETH_ADDRESS)
 
       // if no pair on v2 either we try uni v3
       if (address == ADDRESS_ZERO) {
+        log.debug('No Uni v2 pair found for {}', [token.toHexString()])
         return getEthRateUniV3(token)
       }
     }
@@ -65,18 +62,23 @@ export function getEthRateUniV3(token: Address): BigDecimal {
   // first try the 0.3% pool
   let pool = factory.getPool(token, WETH_ADDRESS, fee)
   if (pool == ADDRESS_ZERO) {
+    log.debug('No Uni v3 pair (.3%) found for {}', [token.toHexString()])
     // if it fails, try 1%
     fee = 10000
     pool = factory.getPool(token, WETH_ADDRESS, fee)
     if (pool == ADDRESS_ZERO) {
+      log.debug('No Uni v3 pair (1%) found for {}', [token.toHexString()])
       return BIG_DECIMAL_ZERO
     }
   }
   const quoter = Quoter.bind(UNI_V3_QUOTER)
-  const rate = quoter.try_quoteExactInputSingle(token, WETH_ADDRESS, fee, BIG_INT_1E18, BIG_INT_ZERO)
+  const decimals = getDecimals(token)
+  const rate = quoter.try_quoteExactInputSingle(token, WETH_ADDRESS, fee, exponentToBigInt(decimals), BIG_INT_ZERO)
   if (!rate.reverted) {
-    return rate.value.toBigDecimal().div(BIG_DECIMAL_1E18)
+    log.debug('Rate for {}: {}', [token.toHexString(), rate.value.toString()])
+    return rate.value.toBigDecimal().div(exponentToBigDecimal(decimals))
   }
+  log.error('Error getting a quote for {} at fee {}', [token.toHexString(), fee.toString()])
   return BIG_DECIMAL_ZERO
 }
 
