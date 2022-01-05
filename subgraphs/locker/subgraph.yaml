@@ -33,6 +33,10 @@ dataSources:
           file: ../../abis/UniswapV2Factory.json
         - name: Pair
           file: ../../abis/UniswapV2Pair.json
+        - name: FactoryV3
+          file: ../../abis/UniswapV3Factory.json
+        - name: Quoter
+          file: ../../abis/UniswapV3Quoter.json
       eventHandlers:
         - event: KickReward(indexed address,indexed address,uint256)
           handler: handleKickReward
@@ -71,6 +75,10 @@ dataSources:
           file: ../../abis/UniswapV2Factory.json
         - name: Pair
           file: ../../abis/UniswapV2Pair.json
+        - name: FactoryV3
+          file: ../../abis/UniswapV3Factory.json
+        - name: Quoter
+          file: ../../abis/UniswapV3Quoter.json
       eventHandlers:
         - event: RewardAdded(indexed address,indexed uint256,uint256)
           handler: handleRewardAdded
