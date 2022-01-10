@@ -30,11 +30,11 @@ dataSources:
           handler: handleMetaPoolDeployed
       file: ./src/mapping.ts
 templates:
-  - name: MetaPool
+  - name: BasePool
     kind: ethereum/contract
     network: mainnet
     source:
-      abi: MetaPool
+      abi: CurvePool
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -48,8 +48,8 @@ templates:
       abis:
         - name: CurveFactory
           file: ./abis/CurveFactory.json
-        - name: MetaPool
-          file: ./abis/MetaPool.json
+        - name: CurvePool
+          file: ./abis/CurvePool.json
         - name: ERC20
           file: ../../abis/ERC20.json
         - name: Factory
@@ -68,40 +68,3 @@ templates:
         - event: TokenExchangeUnderlying(indexed address,int128,uint256,int128,uint256)
           handler: handleTokenExchangeUnderlying
       file: ./src/mapping.ts
-  - name: PlainPool
-    kind: ethereum/contract
-    network: mainnet
-    source:
-      abi: PlainPool
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      entities:
-        - Pool
-        - TokenSnapshot
-        - HourlyVolumeSnapshot
-        - DailyVolumeSnapshot
-        - WeeklyVolumeSnapshot
-      abis:
-        - name: CurveFactory
-          file: ./abis/CurveFactory.json
-        - name: PlainPool
-          file: ./abis/PlainPool.json
-        - name: ERC20
-          file: ../../abis/ERC20.json
-        - name: Factory
-          file: ../../abis/UniswapV2Factory.json
-        - name: Pair
-          file: ../../abis/UniswapV2Pair.json
-        - name: FactoryV3
-          file: ../../abis/UniswapV3Factory.json
-        - name: Quoter
-          file: ../../abis/UniswapV3Quoter.json
-        - name: ChainlinkAggregator
-          file: ../../abis/CLAggregator.json
-      eventHandlers:
-        - event: TokenExchange(indexed address,int128,uint256,int128,uint256)
-          handler: handleTokenExchange
-      file: ./src/mapping.ts
-
