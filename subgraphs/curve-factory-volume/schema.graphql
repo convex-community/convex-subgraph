@@ -1,0 +1,50 @@
+type Pool @entity {
+  id: ID!
+  address: Bytes!
+  name: String!
+  metapool: Boolean
+  coins: [Bytes!]!
+  hourlyVolumeSnapshots: [HourlyVolumeSnapshot!] @derivedFrom(field: "pool")
+  dailyVolumeSnapshots: [DailyVolumeSnapshot!] @derivedFrom(field: "pool")
+  weeklyVolumeSnapshots: [WeeklyVolumeSnapshot!] @derivedFrom(field: "pool")
+
+}
+
+type TokenSnapshot @entity {
+  id: ID!
+  token: Bytes!
+  startingPrice: BigDecimal!
+  amountSold: BigInt!
+  amountBought: BigInt!
+  volume: BigInt!
+}
+
+type HourlyVolumeSnapshot @entity {
+  id: ID!
+  pool: Pool!
+  amountSold: BigInt!
+  amountBought: BigInt!
+  volume: BigInt!
+  volumeUSD: BigInt!
+  timestamp: BigInt!
+}
+
+type DailyVolumeSnapshot @entity {
+  id: ID!
+  pool: Pool!
+  amountSold: BigInt!
+  amountBought: BigInt!
+  volume: BigInt!
+  volumeUSD: BigInt!
+  timestamp: BigInt!
+}
+
+type WeeklyVolumeSnapshot @entity {
+  id: ID!
+  pool: Pool!
+  amountSold: BigInt!
+  amountBought: BigInt!
+  volume: BigInt!
+  volumeUSD: BigInt!
+  timestamp: BigInt!
+}
