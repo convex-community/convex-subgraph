@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt, Bytes } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
 import { Pool, SwapEvent } from '../../generated/schema'
 import {
   getDailySwapSnapshot,
@@ -6,9 +6,10 @@ import {
   getTokenSnapshotByAssetType,
   getWeeklySwapSnapshot,
 } from './snapshots'
-import { BIG_DECIMAL_TWO, BIG_INT_ONE } from '../../../../packages/constants'
+import { BIG_DECIMAL_1E18, BIG_DECIMAL_TWO, BIG_INT_ONE } from '../../../../packages/constants'
 import { getBasePool } from './pools'
 import { bytesToAddress } from '../../../../packages/utils'
+import { exponentToBigDecimal } from '../../../../packages/utils/maths'
 
 export function handleExchange(
   sold_id: BigInt,
@@ -32,9 +33,22 @@ export function handleExchange(
   if (exchangeUnderlying && soldId != 0) {
     const underlyingSoldIndex = soldId - 1
     const basePool = getBasePool(bytesToAddress(pool.basePool))
+    log.debug('Basepool: {}, {}', [basePool.id, basePool.coins.length.toString()])
+    if (underlyingSoldIndex > basePool.coins.length) {
+      log.error('Undefined underlying sold Id {} for pool {} at tx {}', [
+        soldId.toString(),
+        pool.id,
+        txhash.toHexString(),
+      ])
+      return
+    }
     tokenSold = basePool.coins[underlyingSoldIndex]
     tokenSoldDecimals = basePool.coinDecimals[underlyingSoldIndex]
   } else {
+    if (soldId > pool.coins.length) {
+      log.error('Undefined sold Id {} for pool {} at tx {}', [soldId.toString(), pool.id, txhash.toHexString()])
+      return
+    }
     tokenSold = pool.coins[soldId]
     tokenSoldDecimals = pool.coinDecimals[soldId]
   }
@@ -42,15 +56,28 @@ export function handleExchange(
   if (exchangeUnderlying && boughtId != 0) {
     const underlyingBoughtIndex = boughtId - 1
     const basePool = getBasePool(bytesToAddress(pool.basePool))
+    log.debug('Basepool: {}, {}', [basePool.id, basePool.coins.length.toString()])
+    if (underlyingBoughtIndex > basePool.coins.length) {
+      log.error('Undefined underlying bought Id {} for pool {} at tx {}', [
+        boughtId.toString(),
+        pool.id,
+        txhash.toHexString(),
+      ])
+      return
+    }
     tokenBought = basePool.coins[underlyingBoughtIndex]
     tokenBoughtDecimals = basePool.coinDecimals[underlyingBoughtIndex]
   } else {
+    if (boughtId > pool.coins.length) {
+      log.error('Undefined bought Id {} for pool {} at tx {}', [boughtId.toString(), pool.id, txhash.toHexString()])
+      return
+    }
     tokenBought = pool.coins[boughtId]
     tokenBoughtDecimals = pool.coinDecimals[boughtId]
   }
 
-  const amountSold = tokens_sold.toBigDecimal().div(tokenSoldDecimals.toBigDecimal())
-  const amountBought = tokens_bought.toBigDecimal().div(tokenBoughtDecimals.toBigDecimal())
+  const amountSold = tokens_sold.toBigDecimal().div(exponentToBigDecimal(tokenSoldDecimals))
+  const amountBought = tokens_bought.toBigDecimal().div(exponentToBigDecimal(tokenBoughtDecimals))
 
   const latestSnapshot = getTokenSnapshotByAssetType(pool, timestamp)
   const latestPrice = latestSnapshot.price
@@ -65,9 +92,10 @@ export function handleExchange(
   swapEvent.amountSold = amountSold
   swapEvent.amountBoughtUSD = amountBoughtUSD
   swapEvent.amountSoldUSD = amountSoldUSD
+  swapEvent.save()
 
   const volume = amountSold.plus(amountBought).div(BIG_DECIMAL_TWO)
-  const volumeUSD = volume.times(latestPrice)
+  const volumeUSD = volume.times(latestPrice).div(BIG_DECIMAL_1E18)
 
   const hourlySnapshot = getHourlySwapSnapshot(pool, timestamp)
   const dailySnapshot = getDailySwapSnapshot(pool, timestamp)
@@ -100,4 +128,8 @@ export function handleExchange(
   hourlySnapshot.volumeUSD = hourlySnapshot.volumeUSD.plus(volumeUSD)
   dailySnapshot.volumeUSD = dailySnapshot.volumeUSD.plus(volumeUSD)
   weeklySnapshot.volumeUSD = weeklySnapshot.volumeUSD.plus(volumeUSD)
+
+  hourlySnapshot.save()
+  dailySnapshot.save()
+  weeklySnapshot.save()
 }

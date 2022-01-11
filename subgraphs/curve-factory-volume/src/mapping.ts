@@ -4,6 +4,7 @@ import { ADDRESS_ZERO, CURVE_FACTORY_V2 } from '../../../packages/constants'
 import { PlainPoolDeployed } from '../generated/CurveFactoryV2/CurveFactoryV2'
 import { MetaPoolDeployed } from '../generated/CurveFactoryV1/CurveFactoryV1'
 import { TokenExchange, TokenExchangeUnderlying } from '../generated/templates/FactoryPool/CurvePool'
+import { log } from '@graphprotocol/graph-ts'
 
 export function handlePlainPoolDeployed(event: PlainPoolDeployed): void {
   createNewPool(2, false, ADDRESS_ZERO, event.block.timestamp, event.block.number, event.transaction.hash)
@@ -39,6 +40,7 @@ export function handleTokenExchange(event: TokenExchange): void {
 }
 
 export function handleTokenExchangeUnderlying(event: TokenExchangeUnderlying): void {
+  log.debug('Underlying swap for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
   const trade = event.params
   handleExchange(
     trade.sold_id,

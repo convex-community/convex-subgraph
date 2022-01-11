@@ -93,6 +93,8 @@ templates:
           file: ../../abis/UniswapV3Quoter.json
         - name: ChainlinkAggregator
           file: ../../abis/CLAggregator.json
+        - name: CurvePoolCoin128
+          file: ../../abis/CurvePoolCoin128.json
       eventHandlers:
         - event: TokenExchange(indexed address,int128,uint256,int128,uint256)
           handler: handleTokenExchange
