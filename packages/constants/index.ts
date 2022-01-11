@@ -76,6 +76,7 @@ export const UNI_V3_QUOTER = Address.fromString('0xb27308f9F90D607463bb33eA1BeBb
 export const BOOSTER_ADDRESS = Address.fromString('0xf403c135812408bfbe8713b5a23a04b3d48aae31')
 export const CURVE_REGISTRY = Address.fromString('0x90e00ace148ca3b23ac1bc8c240c2a7dd9c2d7f5')
 export const CURVE_REGISTRY_V2 = Address.fromString('0x4AacF35761d06Aa7142B9326612A42A2b9170E33')
+export const CURVE_FACTORY_V1 = Address.fromString('0xb9fc157394af804a3578134a6585c0dc9cc990d4')
 
 export const TRICRYPTO_LP_ADDRESS = Address.fromString('0xca3d75ac011bf5ad07a98d02f18225f9bd9a6bdf')
 export const TRICRYPTO2_LP_ADDRESS = Address.fromString('0xc4ad29ba4b3c580e6d59105fff484999997675ff')

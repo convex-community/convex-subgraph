@@ -4,12 +4,22 @@ import { BigInt } from '@graphprotocol/graph-ts/index'
 import { Address, Bytes } from '@graphprotocol/graph-ts'
 import { getDecimals } from '../../../../packages/utils/pricing'
 import { CurvePool } from '../../generated/templates/BasePool/CurvePool'
+import { getPlatform } from './platform'
+import { CurveFactory } from '../../generated/CurveFactory/CurveFactory'
+import { BIG_INT_ONE, CURVE_FACTORY_V1 } from '../../../../packages/constants'
 
-export function createNewPool(basePool: Address, metapool: boolean, timestamp: BigInt, block: BigInt, tx: Bytes): void {
+export function createNewPool(metapool: boolean, timestamp: BigInt, block: BigInt, tx: Bytes): void {
+  const platform = getPlatform()
+  const factory = CurveFactory.bind(CURVE_FACTORY_V1)
+  const basePool = factory.pool_list(platform.poolCount)
+  platform.poolCount = platform.poolCount.plus(BIG_INT_ONE)
+  platform.save()
+
   BasePool.create(basePool)
   const pool = new Pool(basePool.toHexString())
   const poolContract = CurvePool.bind(basePool)
   pool.name = poolContract.name()
+  pool.platform = platform.id
   pool.symbol = poolContract.symbol()
   pool.metapool = metapool
   pool.address = basePool

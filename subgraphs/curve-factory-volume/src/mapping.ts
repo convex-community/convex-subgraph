@@ -1,15 +1,15 @@
-import { BasePoolAdded, MetaPoolDeployed } from '../generated/CurveFactory/CurveFactory'
+import { PlainPoolDeployed, MetaPoolDeployed } from '../generated/CurveFactory/CurveFactory'
 
 import { createNewPool } from './services/pools'
 import { TokenExchangeUnderlying, TokenExchange } from '../generated/templates/BasePool/CurvePool'
 import { handleExchange } from './services/swaps'
 
-export function handleBasePoolAdded(event: BasePoolAdded): void {
-  createNewPool(event.params.base_pool, false, event.block.timestamp, event.block.number, event.transaction.hash)
+export function handlePlainPoolDeployed(event: PlainPoolDeployed): void {
+  createNewPool(false, event.block.timestamp, event.block.number, event.transaction.hash)
 }
 
 export function handleMetaPoolDeployed(event: MetaPoolDeployed): void {
-  createNewPool(event.params.base_pool, true, event.block.timestamp, event.block.number, event.transaction.hash)
+  createNewPool(true, event.block.timestamp, event.block.number, event.transaction.hash)
 }
 
 export function handleTokenExchange(event: TokenExchange): void {
