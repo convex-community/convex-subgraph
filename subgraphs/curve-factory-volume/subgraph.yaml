@@ -59,7 +59,7 @@ dataSources:
           handler: handleMetaPoolDeployed
       file: ./src/mapping.ts
 templates:
-  - name: BasePool
+  - name: FactoryPool
     kind: ethereum/contract
     network: mainnet
     source:

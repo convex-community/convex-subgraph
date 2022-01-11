@@ -12,6 +12,7 @@ type Pool @entity {
   name: String!
   symbol: String!
   metapool: Boolean
+  basePool: Bytes!
   coins: [Bytes!]!
   coinDecimals: [BigInt!]!
   assetType: Int!
@@ -30,6 +31,12 @@ type Pool @entity {
   dailyLiquidityVolumeSnapshots: [DailyLiquidityVolumeSnapshot!] @derivedFrom(field: "pool")
   weeklyLiquidityVolumeSnapshots: [WeeklyLiquidityVolumeSnapshot!] @derivedFrom(field: "pool")
 
+}
+
+type BasePool @entity {
+  id: ID!
+  coins: [Bytes!]!
+  coinDecimals: [BigInt!]!
 }
 
 type TokenSnapshot @entity {

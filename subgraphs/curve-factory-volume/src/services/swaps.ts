@@ -1,4 +1,4 @@
-import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt, Bytes } from '@graphprotocol/graph-ts'
 import { Pool, SwapEvent } from '../../generated/schema'
 import {
   getDailySwapSnapshot,
@@ -7,6 +7,8 @@ import {
   getWeeklySwapSnapshot,
 } from './snapshots'
 import { BIG_DECIMAL_TWO, BIG_INT_ONE } from '../../../../packages/constants'
+import { getBasePool } from './pools'
+import { bytesToAddress } from '../../../../packages/utils'
 
 export function handleExchange(
   sold_id: BigInt,
@@ -15,17 +17,38 @@ export function handleExchange(
   tokens_bought: BigInt,
   timestamp: BigInt,
   address: Address,
-  txhash: Bytes
+  txhash: Bytes,
+  exchangeUnderlying: boolean
 ): void {
   const pool = Pool.load(address.toHexString())
   if (!pool) {
     return
   }
+  const soldId = sold_id.toI32()
+  const boughtId = bought_id.toI32()
+  let tokenSold: Bytes, tokenBought: Bytes
+  let tokenSoldDecimals: BigInt, tokenBoughtDecimals: BigInt
 
-  const tokenSold = pool.coins[sold_id.toI32()]
-  const tokenBought = pool.coins[bought_id.toI32()]
-  const tokenSoldDecimals = pool.coinDecimals[sold_id.toI32()]
-  const tokenBoughtDecimals = pool.coinDecimals[bought_id.toI32()]
+  if (exchangeUnderlying && soldId != 0) {
+    const underlyingSoldIndex = soldId - 1
+    const basePool = getBasePool(bytesToAddress(pool.basePool))
+    tokenSold = basePool.coins[underlyingSoldIndex]
+    tokenSoldDecimals = basePool.coinDecimals[underlyingSoldIndex]
+  } else {
+    tokenSold = pool.coins[soldId]
+    tokenSoldDecimals = pool.coinDecimals[soldId]
+  }
+
+  if (exchangeUnderlying && boughtId != 0) {
+    const underlyingBoughtIndex = boughtId - 1
+    const basePool = getBasePool(bytesToAddress(pool.basePool))
+    tokenBought = basePool.coins[underlyingBoughtIndex]
+    tokenBoughtDecimals = basePool.coinDecimals[underlyingBoughtIndex]
+  } else {
+    tokenBought = pool.coins[boughtId]
+    tokenBoughtDecimals = pool.coinDecimals[boughtId]
+  }
+
   const amountSold = tokens_sold.toBigDecimal().div(tokenSoldDecimals.toBigDecimal())
   const amountBought = tokens_bought.toBigDecimal().div(tokenBoughtDecimals.toBigDecimal())
 

@@ -1,43 +1,51 @@
-import { BasePool } from '../../generated/templates'
-import { Pool } from '../../generated/schema'
+import { FactoryPool } from '../../generated/templates'
+import { BasePool, Pool } from '../../generated/schema'
 import { BigInt } from '@graphprotocol/graph-ts/index'
 import { Address, Bytes } from '@graphprotocol/graph-ts'
 import { getDecimals } from '../../../../packages/utils/pricing'
-import { CurvePool } from '../../generated/templates/BasePool/CurvePool'
 import { getPlatform } from './platform'
 import { BIG_INT_ONE, CURVE_FACTORY_V1, CURVE_FACTORY_V2 } from '../../../../packages/constants'
 import { CurveFactoryV2 } from '../../generated/CurveFactoryV2/CurveFactoryV2'
 import { CurveFactoryV1 } from '../../generated/CurveFactoryV1/CurveFactoryV1'
+import { CurvePool } from '../../generated/templates/FactoryPool/CurvePool'
 
-export function createNewPool(version: i32, metapool: boolean, timestamp: BigInt, block: BigInt, tx: Bytes): void {
+export function createNewPool(
+  version: i32,
+  metapool: boolean,
+  basePool: Address,
+  timestamp: BigInt,
+  block: BigInt,
+  tx: Bytes
+): void {
   const platform = getPlatform()
   let poolCount: BigInt
-  let basePool: Address
+  let factoryPool: Address
   if (version == 2) {
     const factory = CurveFactoryV2.bind(CURVE_FACTORY_V2)
     poolCount = platform.poolCountV2
-    basePool = factory.pool_list(poolCount)
+    factoryPool = factory.pool_list(poolCount)
     platform.poolCountV2 = platform.poolCountV2.plus(BIG_INT_ONE)
   } else {
     const factory = CurveFactoryV1.bind(CURVE_FACTORY_V1)
     poolCount = platform.poolCountV1
-    basePool = factory.pool_list(poolCount)
+    factoryPool = factory.pool_list(poolCount)
     platform.poolCountV1 = platform.poolCountV1.plus(BIG_INT_ONE)
   }
   platform.save()
 
-  BasePool.create(basePool)
-  const pool = new Pool(basePool.toHexString())
-  const poolContract = CurvePool.bind(basePool)
+  FactoryPool.create(factoryPool)
+  const pool = new Pool(factoryPool.toHexString())
+  const poolContract = CurvePool.bind(factoryPool)
   pool.name = poolContract.name()
   pool.platform = platform.id
   pool.symbol = poolContract.symbol()
   pool.metapool = metapool
-  pool.address = basePool
+  pool.address = factoryPool
   pool.creationBlock = block
   pool.creationTx = tx
   pool.creationDate = timestamp
   pool.assetType = getAssetType(pool.name, pool.symbol)
+  pool.basePool = basePool
 
   const coins = pool.coins
   const coinDecimals = pool.coinDecimals
@@ -50,7 +58,30 @@ export function createNewPool(version: i32, metapool: boolean, timestamp: BigInt
     coinResult = poolContract.try_coins(BigInt.fromI32(i))
   }
   pool.coins = coins
+  pool.coinDecimals = coinDecimals
   pool.save()
+}
+
+export function getBasePool(pool: Address): BasePool {
+  let basePool = BasePool.load(pool.toHexString())
+  if (!basePool) {
+    basePool = new BasePool(pool.toHexString())
+    const poolContract = CurvePool.bind(pool)
+    const coins = basePool.coins
+    const coinDecimals = basePool.coinDecimals
+    let i = 0
+    let coinResult = poolContract.try_coins(BigInt.fromI32(i))
+    while (!coinResult.reverted) {
+      coins.push(coinResult.value)
+      coinDecimals.push(getDecimals(coinResult.value))
+      i += 1
+      coinResult = poolContract.try_coins(BigInt.fromI32(i))
+    }
+    basePool.coins = coins
+    basePool.coinDecimals = coinDecimals
+    basePool.save()
+  }
+  return basePool
 }
 
 export function getAssetType(name: string, symbol: string): i32 {
