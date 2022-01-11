@@ -1,6 +1,14 @@
+type Platform @entity {
+  id: ID!
+  poolCountV1: BigInt!
+  poolCountV2: BigInt!
+  pools: [Pool!]! @derivedFrom(field: "platform")
+}
+
 type Pool @entity {
   id: ID!
   address: Bytes!
+  platform: Platform!
   name: String!
   symbol: String!
   metapool: Boolean

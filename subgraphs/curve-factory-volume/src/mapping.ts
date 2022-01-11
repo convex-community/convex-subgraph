@@ -3,13 +3,18 @@ import { PlainPoolDeployed, MetaPoolDeployed } from '../generated/CurveFactory/C
 import { createNewPool } from './services/pools'
 import { TokenExchangeUnderlying, TokenExchange } from '../generated/templates/BasePool/CurvePool'
 import { handleExchange } from './services/swaps'
+import { CURVE_FACTORY_V2 } from '../../../packages/constants'
 
 export function handlePlainPoolDeployed(event: PlainPoolDeployed): void {
-  createNewPool(false, event.block.timestamp, event.block.number, event.transaction.hash)
+  createNewPool(2, false, event.block.timestamp, event.block.number, event.transaction.hash)
 }
 
 export function handleMetaPoolDeployed(event: MetaPoolDeployed): void {
-  createNewPool(true, event.block.timestamp, event.block.number, event.transaction.hash)
+  let version = 1
+  if (event.address == CURVE_FACTORY_V2) {
+    version = 2
+  }
+  createNewPool(version, true, event.block.timestamp, event.block.number, event.transaction.hash)
 }
 
 export function handleTokenExchange(event: TokenExchange): void {

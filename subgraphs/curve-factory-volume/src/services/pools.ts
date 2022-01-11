@@ -5,14 +5,25 @@ import { Address, Bytes } from '@graphprotocol/graph-ts'
 import { getDecimals } from '../../../../packages/utils/pricing'
 import { CurvePool } from '../../generated/templates/BasePool/CurvePool'
 import { getPlatform } from './platform'
-import { CurveFactory } from '../../generated/CurveFactory/CurveFactory'
-import { BIG_INT_ONE, CURVE_FACTORY_V1 } from '../../../../packages/constants'
+import { BIG_INT_ONE, CURVE_FACTORY_V1, CURVE_FACTORY_V2 } from '../../../../packages/constants'
+import { CurveFactoryV2 } from '../../generated/CurveFactoryV2/CurveFactoryV2'
+import { CurveFactoryV1 } from '../../generated/CurveFactoryV1/CurveFactoryV1'
 
-export function createNewPool(metapool: boolean, timestamp: BigInt, block: BigInt, tx: Bytes): void {
+export function createNewPool(version: i32, metapool: boolean, timestamp: BigInt, block: BigInt, tx: Bytes): void {
   const platform = getPlatform()
-  const factory = CurveFactory.bind(CURVE_FACTORY_V1)
-  const basePool = factory.pool_list(platform.poolCount)
-  platform.poolCount = platform.poolCount.plus(BIG_INT_ONE)
+  let poolCount: BigInt
+  let basePool: Address
+  if (version == 2) {
+    const factory = CurveFactoryV2.bind(CURVE_FACTORY_V2)
+    poolCount = platform.poolCountV2
+    basePool = factory.pool_list(poolCount)
+    platform.poolCountV2 = platform.poolCountV2.plus(BIG_INT_ONE)
+  } else {
+    const factory = CurveFactoryV1.bind(CURVE_FACTORY_V1)
+    poolCount = platform.poolCountV1
+    basePool = factory.pool_list(poolCount)
+    platform.poolCountV1 = platform.poolCountV1.plus(BIG_INT_ONE)
+  }
   platform.save()
 
   BasePool.create(basePool)
