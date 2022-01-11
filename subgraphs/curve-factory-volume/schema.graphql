@@ -5,28 +5,33 @@ type Pool @entity {
   symbol: String!
   metapool: Boolean
   coins: [Bytes!]!
-  assetType: BigInt!
+  coinDecimals: [BigInt!]!
+  assetType: Int!
 
-  dailyPoolSnapshots: [DailyPoolSnapshot] @derivedFrom(field: "pool")
+  creationDate: BigInt!
+  creationTx: Bytes!
+  creationBlock: BigInt!
 
-  hourlySwapVolumeSnapshots: [HourlyVolumeSnapshot!] @derivedFrom(field: "pool")
-  dailySwapVolumeSnapshots: [DailyVolumeSnapshot!] @derivedFrom(field: "pool")
-  weeklySwapVolumeSnapshots: [WeeklyVolumeSnapshot!] @derivedFrom(field: "pool")
+  dailyPoolSnapshots: [DailyPoolSnapshot!] @derivedFrom(field: "pool")
 
-  hourlyLiquidityVolumeSnapshots: [HourlyVolumeSnapshot!] @derivedFrom(field: "pool")
-  dailyLiquidityVolumeSnapshots: [DailyVolumeSnapshot!] @derivedFrom(field: "pool")
-  weeklyLiquidityVolumeSnapshots: [WeeklyVolumeSnapshot!] @derivedFrom(field: "pool")
+  hourlySwapVolumeSnapshots: [HourlySwapVolumeSnapshot!] @derivedFrom(field: "pool")
+  dailySwapVolumeSnapshots: [DailySwapVolumeSnapshot!] @derivedFrom(field: "pool")
+  weeklySwapVolumeSnapshots: [WeeklySwapVolumeSnapshot!] @derivedFrom(field: "pool")
+
+  hourlyLiquidityVolumeSnapshots: [HourlyLiquidityVolumeSnapshot!] @derivedFrom(field: "pool")
+  dailyLiquidityVolumeSnapshots: [DailyLiquidityVolumeSnapshot!] @derivedFrom(field: "pool")
+  weeklyLiquidityVolumeSnapshots: [WeeklyLiquidityVolumeSnapshot!] @derivedFrom(field: "pool")
 
 }
 
 type TokenSnapshot @entity {
   id: ID!
   price: BigDecimal!
-  decimals: BigInt!
 }
 
 type DailyPoolSnapshot @entity {
   id: ID!
+  pool: Pool!
   virtualPrice: BigInt!
   A: BigInt!
   lpTokenTotalSupply: BigInt!
@@ -35,33 +40,39 @@ type DailyPoolSnapshot @entity {
 type HourlySwapVolumeSnapshot @entity {
   id: ID!
   pool: Pool!
-  amountSold: BigInt!
-  amountBought: BigInt!
+  amountSold: BigDecimal!
+  amountBought: BigDecimal!
+  amountSoldUSD: BigDecimal!
+  amountBoughtUSD: BigDecimal!
   count: BigInt!
-  volume: BigInt!
-  volumeUSD: BigInt!
+  volume: BigDecimal!
+  volumeUSD: BigDecimal!
   timestamp: BigInt!
 }
 
 type DailySwapVolumeSnapshot @entity {
   id: ID!
   pool: Pool!
-  amountSold: BigInt!
-  amountBought: BigInt!
+  amountSold: BigDecimal!
+  amountBought: BigDecimal!
+  amountSoldUSD: BigDecimal!
+  amountBoughtUSD: BigDecimal!
   count: BigInt!
-  volume: BigInt!
-  volumeUSD: BigInt!
+  volume: BigDecimal!
+  volumeUSD: BigDecimal!
   timestamp: BigInt!
 }
 
 type WeeklySwapVolumeSnapshot @entity {
   id: ID!
   pool: Pool!
-  amountSold: BigInt!
-  amountBought: BigInt!
+  amountSold: BigDecimal!
+  amountBought: BigDecimal!
+  amountSoldUSD: BigDecimal!
+  amountBoughtUSD: BigDecimal!
   count: BigInt!
-  volume: BigInt!
-  volumeUSD: BigInt!
+  volume: BigDecimal!
+  volumeUSD: BigDecimal!
   timestamp: BigInt!
 }
 
@@ -78,7 +89,7 @@ type HourlyLiquidityVolumeSnapshot @entity {
   timestamp: BigInt!
 }
 
-type DailyLiquiditySnapshot @entity {
+type DailyLiquidityVolumeSnapshot @entity {
   id: ID!
   pool: Pool!
   amountAdded: BigInt!
@@ -90,7 +101,7 @@ type DailyLiquiditySnapshot @entity {
   timestamp: BigInt!
 }
 
-type WeeklyLiquiditySnapshot @entity {
+type WeeklyLiquidityVolumeSnapshot @entity {
   id: ID!
   pool: Pool!
   amountAdded: BigInt!
@@ -107,8 +118,10 @@ type SwapEvent @entity {
   pool: Pool!
   tokenSold: Bytes!
   tokenBought: Bytes!
-  amountSold: BigInt!
-  amountBought: BigInt!
+  amountSold: BigDecimal!
+  amountBought: BigDecimal!
+  amountSoldUSD: BigDecimal!
+  amountBoughtUSD: BigDecimal!
 }
 
 type LiquidityEvent @entity {

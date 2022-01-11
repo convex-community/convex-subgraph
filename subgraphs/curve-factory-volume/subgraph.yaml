@@ -19,10 +19,8 @@ dataSources:
       abis:
         - name: CurveFactory
           file: ./abis/CurveFactory.json
-        - name: MetaPool
-          file: ./abis/MetaPool.json
-        - name: PlainPool
-          file: ./abis/PlainPool.json
+        - name: CurvePool
+          file: ./abis/CurvePool.json
       eventHandlers:
         - event: BasePoolAdded(address,address)
           handler: handleBasePoolAdded
