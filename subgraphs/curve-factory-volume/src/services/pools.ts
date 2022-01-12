@@ -117,10 +117,10 @@ export function getBasePool(pool: Address): BasePool {
 
 export function getAssetType(name: string, symbol: string): i32 {
   const description = name.toUpperCase() + '-' + name.toUpperCase()
-  if (description.indexOf('BTC') >= 0) {
-    return 2
-  } else if (description.indexOf('USD') >= 0 || description.indexOf('DAI') >= 0) {
+  if (description.indexOf('USD') >= 0 || description.indexOf('DAI') >= 0) {
     return 0
+  } else if (description.indexOf('BTC') >= 0) {
+    return 2
   } else if (description.indexOf('ETH') >= 0) {
     return 1
   } else {
