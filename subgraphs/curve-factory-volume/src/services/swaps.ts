@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
+import { Address, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
 import { Pool, SwapEvent } from '../../generated/schema'
 import {
   getDailySwapSnapshot,
@@ -33,7 +33,6 @@ export function handleExchange(
   if (exchangeUnderlying && soldId != 0) {
     const underlyingSoldIndex = soldId - 1
     const basePool = getBasePool(bytesToAddress(pool.basePool))
-    log.debug('Basepool: {}, {}', [basePool.id, basePool.coins.length.toString()])
     if (underlyingSoldIndex > basePool.coins.length) {
       log.error('Undefined underlying sold Id {} for pool {} at tx {}', [
         soldId.toString(),
@@ -56,7 +55,6 @@ export function handleExchange(
   if (exchangeUnderlying && boughtId != 0) {
     const underlyingBoughtIndex = boughtId - 1
     const basePool = getBasePool(bytesToAddress(pool.basePool))
-    log.debug('Basepool: {}, {}', [basePool.id, basePool.coins.length.toString()])
     if (underlyingBoughtIndex > basePool.coins.length) {
       log.error('Undefined underlying bought Id {} for pool {} at tx {}', [
         boughtId.toString(),

@@ -8,7 +8,6 @@ import { BIG_INT_ONE, CURVE_FACTORY_V1, CURVE_FACTORY_V2 } from '../../../../pac
 import { CurveFactoryV2 } from '../../generated/CurveFactoryV2/CurveFactoryV2'
 import { CurveFactoryV1 } from '../../generated/CurveFactoryV1/CurveFactoryV1'
 import { CurvePool } from '../../generated/templates/FactoryPool/CurvePool'
-import { bytesToAddress } from '../../../../packages/utils'
 import { CurvePoolCoin128 } from '../../generated/templates/FactoryPool/CurvePoolCoin128'
 
 export function createNewPool(
@@ -68,16 +67,19 @@ export function getPoolCoins128(pool: BasePool): BasePool {
   const poolContract = CurvePoolCoin128.bind(Address.fromString(pool.id))
   let i = 0
   const coins = pool.coins
+  const coinDecimals = pool.coinDecimals
   let coinResult = poolContract.try_coins(BigInt.fromI32(i))
   if (coinResult.reverted) {
     log.warning('Call to int128 coins failed for {}', [pool.id])
   }
   while (!coinResult.reverted) {
     coins.push(coinResult.value)
+    coinDecimals.push(getDecimals(coinResult.value))
     i += 1
     coinResult = poolContract.try_coins(BigInt.fromI32(i))
   }
   pool.coins = coins
+  pool.coinDecimals = coinDecimals
   pool.save()
   return pool
 }
