@@ -25,11 +25,13 @@ export function createNewPool(
     const factory = CurveFactoryV2.bind(CURVE_FACTORY_V2)
     poolCount = platform.poolCountV2
     factoryPool = factory.pool_list(poolCount)
+    log.info('New factory pool added (v2) {} with id {}', [factoryPool.toHexString(), poolCount.toString()])
     platform.poolCountV2 = platform.poolCountV2.plus(BIG_INT_ONE)
   } else {
     const factory = CurveFactoryV1.bind(CURVE_FACTORY_V1)
     poolCount = platform.poolCountV1
     factoryPool = factory.pool_list(poolCount)
+    log.info('New factory pool added (v1) {} with id {}', [factoryPool.toHexString(), poolCount.toString()])
     platform.poolCountV1 = platform.poolCountV1.plus(BIG_INT_ONE)
   }
   platform.save()

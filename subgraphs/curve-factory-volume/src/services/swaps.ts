@@ -6,7 +6,7 @@ import {
   getTokenSnapshotByAssetType,
   getWeeklySwapSnapshot,
 } from './snapshots'
-import { BIG_DECIMAL_1E18, BIG_DECIMAL_TWO, BIG_INT_ONE } from '../../../../packages/constants'
+import { BIG_DECIMAL_TWO, BIG_INT_ONE } from '../../../../packages/constants'
 import { getBasePool } from './pools'
 import { bytesToAddress } from '../../../../packages/utils'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
@@ -61,7 +61,6 @@ export function handleExchange(
         pool.id,
         txhash.toHexString(),
       ])
-      return
     }
     tokenBought = basePool.coins[underlyingBoughtIndex]
     tokenBoughtDecimals = basePool.coinDecimals[underlyingBoughtIndex]
@@ -76,7 +75,7 @@ export function handleExchange(
 
   const amountSold = tokens_sold.toBigDecimal().div(exponentToBigDecimal(tokenSoldDecimals))
   const amountBought = tokens_bought.toBigDecimal().div(exponentToBigDecimal(tokenBoughtDecimals))
-
+  log.debug('Getting token snaphsot for {}', [pool.id])
   const latestSnapshot = getTokenSnapshotByAssetType(pool, timestamp)
   const latestPrice = latestSnapshot.price
   const amountBoughtUSD = amountBought.times(latestPrice)
@@ -93,7 +92,7 @@ export function handleExchange(
   swapEvent.save()
 
   const volume = amountSold.plus(amountBought).div(BIG_DECIMAL_TWO)
-  const volumeUSD = volume.times(latestPrice).div(BIG_DECIMAL_1E18)
+  const volumeUSD = volume.times(latestPrice)
 
   const hourlySnapshot = getHourlySwapSnapshot(pool, timestamp)
   const dailySnapshot = getDailySwapSnapshot(pool, timestamp)
