@@ -81,7 +81,7 @@ export function handleExchange(
   const amountBoughtUSD = amountBought.times(latestPrice)
   const amountSoldUSD = amountSold.times(latestPrice)
 
-  const swapEvent = new SwapEvent(txhash.toHexString())
+  const swapEvent = new SwapEvent(txhash.toHexString() + '-' + amountBought.toString())
   swapEvent.pool = address.toHexString()
   swapEvent.tokenBought = tokenBought
   swapEvent.tokenSold = tokenSold
@@ -89,6 +89,7 @@ export function handleExchange(
   swapEvent.amountSold = amountSold
   swapEvent.amountBoughtUSD = amountBoughtUSD
   swapEvent.amountSoldUSD = amountSoldUSD
+  swapEvent.timestamp = timestamp
   swapEvent.save()
 
   const volume = amountSold.plus(amountBought).div(BIG_DECIMAL_TWO)

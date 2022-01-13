@@ -66,6 +66,7 @@ export function getCryptoTokenSnapshot(pool: Pool, timestamp: BigInt): TokenSnap
         break
       }
     }
+    snapshot.timestamp = hour
     snapshot.price = price
     snapshot.save()
   }

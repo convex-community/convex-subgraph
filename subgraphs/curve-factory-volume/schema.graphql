@@ -42,6 +42,7 @@ type BasePool @entity {
 type TokenSnapshot @entity {
   id: ID!
   price: BigDecimal!
+  timestamp: BigInt!
 }
 
 type DailyPoolSnapshot @entity {
@@ -137,6 +138,7 @@ type SwapEvent @entity {
   amountBought: BigDecimal!
   amountSoldUSD: BigDecimal!
   amountBoughtUSD: BigDecimal!
+  timestamp: BigInt!
 }
 
 type LiquidityEvent @entity {
