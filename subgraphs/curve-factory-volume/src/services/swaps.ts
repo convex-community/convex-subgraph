@@ -42,7 +42,13 @@ export function handleExchange(
       return
     }
     tokenSold = basePool.coins[underlyingSoldIndex]
-    tokenSoldDecimals = basePool.coinDecimals[underlyingSoldIndex]
+    if (pool.assetType == 2) {
+      // handling an edge-case in the way the dx is logged in the event
+      // for BTC metapools
+      tokenSoldDecimals = BigInt.fromI32(18)
+    } else {
+      tokenSoldDecimals = basePool.coinDecimals[underlyingSoldIndex]
+    }
   } else {
     if (soldId > pool.coins.length) {
       log.error('Undefined sold Id {} for pool {} at tx {}', [soldId.toString(), pool.id, txhash.toHexString()])
