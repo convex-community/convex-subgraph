@@ -92,15 +92,13 @@ type WeeklySwapVolumeSnapshot @entity {
   timestamp: BigInt!
 }
 
-
 type HourlyLiquidityVolumeSnapshot @entity {
   id: ID!
   pool: Pool!
-  amountAdded: BigInt!
-  amountRemoved: BigInt!
+  amountAdded: [BigDecimal!]!
+  amountRemoved: [BigDecimal!]!
   addCount: BigInt!
-  removeCount: BigInt
-  volume: BigInt!
+  removeCount: BigInt!
   volumeUSD: BigInt!
   timestamp: BigInt!
 }
@@ -108,11 +106,10 @@ type HourlyLiquidityVolumeSnapshot @entity {
 type DailyLiquidityVolumeSnapshot @entity {
   id: ID!
   pool: Pool!
-  amountAdded: BigInt!
-  amountRemoved: BigInt!
+  amountAdded: [BigDecimal!]!
+  amountRemoved: [BigDecimal!]!
   addCount: BigInt!
-  removeCount: BigInt
-  volume: BigInt!
+  removeCount: BigInt!
   volumeUSD: BigInt!
   timestamp: BigInt!
 }
@@ -120,11 +117,10 @@ type DailyLiquidityVolumeSnapshot @entity {
 type WeeklyLiquidityVolumeSnapshot @entity {
   id: ID!
   pool: Pool!
-  amountAdded: BigInt!
-  amountRemoved: BigInt!
+  amountAdded: [BigDecimal!]!
+  amountRemoved: [BigDecimal!]!
   addCount: BigInt!
-  removeCount: BigInt
-  volume: BigInt!
+  removeCount: BigInt!
   volumeUSD: BigInt!
   timestamp: BigInt!
 }
@@ -132,6 +128,7 @@ type WeeklyLiquidityVolumeSnapshot @entity {
 type SwapEvent @entity {
   id: ID!
   pool: Pool!
+  block: BigInt!
   tokenSold: Bytes!
   tokenBought: Bytes!
   amountSold: BigDecimal!
@@ -143,8 +140,11 @@ type SwapEvent @entity {
 
 type LiquidityEvent @entity {
   id: ID!
-  pool: Pool!
-  token: Bytes!
-  tokenAmount: BigInt!
+  liquidityProvider: Bytes!
+  timestamp: BigInt!
+  block: BigInt!
+  poolAddress: Bytes!
+  tokenAmount: [BigInt!]!
+  volumeUSD: BigDecimal!
   removal: Boolean!
 }

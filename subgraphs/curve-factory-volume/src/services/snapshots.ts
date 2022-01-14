@@ -1,9 +1,12 @@
 import {
-  DailySwapVolumeSnapshot,
-  HourlySwapVolumeSnapshot,
   Pool,
   TokenSnapshot,
+  DailySwapVolumeSnapshot,
+  HourlySwapVolumeSnapshot,
   WeeklySwapVolumeSnapshot,
+  HourlyLiquidityVolumeSnapshot,
+  DailyLiquidityVolumeSnapshot,
+  WeeklyLiquidityVolumeSnapshot,
 } from '../../generated/schema'
 import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
 import { DAY, getIntervalFromTimestamp, HOUR, WEEK } from '../../../../packages/utils/time'
@@ -117,6 +120,45 @@ export function getWeeklySwapSnapshot(pool: Pool, timestamp: BigInt): WeeklySwap
   let snapshot = WeeklySwapVolumeSnapshot.load(snapshotId)
   if (!snapshot) {
     snapshot = new WeeklySwapVolumeSnapshot(snapshotId)
+    snapshot.pool = pool.id
+    snapshot.timestamp = week
+    snapshot.save()
+  }
+  return snapshot
+}
+
+export function getHourlyLiquiditySnapshot(pool: Pool, timestamp: BigInt): HourlyLiquidityVolumeSnapshot {
+  const hour = getIntervalFromTimestamp(timestamp, HOUR)
+  const snapshotId = pool.id + '-' + hour.toString()
+  let snapshot = HourlyLiquidityVolumeSnapshot.load(snapshotId)
+  if (!snapshot) {
+    snapshot = new HourlyLiquidityVolumeSnapshot(snapshotId)
+    snapshot.pool = pool.id
+    snapshot.timestamp = hour
+    snapshot.save()
+  }
+  return snapshot
+}
+
+export function getDailyLiquiditySnapshot(pool: Pool, timestamp: BigInt): DailyLiquidityVolumeSnapshot {
+  const day = getIntervalFromTimestamp(timestamp, DAY)
+  const snapshotId = pool.id + '-' + day.toString()
+  let snapshot = DailyLiquidityVolumeSnapshot.load(snapshotId)
+  if (!snapshot) {
+    snapshot = new DailyLiquidityVolumeSnapshot(snapshotId)
+    snapshot.pool = pool.id
+    snapshot.timestamp = day
+    snapshot.save()
+  }
+  return snapshot
+}
+
+export function getWeeklyLiquiditySnapshot(pool: Pool, timestamp: BigInt): WeeklyLiquidityVolumeSnapshot {
+  const week = getIntervalFromTimestamp(timestamp, WEEK)
+  const snapshotId = pool.id + '-' + week.toString()
+  let snapshot = WeeklyLiquidityVolumeSnapshot.load(snapshotId)
+  if (!snapshot) {
+    snapshot = new WeeklyLiquidityVolumeSnapshot(snapshotId)
     snapshot.pool = pool.id
     snapshot.timestamp = week
     snapshot.save()

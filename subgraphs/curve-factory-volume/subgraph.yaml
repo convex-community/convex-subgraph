@@ -104,4 +104,13 @@ templates:
           handler: handleTokenExchange
         - event: TokenExchangeUnderlying(indexed address,int128,uint256,int128,uint256)
           handler: handleTokenExchangeUnderlying
+        - event: AddLiquidity(indexed address,uint256[2],uint256[2],uint256,uint256)
+          handler: handleAddLiquidity
+        - event: RemoveLiquidity(indexed address,uint256[2],uint256[2],uint256)
+          handler: handleRemoveLiquidity
+        - event: RemoveLiquidityImbalance(indexed address,uint256[2],uint256[2],uint256,uint256)
+          handler: handleRemoveLiquidityImbalance
+      callHandlers:
+        - function: remove_liquidity_one_coin(uint256, int128, uint256, indexed address)
+          handler: handleRemoveLiquidityOne
       file: ./src/mapping.ts

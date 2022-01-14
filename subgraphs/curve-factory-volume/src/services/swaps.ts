@@ -17,6 +17,7 @@ export function handleExchange(
   tokens_sold: BigInt,
   tokens_bought: BigInt,
   timestamp: BigInt,
+  blockNumber: BigInt,
   address: Address,
   txhash: Bytes,
   exchangeUnderlying: boolean
@@ -89,6 +90,7 @@ export function handleExchange(
 
   const swapEvent = new SwapEvent(txhash.toHexString() + '-' + amountBought.toString())
   swapEvent.pool = address.toHexString()
+  swapEvent.block = blockNumber
   swapEvent.tokenBought = tokenBought
   swapEvent.tokenSold = tokenSold
   swapEvent.amountBought = amountBought
