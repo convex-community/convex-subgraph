@@ -15,7 +15,7 @@ import { ChainlinkAggregator } from '../../../curve-pools/generated/Booster/Chai
 import {
   BIG_DECIMAL_1E8,
   BIG_DECIMAL_ONE,
-  BIG_DECIMAL_ZERO,
+  BIG_DECIMAL_ZERO, BIG_INT_ZERO,
   FOREX_ORACLES,
   WBTC_ADDRESS,
   WETH_ADDRESS,
@@ -133,8 +133,14 @@ export function getHourlyLiquiditySnapshot(pool: Pool, timestamp: BigInt): Hourl
   let snapshot = HourlyLiquidityVolumeSnapshot.load(snapshotId)
   if (!snapshot) {
     snapshot = new HourlyLiquidityVolumeSnapshot(snapshotId)
+    let coinArray = snapshot.amountAdded
+    for (let i = 0; i  < pool.coins.length; i++) {
+      coinArray.push(BIG_DECIMAL_ZERO)
+    }
     snapshot.pool = pool.id
     snapshot.timestamp = hour
+    snapshot.amountAdded = coinArray
+    snapshot.amountRemoved = coinArray
     snapshot.save()
   }
   return snapshot
@@ -146,8 +152,14 @@ export function getDailyLiquiditySnapshot(pool: Pool, timestamp: BigInt): DailyL
   let snapshot = DailyLiquidityVolumeSnapshot.load(snapshotId)
   if (!snapshot) {
     snapshot = new DailyLiquidityVolumeSnapshot(snapshotId)
+    let coinArray = snapshot.amountAdded
+    for (let i = 0; i  < pool.coins.length; i++) {
+      coinArray.push(BIG_DECIMAL_ZERO)
+    }
     snapshot.pool = pool.id
     snapshot.timestamp = day
+    snapshot.amountAdded = coinArray
+    snapshot.amountRemoved = coinArray
     snapshot.save()
   }
   return snapshot
@@ -159,8 +171,14 @@ export function getWeeklyLiquiditySnapshot(pool: Pool, timestamp: BigInt): Weekl
   let snapshot = WeeklyLiquidityVolumeSnapshot.load(snapshotId)
   if (!snapshot) {
     snapshot = new WeeklyLiquidityVolumeSnapshot(snapshotId)
+    let coinArray = snapshot.amountAdded
+    for (let i = 0; i  < pool.coins.length; i++) {
+      coinArray.push(BIG_DECIMAL_ZERO)
+    }
     snapshot.pool = pool.id
     snapshot.timestamp = week
+    snapshot.amountAdded = coinArray
+    snapshot.amountRemoved = coinArray
     snapshot.save()
   }
   return snapshot

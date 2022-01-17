@@ -11,11 +11,12 @@ import {
 } from '../../../../packages/constants'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
 import {
-  AddLiquidity,
+  AddLiquidity, CurvePool,
   Remove_liquidity_one_coinCall,
   RemoveLiquidity,
   RemoveLiquidityImbalance
 } from "../../generated/templates/FactoryPool/CurvePool";
+import {BigInt} from "@graphprotocol/graph-ts";
 
 export function processAddLiquidity(
   event: AddLiquidity
@@ -41,19 +42,28 @@ export function processAddLiquidity(
   const latestPrice = latestSnapshot.price
   let coinAmountAdded = BIG_DECIMAL_ZERO
   let volumeUSD = BIG_DECIMAL_ZERO
+  const hourlyAmountAdded = hourlySnapshot.amountAdded
+  const dailyAmountAdded = dailySnapshot.amountAdded
+  const weeklyAmountAdded = weeklySnapshot.amountAdded
   for (let i = 0; i  < pool.coins.length; i++) {
     coinAmountAdded = tokenAmount[i].toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[i]))
+    hourlyAmountAdded[i] = hourlyAmountAdded[i].plus(coinAmountAdded)
+    dailyAmountAdded[i] = dailyAmountAdded[i].plus(coinAmountAdded)
+    weeklyAmountAdded[i] = weeklyAmountAdded[i].plus(coinAmountAdded)
     volumeUSD = volumeUSD.plus(coinAmountAdded.times(latestPrice))
-
-    hourlySnapshot.amountAdded[i] = hourlySnapshot.amountAdded[i].plus(coinAmountAdded)
-    dailySnapshot.amountAdded[i] = dailySnapshot.amountAdded[i].plus(coinAmountAdded)
-    weeklySnapshot.amountAdded[i] = weeklySnapshot.amountAdded[i].plus(coinAmountAdded)
   }
+  hourlySnapshot.amountAdded = hourlyAmountAdded
+  dailySnapshot.amountAdded = dailyAmountAdded
+  weeklySnapshot.amountAdded = weeklyAmountAdded
 
   // update entities:
   hourlySnapshot.addCount = hourlySnapshot.addCount.plus(BIG_INT_ONE)
   dailySnapshot.addCount = dailySnapshot.addCount.plus(BIG_INT_ONE)
   weeklySnapshot.addCount = weeklySnapshot.addCount.plus(BIG_INT_ONE)
+
+  hourlySnapshot.volumeUSD = hourlySnapshot.volumeUSD.plus(volumeUSD)
+  dailySnapshot.volumeUSD = dailySnapshot.volumeUSD.plus(volumeUSD)
+  weeklySnapshot.volumeUSD = weeklySnapshot.volumeUSD.plus(volumeUSD)
 
   liquidityEvent.liquidityProvider = provider
   liquidityEvent.timestamp = timestamp
@@ -93,19 +103,29 @@ export function processRemoveLiquidity(
   const latestPrice = latestSnapshot.price
   let coinAmountRemoved = BIG_DECIMAL_ZERO
   let volumeUSD = BIG_DECIMAL_ZERO
+  const hourlyAmountRemoved = hourlySnapshot.amountRemoved
+  const dailyAmountRemoved = dailySnapshot.amountRemoved
+  const weeklyAmountRemoved = weeklySnapshot.amountRemoved
   for (let i = 0; i  < pool.coins.length; i++) {
     coinAmountRemoved = tokenAmount[i].toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[i]))
+    hourlyAmountRemoved[i] = hourlyAmountRemoved[i].plus(coinAmountRemoved)
+    dailyAmountRemoved[i] = dailyAmountRemoved[i].plus(coinAmountRemoved)
+    weeklyAmountRemoved[i] = weeklyAmountRemoved[i].plus(coinAmountRemoved)
     volumeUSD = volumeUSD.plus(coinAmountRemoved.times(latestPrice))
-
-    hourlySnapshot.amountRemoved[i] = hourlySnapshot.amountRemoved[i].plus(coinAmountRemoved)
-    dailySnapshot.amountRemoved[i] = dailySnapshot.amountRemoved[i].plus(coinAmountRemoved)
-    weeklySnapshot.amountRemoved[i] = weeklySnapshot.amountRemoved[i].plus(coinAmountRemoved)
   }
 
   // update entities:
+  hourlySnapshot.amountRemoved = hourlyAmountRemoved
+  dailySnapshot.amountRemoved = dailyAmountRemoved
+  weeklySnapshot.amountRemoved = weeklyAmountRemoved
+
   hourlySnapshot.removeCount = hourlySnapshot.removeCount.plus(BIG_INT_ONE)
   dailySnapshot.removeCount = dailySnapshot.removeCount.plus(BIG_INT_ONE)
   weeklySnapshot.removeCount = weeklySnapshot.removeCount.plus(BIG_INT_ONE)
+
+  hourlySnapshot.volumeUSD = hourlySnapshot.volumeUSD.plus(volumeUSD)
+  dailySnapshot.volumeUSD = dailySnapshot.volumeUSD.plus(volumeUSD)
+  weeklySnapshot.volumeUSD = weeklySnapshot.volumeUSD.plus(volumeUSD)
 
   liquidityEvent.liquidityProvider = provider
   liquidityEvent.timestamp = timestamp
@@ -145,19 +165,28 @@ export function processRemoveLiquidityImbalance(
   const latestPrice = latestSnapshot.price
   let coinAmountRemoved = BIG_DECIMAL_ZERO
   let volumeUSD = BIG_DECIMAL_ZERO
+  const hourlyAmountRemoved = hourlySnapshot.amountRemoved
+  const dailyAmountRemoved = dailySnapshot.amountRemoved
+  const weeklyAmountRemoved = weeklySnapshot.amountRemoved
   for (let i = 0; i  < pool.coins.length; i++) {
     coinAmountRemoved = tokenAmount[i].toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[i]))
+    hourlyAmountRemoved[i] = hourlyAmountRemoved[i].plus(coinAmountRemoved)
+    dailyAmountRemoved[i] = dailyAmountRemoved[i].plus(coinAmountRemoved)
+    weeklyAmountRemoved[i] = weeklyAmountRemoved[i].plus(coinAmountRemoved)
     volumeUSD = volumeUSD.plus(coinAmountRemoved.times(latestPrice))
-
-    hourlySnapshot.amountRemoved[i] = hourlySnapshot.amountRemoved[i].plus(coinAmountRemoved)
-    dailySnapshot.amountRemoved[i] = dailySnapshot.amountRemoved[i].plus(coinAmountRemoved)
-    weeklySnapshot.amountRemoved[i] = weeklySnapshot.amountRemoved[i].plus(coinAmountRemoved)
   }
+  hourlySnapshot.amountRemoved = hourlyAmountRemoved
+  dailySnapshot.amountRemoved = dailyAmountRemoved
+  weeklySnapshot.amountRemoved = weeklyAmountRemoved
 
   // update entities:
   hourlySnapshot.removeCount = hourlySnapshot.removeCount.plus(BIG_INT_ONE)
   dailySnapshot.removeCount = dailySnapshot.removeCount.plus(BIG_INT_ONE)
   weeklySnapshot.removeCount = weeklySnapshot.removeCount.plus(BIG_INT_ONE)
+
+  hourlySnapshot.volumeUSD = hourlySnapshot.volumeUSD.plus(volumeUSD)
+  dailySnapshot.volumeUSD = dailySnapshot.volumeUSD.plus(volumeUSD)
+  weeklySnapshot.volumeUSD = weeklySnapshot.volumeUSD.plus(volumeUSD)
 
   liquidityEvent.liquidityProvider = provider
   liquidityEvent.timestamp = timestamp
@@ -200,14 +229,26 @@ export function processRemoveLiquidityOneCall(
   const coinAmountRemoved = tokenAmount.toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[coinIndex]))
   const volumeUSD = coinAmountRemoved.times(latestPrice)
 
-  hourlySnapshot.amountRemoved[coinIndex] = hourlySnapshot.amountRemoved[coinIndex].plus(coinAmountRemoved)
-  dailySnapshot.amountRemoved[coinIndex] = dailySnapshot.amountRemoved[coinIndex].plus(coinAmountRemoved)
-  weeklySnapshot.amountRemoved[coinIndex] = weeklySnapshot.amountRemoved[coinIndex].plus(coinAmountRemoved)
+  const hourlyAmountRemoved = hourlySnapshot.amountRemoved
+  const dailyAmountRemoved = dailySnapshot.amountRemoved
+  const weeklyAmountRemoved = weeklySnapshot.amountRemoved
+
+  hourlyAmountRemoved[coinIndex] = hourlyAmountRemoved[coinIndex].plus(coinAmountRemoved)
+  dailyAmountRemoved[coinIndex] = dailyAmountRemoved[coinIndex].plus(coinAmountRemoved)
+  weeklyAmountRemoved[coinIndex] = weeklyAmountRemoved[coinIndex].plus(coinAmountRemoved)
 
   // update entities:
+  hourlySnapshot.amountRemoved = hourlyAmountRemoved
+  dailySnapshot.amountRemoved = dailyAmountRemoved
+  weeklySnapshot.amountRemoved = weeklyAmountRemoved
+
   hourlySnapshot.removeCount = hourlySnapshot.removeCount.plus(BIG_INT_ONE)
   dailySnapshot.removeCount = dailySnapshot.removeCount.plus(BIG_INT_ONE)
   weeklySnapshot.removeCount = weeklySnapshot.removeCount.plus(BIG_INT_ONE)
+
+  hourlySnapshot.volumeUSD = hourlySnapshot.volumeUSD.plus(volumeUSD)
+  dailySnapshot.volumeUSD = dailySnapshot.volumeUSD.plus(volumeUSD)
+  weeklySnapshot.volumeUSD = weeklySnapshot.volumeUSD.plus(volumeUSD)
 
   liquidityEvent.liquidityProvider = provider
   liquidityEvent.timestamp = timestamp

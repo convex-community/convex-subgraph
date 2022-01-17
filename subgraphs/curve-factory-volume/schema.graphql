@@ -99,7 +99,7 @@ type HourlyLiquidityVolumeSnapshot @entity {
   amountRemoved: [BigDecimal!]!
   addCount: BigInt!
   removeCount: BigInt!
-  volumeUSD: BigInt!
+  volumeUSD: BigDecimal!
   timestamp: BigInt!
 }
 
@@ -110,7 +110,7 @@ type DailyLiquidityVolumeSnapshot @entity {
   amountRemoved: [BigDecimal!]!
   addCount: BigInt!
   removeCount: BigInt!
-  volumeUSD: BigInt!
+  volumeUSD: BigDecimal!
   timestamp: BigInt!
 }
 
@@ -121,7 +121,7 @@ type WeeklyLiquidityVolumeSnapshot @entity {
   amountRemoved: [BigDecimal!]!
   addCount: BigInt!
   removeCount: BigInt!
-  volumeUSD: BigInt!
+  volumeUSD: BigDecimal!
   timestamp: BigInt!
 }
 
