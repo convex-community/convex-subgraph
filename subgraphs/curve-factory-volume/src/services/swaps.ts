@@ -12,6 +12,7 @@ import { bytesToAddress } from '../../../../packages/utils'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
 
 export function handleExchange(
+  buyer: Address,
   sold_id: BigInt,
   bought_id: BigInt,
   tokens_sold: BigInt,
@@ -91,6 +92,7 @@ export function handleExchange(
   const swapEvent = new SwapEvent(txhash.toHexString() + '-' + amountBought.toString())
   swapEvent.pool = address.toHexString()
   swapEvent.block = blockNumber
+  swapEvent.buyer = buyer
   swapEvent.tokenBought = tokenBought
   swapEvent.tokenSold = tokenSold
   swapEvent.amountBought = amountBought

@@ -9,7 +9,7 @@ import {
   AddLiquidity,
   Remove_liquidity_one_coinCall,
   RemoveLiquidity,
-  RemoveLiquidityImbalance
+  RemoveLiquidityImbalance,
 } from '../generated/templates/FactoryPool/CurvePool'
 import { log } from '@graphprotocol/graph-ts'
 import { getPlatform } from './services/platform'
@@ -17,8 +17,8 @@ import {
   processAddLiquidity,
   processRemoveLiquidity,
   processRemoveLiquidityOneCall,
-  processRemoveLiquidityImbalance
-} from "./services/liquidity"
+  processRemoveLiquidityImbalance,
+} from './services/liquidity'
 
 export function handlePlainPoolDeployed(event: PlainPoolDeployed): void {
   createNewPool(2, false, ADDRESS_ZERO, event.block.timestamp, event.block.number, event.transaction.hash)
@@ -42,6 +42,7 @@ export function handleMetaPoolDeployed(event: MetaPoolDeployed): void {
 export function handleTokenExchange(event: TokenExchange): void {
   const trade = event.params
   handleExchange(
+    trade.buyer,
     trade.sold_id,
     trade.bought_id,
     trade.tokens_sold,
@@ -58,6 +59,7 @@ export function handleTokenExchangeUnderlying(event: TokenExchangeUnderlying): v
   log.debug('Underlying swap for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
   const trade = event.params
   handleExchange(
+    trade.buyer,
     trade.sold_id,
     trade.bought_id,
     trade.tokens_sold,
@@ -93,32 +95,23 @@ export function handleAddExistingMetaPools(call: Add_existing_metapoolsCall): vo
   platform.save()
 }
 
-
 // Liquidity events
 export function handleAddLiquidity(event: AddLiquidity): void {
   log.debug('Added liquidity for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
-  processAddLiquidity(
-      event
-  )
+  processAddLiquidity(event)
 }
 
 export function handleRemoveLiquidity(event: RemoveLiquidity): void {
   log.debug('Removed liquidity for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
-  processRemoveLiquidity(
-      event
-  )
+  processRemoveLiquidity(event)
 }
 
 export function handleRemoveLiquidityImbalance(event: RemoveLiquidityImbalance): void {
   log.debug('Removed liquidity for pool: {} at {}', [event.address.toHexString(), event.transaction.hash.toHexString()])
-  processRemoveLiquidityImbalance(
-      event
-  )
+  processRemoveLiquidityImbalance(event)
 }
 
 export function handleRemoveLiquidityOne(call: Remove_liquidity_one_coinCall): void {
   log.debug('Removed liquidity for pool: {} at {}', [call.to.toHexString(), call.transaction.hash.toHexString()])
-  processRemoveLiquidityOneCall(
-      call
-  )
+  processRemoveLiquidityOneCall(call)
 }
