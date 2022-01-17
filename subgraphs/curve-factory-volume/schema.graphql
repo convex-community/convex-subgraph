@@ -16,6 +16,8 @@ type Pool @entity {
   coins: [Bytes!]!
   coinDecimals: [BigInt!]!
   assetType: Int!
+  cumulativeVolume: BigDecimal!
+  cumulativeVolumeUSD: BigDecimal!
 
   creationDate: BigInt!
   creationTx: Bytes!

@@ -137,6 +137,10 @@ export function handleExchange(
   dailySnapshot.volumeUSD = dailySnapshot.volumeUSD.plus(volumeUSD)
   weeklySnapshot.volumeUSD = weeklySnapshot.volumeUSD.plus(volumeUSD)
 
+  pool.cumulativeVolume = pool.cumulativeVolume.plus(volume)
+  pool.cumulativeVolumeUSD = pool.cumulativeVolumeUSD.plus(volumeUSD)
+
+  pool.save()
   hourlySnapshot.save()
   dailySnapshot.save()
   weeklySnapshot.save()
