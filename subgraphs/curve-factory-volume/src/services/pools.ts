@@ -1,16 +1,133 @@
-import { FactoryPool } from '../../generated/templates'
+import { CurvePoolTemplate } from '../../generated/templates'
 import { BasePool, Pool } from '../../generated/schema'
 import { BigInt } from '@graphprotocol/graph-ts/index'
 import { Address, Bytes, log } from '@graphprotocol/graph-ts'
 import { getDecimals } from '../../../../packages/utils/pricing'
 import { getPlatform } from './platform'
-import { BIG_INT_ONE, CURVE_FACTORY_V1, CURVE_FACTORY_V2 } from '../../../../packages/constants'
-import { CurveFactoryV2 } from '../../generated/CurveFactoryV2/CurveFactoryV2'
-import { CurveFactoryV1 } from '../../generated/CurveFactoryV1/CurveFactoryV1'
-import { CurvePool } from '../../generated/templates/FactoryPool/CurvePool'
-import { CurvePoolCoin128 } from '../../generated/templates/FactoryPool/CurvePoolCoin128'
+import {
+  BIG_INT_ONE,
+  CURVE_FACTORY_V1,
+  CURVE_FACTORY_V1_2,
+  CURVE_PLATFORM_ID,
+  FACTORY_V10,
+  FACTORY_V12,
+  REGISTRY_V1,
+} from '../../../../packages/constants'
+import { CurveFactoryV12 } from '../../generated/CurveFactoryV12/CurveFactoryV12'
+import { CurveFactoryV10 } from '../../generated/CurveFactoryV10/CurveFactoryV10'
+import { CurvePool } from '../../generated/templates/CurvePoolTemplate/CurvePool'
+import { CurvePoolCoin128 } from '../../generated/templates/CurvePoolTemplate/CurvePoolCoin128'
+import { ERC20 } from '../../generated/CurveRegistryV1/ERC20'
 
 export function createNewPool(
+  poolAddress: Address,
+  lpToken: Address,
+  platformId: string,
+  name: string,
+  symbol: string,
+  poolType: string,
+  metapool: boolean,
+  isV2: boolean,
+  block: BigInt,
+  tx: Bytes,
+  timestamp: BigInt,
+  basePool: Address
+): void {
+  const pool = new Pool(poolAddress.toHexString())
+  const poolContract = CurvePool.bind(poolAddress)
+  pool.name = name
+  pool.platform = platformId
+  pool.lpToken = lpToken
+  pool.symbol = symbol
+  pool.metapool = metapool
+  pool.isV2 = isV2
+  pool.address = poolAddress
+  pool.creationBlock = block
+  pool.creationTx = tx
+  pool.creationDate = timestamp
+  pool.poolType = poolType
+  pool.assetType = getAssetType(pool.name, pool.symbol)
+  pool.basePool = basePool
+
+  const coins = pool.coins
+  const coinDecimals = pool.coinDecimals
+  let i = 0
+  let coinResult = poolContract.try_coins(BigInt.fromI32(i))
+
+  if (coinResult.reverted) {
+    // we have to duplicate code from getPoolCoin128 below because no type inheritance
+    // not sure if possible to refactor by passing arrays as arg to single function
+    // TODO: try above suggestion
+    // some pools require an int128 for coins and will revert with the
+    // regular abi. e.g. 0x7fc77b5c7614e1533320ea6ddc2eb61fa00a9714
+    log.debug('Call to coins reverted for pool ({}), attempting 128 bytes call', [pool.id])
+    const poolContract = CurvePoolCoin128.bind(poolAddress)
+    const coins = pool.coins
+    const coinDecimals = pool.coinDecimals
+    let coinResult = poolContract.try_coins(BigInt.fromI32(i))
+    if (coinResult.reverted) {
+      log.warning('Call to int128 coins failed for {}', [pool.id])
+    }
+    while (!coinResult.reverted) {
+      coins.push(coinResult.value)
+      coinDecimals.push(getDecimals(coinResult.value))
+      i += 1
+      coinResult = poolContract.try_coins(BigInt.fromI32(i))
+    }
+    pool.coins = coins
+    pool.coinDecimals = coinDecimals
+    pool.save()
+    return
+  }
+
+  while (!coinResult.reverted) {
+    coins.push(coinResult.value)
+    coinDecimals.push(getDecimals(coinResult.value))
+    i += 1
+    coinResult = poolContract.try_coins(BigInt.fromI32(i))
+  }
+  pool.coins = coins
+  pool.coinDecimals = coinDecimals
+  pool.save()
+}
+
+export function createNewRegistryPool(
+  poolAddress: Address,
+  basePool: Address,
+  lpToken: Address,
+  metapool: boolean,
+  timestamp: BigInt,
+  block: BigInt,
+  tx: Bytes
+): void {
+  if (!Pool.load(poolAddress.toHexString())) {
+    log.debug('Non factory pool: {}, lpToken: {}, added to registry at {}', [
+      poolAddress.toHexString(),
+      lpToken.toHexString(),
+      tx.toHexString(),
+    ])
+    CurvePoolTemplate.create(poolAddress)
+    const lpTokenContract = ERC20.bind(lpToken)
+    createNewPool(
+      poolAddress,
+      lpToken,
+      CURVE_PLATFORM_ID,
+      lpTokenContract.name(),
+      lpTokenContract.symbol(),
+      REGISTRY_V1,
+      metapool,
+      false,
+      block,
+      tx,
+      timestamp,
+      basePool
+    )
+  } else {
+    log.debug('Pool: {} added to the registry at {} but already tracked', [poolAddress.toHexString(), tx.toHexString()])
+  }
+}
+
+export function createNewFactoryPool(
   version: i32,
   metapool: boolean,
   basePool: Address,
@@ -21,48 +138,40 @@ export function createNewPool(
   const platform = getPlatform()
   let poolCount: BigInt
   let factoryPool: Address
-  if (version == 2) {
-    const factory = CurveFactoryV2.bind(CURVE_FACTORY_V2)
-    poolCount = platform.poolCountV2
+  let poolType: string
+  if (version == 12) {
+    const factory = CurveFactoryV12.bind(CURVE_FACTORY_V1_2)
+    poolCount = platform.poolCountV12
+    poolType = FACTORY_V12
     factoryPool = factory.pool_list(poolCount)
-    log.info('New factory pool added (v2) {} with id {}', [factoryPool.toHexString(), poolCount.toString()])
-    platform.poolCountV2 = platform.poolCountV2.plus(BIG_INT_ONE)
+    log.info('New factory pool added (v1.2) {} with id {}', [factoryPool.toHexString(), poolCount.toString()])
+    platform.poolCountV12 = platform.poolCountV12.plus(BIG_INT_ONE)
   } else {
-    const factory = CurveFactoryV1.bind(CURVE_FACTORY_V1)
-    poolCount = platform.poolCountV1
+    const factory = CurveFactoryV10.bind(CURVE_FACTORY_V1)
+    poolCount = platform.poolCountV10
+    poolType = FACTORY_V10
     factoryPool = factory.pool_list(poolCount)
-    log.info('New factory pool added (v1) {} with id {}', [factoryPool.toHexString(), poolCount.toString()])
-    platform.poolCountV1 = platform.poolCountV1.plus(BIG_INT_ONE)
+    log.info('New factory pool added (v1.0) {} with id {}', [factoryPool.toHexString(), poolCount.toString()])
+    platform.poolCountV10 = platform.poolCountV10.plus(BIG_INT_ONE)
   }
   platform.save()
 
-  FactoryPool.create(factoryPool)
-  const pool = new Pool(factoryPool.toHexString())
+  CurvePoolTemplate.create(factoryPool)
   const poolContract = CurvePool.bind(factoryPool)
-  pool.name = poolContract.name()
-  pool.platform = platform.id
-  pool.symbol = poolContract.symbol()
-  pool.metapool = metapool
-  pool.address = factoryPool
-  pool.creationBlock = block
-  pool.creationTx = tx
-  pool.creationDate = timestamp
-  pool.assetType = getAssetType(pool.name, pool.symbol)
-  pool.basePool = basePool
-
-  const coins = pool.coins
-  const coinDecimals = pool.coinDecimals
-  let i = 0
-  let coinResult = poolContract.try_coins(BigInt.fromI32(i))
-  while (!coinResult.reverted) {
-    coins.push(coinResult.value)
-    coinDecimals.push(getDecimals(coinResult.value))
-    i += 1
-    coinResult = poolContract.try_coins(BigInt.fromI32(i))
-  }
-  pool.coins = coins
-  pool.coinDecimals = coinDecimals
-  pool.save()
+  createNewPool(
+    factoryPool,
+    factoryPool,
+    platform.id,
+    poolContract.name(),
+    poolContract.symbol(),
+    poolType,
+    metapool,
+    false,
+    block,
+    tx,
+    timestamp,
+    basePool
+  )
 }
 
 export function getPoolCoins128(pool: BasePool): BasePool {

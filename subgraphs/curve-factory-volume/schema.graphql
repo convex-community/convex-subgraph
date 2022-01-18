@@ -1,7 +1,15 @@
+enum PoolType {
+  FACTORY_V10
+  FACTORY_V12
+  REGISTRY_V1
+  REGISTRY_V2
+}
+
 type Platform @entity {
   id: ID!
-  poolCountV1: BigInt!
-  poolCountV2: BigInt!
+  poolCountV10: BigInt!
+  poolCountV12: BigInt!
+  poolCountV20: BigInt!
   pools: [Pool!]! @derivedFrom(field: "platform")
 }
 
@@ -11,11 +19,14 @@ type Pool @entity {
   platform: Platform!
   name: String!
   symbol: String!
-  metapool: Boolean
+  metapool: Boolean!
+  lpToken: Bytes!
   basePool: Bytes!
   coins: [Bytes!]!
   coinDecimals: [BigInt!]!
   assetType: Int!
+  poolType: PoolType!
+  isV2: Boolean!
   cumulativeVolume: BigDecimal!
   cumulativeVolumeUSD: BigDecimal!
 

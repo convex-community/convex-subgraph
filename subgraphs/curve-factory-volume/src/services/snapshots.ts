@@ -15,8 +15,9 @@ import { ChainlinkAggregator } from '../../../curve-pools/generated/Booster/Chai
 import {
   BIG_DECIMAL_1E8,
   BIG_DECIMAL_ONE,
-  BIG_DECIMAL_ZERO, BIG_INT_ZERO,
+  BIG_DECIMAL_ZERO,
   FOREX_ORACLES,
+  USDT_ADDRESS,
   WBTC_ADDRESS,
   WETH_ADDRESS,
 } from '../../../../packages/constants'
@@ -83,6 +84,8 @@ export function getTokenSnapshotByAssetType(pool: Pool, timestamp: BigInt): Toke
     return getTokenSnapshot(WETH_ADDRESS, timestamp, false)
   } else if (pool.assetType == 2) {
     return getTokenSnapshot(WBTC_ADDRESS, timestamp, false)
+  } else if (pool.assetType == 0) {
+    return getTokenSnapshot(USDT_ADDRESS, timestamp, false)
   } else {
     return getCryptoTokenSnapshot(pool, timestamp)
   }
@@ -133,8 +136,8 @@ export function getHourlyLiquiditySnapshot(pool: Pool, timestamp: BigInt): Hourl
   let snapshot = HourlyLiquidityVolumeSnapshot.load(snapshotId)
   if (!snapshot) {
     snapshot = new HourlyLiquidityVolumeSnapshot(snapshotId)
-    let coinArray = snapshot.amountAdded
-    for (let i = 0; i  < pool.coins.length; i++) {
+    const coinArray = snapshot.amountAdded
+    for (let i = 0; i < pool.coins.length; i++) {
       coinArray.push(BIG_DECIMAL_ZERO)
     }
     snapshot.pool = pool.id
@@ -152,8 +155,8 @@ export function getDailyLiquiditySnapshot(pool: Pool, timestamp: BigInt): DailyL
   let snapshot = DailyLiquidityVolumeSnapshot.load(snapshotId)
   if (!snapshot) {
     snapshot = new DailyLiquidityVolumeSnapshot(snapshotId)
-    let coinArray = snapshot.amountAdded
-    for (let i = 0; i  < pool.coins.length; i++) {
+    const coinArray = snapshot.amountAdded
+    for (let i = 0; i < pool.coins.length; i++) {
       coinArray.push(BIG_DECIMAL_ZERO)
     }
     snapshot.pool = pool.id
@@ -171,8 +174,8 @@ export function getWeeklyLiquiditySnapshot(pool: Pool, timestamp: BigInt): Weekl
   let snapshot = WeeklyLiquidityVolumeSnapshot.load(snapshotId)
   if (!snapshot) {
     snapshot = new WeeklyLiquidityVolumeSnapshot(snapshotId)
-    let coinArray = snapshot.amountAdded
-    for (let i = 0; i  < pool.coins.length; i++) {
+    const coinArray = snapshot.amountAdded
+    for (let i = 0; i < pool.coins.length; i++) {
       coinArray.push(BIG_DECIMAL_ZERO)
     }
     snapshot.pool = pool.id

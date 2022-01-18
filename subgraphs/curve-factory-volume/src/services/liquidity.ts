@@ -5,22 +5,18 @@ import {
   getHourlyLiquiditySnapshot,
   getWeeklyLiquiditySnapshot,
 } from './snapshots'
-import {
-  BIG_DECIMAL_ZERO,
-  BIG_INT_ONE,
-} from '../../../../packages/constants'
+import { BIG_DECIMAL_ZERO, BIG_INT_ONE } from '../../../../packages/constants'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
 import {
-  AddLiquidity, CurvePool,
+  AddLiquidity,
+  CurvePool,
   Remove_liquidity_one_coinCall,
   RemoveLiquidity,
-  RemoveLiquidityImbalance
-} from "../../generated/templates/FactoryPool/CurvePool";
-import {BigInt} from "@graphprotocol/graph-ts";
+  RemoveLiquidityImbalance,
+} from '../../generated/templates/CurvePoolTemplate/CurvePool'
+import { BigInt } from '@graphprotocol/graph-ts'
 
-export function processAddLiquidity(
-  event: AddLiquidity
-): void {
+export function processAddLiquidity(event: AddLiquidity): void {
   const pool = Pool.load(event.address.toHexString())
   if (!pool) {
     return
@@ -45,7 +41,7 @@ export function processAddLiquidity(
   const hourlyAmountAdded = hourlySnapshot.amountAdded
   const dailyAmountAdded = dailySnapshot.amountAdded
   const weeklyAmountAdded = weeklySnapshot.amountAdded
-  for (let i = 0; i  < pool.coins.length; i++) {
+  for (let i = 0; i < pool.coins.length; i++) {
     coinAmountAdded = tokenAmount[i].toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[i]))
     hourlyAmountAdded[i] = hourlyAmountAdded[i].plus(coinAmountAdded)
     dailyAmountAdded[i] = dailyAmountAdded[i].plus(coinAmountAdded)
@@ -79,9 +75,7 @@ export function processAddLiquidity(
   liquidityEvent.save()
 }
 
-export function processRemoveLiquidity(
-    event: RemoveLiquidity
-): void {
+export function processRemoveLiquidity(event: RemoveLiquidity): void {
   const pool = Pool.load(event.address.toHexString())
   if (!pool) {
     return
@@ -106,7 +100,7 @@ export function processRemoveLiquidity(
   const hourlyAmountRemoved = hourlySnapshot.amountRemoved
   const dailyAmountRemoved = dailySnapshot.amountRemoved
   const weeklyAmountRemoved = weeklySnapshot.amountRemoved
-  for (let i = 0; i  < pool.coins.length; i++) {
+  for (let i = 0; i < pool.coins.length; i++) {
     coinAmountRemoved = tokenAmount[i].toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[i]))
     hourlyAmountRemoved[i] = hourlyAmountRemoved[i].plus(coinAmountRemoved)
     dailyAmountRemoved[i] = dailyAmountRemoved[i].plus(coinAmountRemoved)
@@ -141,9 +135,7 @@ export function processRemoveLiquidity(
   liquidityEvent.save()
 }
 
-export function processRemoveLiquidityImbalance(
-  event: RemoveLiquidityImbalance
-): void {
+export function processRemoveLiquidityImbalance(event: RemoveLiquidityImbalance): void {
   const pool = Pool.load(event.address.toHexString())
   if (!pool) {
     return
@@ -168,7 +160,7 @@ export function processRemoveLiquidityImbalance(
   const hourlyAmountRemoved = hourlySnapshot.amountRemoved
   const dailyAmountRemoved = dailySnapshot.amountRemoved
   const weeklyAmountRemoved = weeklySnapshot.amountRemoved
-  for (let i = 0; i  < pool.coins.length; i++) {
+  for (let i = 0; i < pool.coins.length; i++) {
     coinAmountRemoved = tokenAmount[i].toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[i]))
     hourlyAmountRemoved[i] = hourlyAmountRemoved[i].plus(coinAmountRemoved)
     dailyAmountRemoved[i] = dailyAmountRemoved[i].plus(coinAmountRemoved)
@@ -203,9 +195,7 @@ export function processRemoveLiquidityImbalance(
 }
 
 // Need to use call instead of event as: no coin indices from
-export function processRemoveLiquidityOneCall(
-    call: Remove_liquidity_one_coinCall
-): void {
+export function processRemoveLiquidityOneCall(call: Remove_liquidity_one_coinCall): void {
   const pool = Pool.load(call.to.toHexString())
   if (!pool) {
     return
