@@ -36,6 +36,7 @@ export function handleAddRegistryV1MetaPool(call: Add_metapoolCall): void {
     call.inputs._base_pool,
     call.inputs._lp_token,
     true,
+    false,
     call.block.timestamp,
     call.block.number,
     call.transaction.hash
@@ -51,6 +52,7 @@ export function handleAddRegistryV1PlainPool(call: Add_pool_without_underlyingCa
     call.inputs._pool,
     ADDRESS_ZERO,
     call.inputs._lp_token,
+    false,
     false,
     call.block.timestamp,
     call.block.number,

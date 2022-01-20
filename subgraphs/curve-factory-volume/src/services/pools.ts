@@ -1,4 +1,4 @@
-import { CurvePoolTemplate } from '../../generated/templates'
+import { CurvePoolTemplate, CurvePoolTemplateV2 } from '../../generated/templates'
 import { BasePool, Pool } from '../../generated/schema'
 import { BigInt } from '@graphprotocol/graph-ts/index'
 import { Address, Bytes, log } from '@graphprotocol/graph-ts'
@@ -12,6 +12,7 @@ import {
   FACTORY_V10,
   FACTORY_V12,
   REGISTRY_V1,
+  REGISTRY_V2,
 } from '../../../../packages/constants'
 import { CurveFactoryV12 } from '../../generated/CurveFactoryV12/CurveFactoryV12'
 import { CurveFactoryV10 } from '../../generated/CurveFactoryV10/CurveFactoryV10'
@@ -46,7 +47,7 @@ export function createNewPool(
   pool.creationTx = tx
   pool.creationDate = timestamp
   pool.poolType = poolType
-  pool.assetType = getAssetType(pool.name, pool.symbol)
+  pool.assetType = isV2 ? 4 : getAssetType(pool.name, pool.symbol)
   pool.basePool = basePool
 
   const coins = pool.coins
@@ -96,17 +97,24 @@ export function createNewRegistryPool(
   basePool: Address,
   lpToken: Address,
   metapool: boolean,
+  isV2: boolean,
   timestamp: BigInt,
   block: BigInt,
   tx: Bytes
 ): void {
   if (!Pool.load(poolAddress.toHexString())) {
-    log.debug('Non factory pool: {}, lpToken: {}, added to registry at {}', [
+    log.debug('Non factory pool ({}): {}, lpToken: {}, added to registry at {}', [
+      isV2 ? 'v2' : 'v1',
       poolAddress.toHexString(),
       lpToken.toHexString(),
       tx.toHexString(),
     ])
-    CurvePoolTemplate.create(poolAddress)
+    const poolType = isV2 ? REGISTRY_V2 : REGISTRY_V1
+    if (!isV2) {
+      CurvePoolTemplate.create(poolAddress)
+    } else {
+      CurvePoolTemplateV2.create(poolAddress)
+    }
     const lpTokenContract = ERC20.bind(lpToken)
     createNewPool(
       poolAddress,
@@ -114,9 +122,9 @@ export function createNewRegistryPool(
       CURVE_PLATFORM_ID,
       lpTokenContract.name(),
       lpTokenContract.symbol(),
-      REGISTRY_V1,
+      poolType,
       metapool,
-      false,
+      isV2,
       block,
       tx,
       timestamp,

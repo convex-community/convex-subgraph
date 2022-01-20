@@ -22,6 +22,7 @@ import {
   WETH_ADDRESS,
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
+import { Token } from '../../../locker/generated/schema'
 
 export function getForexUsdRate(token: string): BigDecimal {
   // returns the amount of USD 1 unit of the foreign currency is worth
@@ -54,7 +55,7 @@ export function getTokenSnapshot(token: Address, timestamp: BigInt, forex: boole
   return snapshot
 }
 
-export function getCryptoTokenSnapshot(pool: Pool, timestamp: BigInt): TokenSnapshot {
+export function getStableCryptoTokenSnapshot(pool: Pool, timestamp: BigInt): TokenSnapshot {
   // we use this for stable crypto pools where one assets may not be traded
   // outside of curve. we just try to get a price out of one of the assets traded
   // and use that
@@ -77,6 +78,19 @@ export function getCryptoTokenSnapshot(pool: Pool, timestamp: BigInt): TokenSnap
   return snapshot
 }
 
+export function getCryptoTokenSnapshot(asset: Address, timestamp: BigInt): TokenSnapshot {
+  const hour = getIntervalFromTimestamp(timestamp, HOUR)
+  const snapshotId = asset.toHexString() + '-' + hour.toString()
+  let snapshot = TokenSnapshot.load(snapshotId)
+  if (!snapshot) {
+    snapshot = new TokenSnapshot(snapshotId)
+    snapshot.timestamp = hour
+    snapshot.price = getUsdRate(asset)
+    snapshot.save()
+  }
+  return snapshot
+}
+
 export function getTokenSnapshotByAssetType(pool: Pool, timestamp: BigInt): TokenSnapshot {
   if (FOREX_ORACLES.has(pool.id)) {
     return getTokenSnapshot(bytesToAddress(pool.address), timestamp, true)
@@ -87,7 +101,7 @@ export function getTokenSnapshotByAssetType(pool: Pool, timestamp: BigInt): Toke
   } else if (pool.assetType == 0) {
     return getTokenSnapshot(USDT_ADDRESS, timestamp, false)
   } else {
-    return getCryptoTokenSnapshot(pool, timestamp)
+    return getStableCryptoTokenSnapshot(pool, timestamp)
   }
 }
 

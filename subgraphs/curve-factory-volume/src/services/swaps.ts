@@ -1,6 +1,7 @@
-import { Address, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
 import { Pool, SwapEvent } from '../../generated/schema'
 import {
+  getCryptoTokenSnapshot,
   getDailySwapSnapshot,
   getHourlySwapSnapshot,
   getTokenSnapshotByAssetType,
@@ -84,10 +85,18 @@ export function handleExchange(
   const amountSold = tokens_sold.toBigDecimal().div(exponentToBigDecimal(tokenSoldDecimals))
   const amountBought = tokens_bought.toBigDecimal().div(exponentToBigDecimal(tokenBoughtDecimals))
   log.debug('Getting token snaphsot for {}', [pool.id])
-  const latestSnapshot = getTokenSnapshotByAssetType(pool, timestamp)
-  const latestPrice = latestSnapshot.price
-  const amountBoughtUSD = amountBought.times(latestPrice)
-  const amountSoldUSD = amountSold.times(latestPrice)
+  let amountBoughtUSD: BigDecimal, amountSoldUSD: BigDecimal
+  if (!pool.isV2) {
+    const latestSnapshot = getTokenSnapshotByAssetType(pool, timestamp)
+    const latestPrice = latestSnapshot.price
+    amountBoughtUSD = amountBought.times(latestPrice)
+    amountSoldUSD = amountSold.times(latestPrice)
+  } else {
+    const latestBoughtSnapshot = getCryptoTokenSnapshot(bytesToAddress(pool.coins[boughtId]), timestamp)
+    const latestSoldSnapshot = getCryptoTokenSnapshot(bytesToAddress(pool.coins[soldId]), timestamp)
+    amountBoughtUSD = amountBought.times(latestBoughtSnapshot.price)
+    amountSoldUSD = amountSold.times(latestSoldSnapshot.price)
+  }
 
   const swapEvent = new SwapEvent(txhash.toHexString() + '-' + amountBought.toString())
   swapEvent.pool = address.toHexString()
@@ -103,7 +112,7 @@ export function handleExchange(
   swapEvent.save()
 
   const volume = amountSold.plus(amountBought).div(BIG_DECIMAL_TWO)
-  const volumeUSD = volume.times(latestPrice)
+  const volumeUSD = amountSoldUSD.plus(amountBoughtUSD).div(BIG_DECIMAL_TWO)
 
   const hourlySnapshot = getHourlySwapSnapshot(pool, timestamp)
   const dailySnapshot = getDailySwapSnapshot(pool, timestamp)
