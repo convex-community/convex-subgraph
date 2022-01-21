@@ -4,6 +4,7 @@ import {
   getDailyLiquiditySnapshot,
   getHourlyLiquiditySnapshot,
   getWeeklyLiquiditySnapshot,
+  takePoolSnapshot,
 } from './snapshots'
 import { BIG_DECIMAL_ZERO, BIG_INT_ONE } from '../../../../packages/constants'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
@@ -21,6 +22,7 @@ export function processAddLiquidity(event: AddLiquidity): void {
   if (!pool) {
     return
   }
+  takePoolSnapshot(pool, event.block.timestamp)
   const timestamp = event.block.timestamp
   const block = event.block.number
   const provider = event.params.provider
@@ -80,6 +82,7 @@ export function processRemoveLiquidity(event: RemoveLiquidity): void {
   if (!pool) {
     return
   }
+  takePoolSnapshot(pool, event.block.timestamp)
   const timestamp = event.block.timestamp
   const block = event.block.number
   const provider = event.params.provider
@@ -140,6 +143,7 @@ export function processRemoveLiquidityImbalance(event: RemoveLiquidityImbalance)
   if (!pool) {
     return
   }
+  takePoolSnapshot(pool, event.block.timestamp)
   const timestamp = event.block.timestamp
   const block = event.block.number
   const provider = event.params.provider
@@ -200,6 +204,7 @@ export function processRemoveLiquidityOneCall(call: Remove_liquidity_one_coinCal
   if (!pool) {
     return
   }
+  takePoolSnapshot(pool, call.block.timestamp)
   const timestamp = call.block.timestamp
   const block = call.block.number
   const provider = call.from

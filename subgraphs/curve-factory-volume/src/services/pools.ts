@@ -5,12 +5,15 @@ import { Address, Bytes, log } from '@graphprotocol/graph-ts'
 import { getDecimals } from '../../../../packages/utils/pricing'
 import { getPlatform } from './platform'
 import {
+  ADDRESS_ZERO,
   BIG_INT_ONE,
   CURVE_FACTORY_V1,
   CURVE_FACTORY_V1_2,
+  CURVE_FACTORY_V2,
   CURVE_PLATFORM_ID,
   FACTORY_V10,
   FACTORY_V12,
+  FACTORY_V20,
   REGISTRY_V1,
   REGISTRY_V2,
 } from '../../../../packages/constants'
@@ -19,6 +22,7 @@ import { CurveFactoryV10 } from '../../generated/CurveFactoryV10/CurveFactoryV10
 import { CurvePool } from '../../generated/templates/CurvePoolTemplate/CurvePool'
 import { CurvePoolCoin128 } from '../../generated/templates/CurvePoolTemplate/CurvePoolCoin128'
 import { ERC20 } from '../../generated/CurveRegistryV1/ERC20'
+import { CurveFactoryV20 } from '../../generated/CurveFactoryV20/CurveFactoryV20'
 
 export function createNewPool(
   poolAddress: Address,
@@ -139,6 +143,7 @@ export function createNewFactoryPool(
   version: i32,
   metapool: boolean,
   basePool: Address,
+  lpToken: Address,
   timestamp: BigInt,
   block: BigInt,
   tx: Bytes
@@ -154,27 +159,43 @@ export function createNewFactoryPool(
     factoryPool = factory.pool_list(poolCount)
     log.info('New factory pool added (v1.2) {} with id {}', [factoryPool.toHexString(), poolCount.toString()])
     platform.poolCountV12 = platform.poolCountV12.plus(BIG_INT_ONE)
-  } else {
+  } else if (version == 10) {
     const factory = CurveFactoryV10.bind(CURVE_FACTORY_V1)
     poolCount = platform.poolCountV10
     poolType = FACTORY_V10
     factoryPool = factory.pool_list(poolCount)
     log.info('New factory pool added (v1.0) {} with id {}', [factoryPool.toHexString(), poolCount.toString()])
     platform.poolCountV10 = platform.poolCountV10.plus(BIG_INT_ONE)
+  } else {
+    const factory = CurveFactoryV20.bind(CURVE_FACTORY_V2)
+    poolCount = platform.poolCountV20
+    poolType = FACTORY_V20
+    factoryPool = factory.pool_list(poolCount)
+    log.info('New factory pool added (v2.0) {} with id {}', [factoryPool.toHexString(), poolCount.toString()])
+    platform.poolCountV20 = platform.poolCountV20.plus(BIG_INT_ONE)
   }
   platform.save()
-
-  CurvePoolTemplate.create(factoryPool)
-  const poolContract = CurvePool.bind(factoryPool)
+  let name: string, symbol: string
+  if (version == 20) {
+    CurvePoolTemplateV2.create(factoryPool)
+    const lpTokenContract = ERC20.bind(lpToken)
+    name = lpTokenContract.name()
+    symbol = lpTokenContract.symbol()
+  } else {
+    CurvePoolTemplate.create(factoryPool)
+    const poolContract = CurvePool.bind(factoryPool)
+    name = poolContract.name()
+    symbol = poolContract.symbol()
+  }
   createNewPool(
     factoryPool,
-    factoryPool,
+    lpToken == ADDRESS_ZERO ? factoryPool : lpToken,
     platform.id,
-    poolContract.name(),
-    poolContract.symbol(),
+    name,
+    symbol,
     poolType,
     metapool,
-    false,
+    version == 20,
     block,
     tx,
     timestamp,

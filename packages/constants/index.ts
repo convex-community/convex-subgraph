@@ -78,6 +78,7 @@ export const CURVE_REGISTRY = Address.fromString('0x90e00ace148ca3b23ac1bc8c240c
 export const CURVE_REGISTRY_V2 = Address.fromString('0x4AacF35761d06Aa7142B9326612A42A2b9170E33')
 export const CURVE_FACTORY_V1 = Address.fromString('0x0959158b6040d32d04c301a72cbfd6b39e21c9ae')
 export const CURVE_FACTORY_V1_2 = Address.fromString('0xb9fc157394af804a3578134a6585c0dc9cc990d4')
+export const CURVE_FACTORY_V2 = Address.fromString('0xf18056bbd320e96a48e3fbf8bc061322531aac99')
 
 export const TRICRYPTO_LP_ADDRESS = Address.fromString('0xca3d75ac011bf5ad07a98d02f18225f9bd9a6bdf')
 export const TRICRYPTO2_LP_ADDRESS = Address.fromString('0xc4ad29ba4b3c580e6d59105fff484999997675ff')
@@ -118,6 +119,7 @@ STAKING_TOKENS.set('0xcf50b810e57ac33b91dcf525c6ddd9881b139332', CVX_TOKEN)
 
 export const FACTORY_V10 = 'FACTORY_V10'
 export const FACTORY_V12 = 'FACTORY_V12'
+export const FACTORY_V20 = 'FACTORY_V20'
 export const REGISTRY_V1 = 'REGISTRY_V1'
 export const REGISTRY_V2 = 'REGISTRY_V2'
 

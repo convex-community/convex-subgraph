@@ -7,6 +7,7 @@ import {
   HourlyLiquidityVolumeSnapshot,
   DailyLiquidityVolumeSnapshot,
   WeeklyLiquidityVolumeSnapshot,
+  DailyPoolSnapshot,
 } from '../../generated/schema'
 import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
 import { DAY, getIntervalFromTimestamp, HOUR, WEEK } from '../../../../packages/utils/time'
@@ -23,6 +24,7 @@ import {
 } from '../../../../packages/constants'
 import { bytesToAddress } from '../../../../packages/utils'
 import { Token } from '../../../locker/generated/schema'
+import { CurvePool } from '../../generated/templates/CurvePoolTemplate/CurvePool'
 
 export function getForexUsdRate(token: string): BigDecimal {
   // returns the amount of USD 1 unit of the foreign currency is worth
@@ -199,4 +201,28 @@ export function getWeeklyLiquiditySnapshot(pool: Pool, timestamp: BigInt): Weekl
     snapshot.save()
   }
   return snapshot
+}
+
+export function getPoolBaseApr(pool: Pool, currentVirtualPrice: BigDecimal, timestamp: BigInt): BigDecimal {
+  const yesterday = getIntervalFromTimestamp(timestamp.minus(DAY), DAY)
+  const previousSnapshot = DailyPoolSnapshot.load(pool.id + '-' + yesterday.toString())
+  const previousSnapshotVPrice = previousSnapshot ? previousSnapshot.virtualPrice : BIG_DECIMAL_ZERO
+  const rate =
+    previousSnapshotVPrice == BIG_DECIMAL_ZERO
+      ? BIG_DECIMAL_ZERO
+      : currentVirtualPrice.minus(previousSnapshotVPrice).div(previousSnapshotVPrice)
+  return rate
+}
+
+export function takePoolSnapshot(pool: Pool, timestamp: BigInt) {
+  const time = getIntervalFromTimestamp(timestamp, DAY)
+  const snapId = pool.id + '-' + time.toString()
+  if (!DailyPoolSnapshot.load(snapId)) {
+    const dailySnapshot = new DailyPoolSnapshot(snapId)
+    dailySnapshot.pool = pool.id
+    const poolContract = CurvePool.bind(Address.fromString(pool.id))
+    dailySnapshot.virtualPrice = poolContract.get_virtual_price().toBigDecimal()
+    dailySnapshot.baseApr = getPoolBaseApr(pool, dailySnapshot.virtualPrice, timestamp)
+    dailySnapshot.save()
+  }
 }

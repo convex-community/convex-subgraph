@@ -6,6 +6,7 @@ import {
   getHourlySwapSnapshot,
   getTokenSnapshotByAssetType,
   getWeeklySwapSnapshot,
+  takePoolSnapshot,
 } from './snapshots'
 import { BIG_DECIMAL_TWO, BIG_INT_ONE, FACTORY_V12 } from '../../../../packages/constants'
 import { getBasePool } from './pools'
@@ -28,6 +29,7 @@ export function handleExchange(
   if (!pool) {
     return
   }
+  takePoolSnapshot(pool, timestamp)
   const soldId = sold_id.toI32()
   const boughtId = bought_id.toI32()
   let tokenSold: Bytes, tokenBought: Bytes

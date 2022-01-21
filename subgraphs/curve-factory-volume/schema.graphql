@@ -1,6 +1,7 @@
 enum PoolType {
   FACTORY_V10
   FACTORY_V12
+  FACTORY_V20
   REGISTRY_V1
   REGISTRY_V2
 }
@@ -61,9 +62,8 @@ type TokenSnapshot @entity {
 type DailyPoolSnapshot @entity {
   id: ID!
   pool: Pool!
-  virtualPrice: BigInt!
-  A: BigInt!
-  lpTokenTotalSupply: BigInt!
+  virtualPrice: BigDecimal!
+  baseApr: BigDecimal!
 }
 
 type HourlySwapVolumeSnapshot @entity {

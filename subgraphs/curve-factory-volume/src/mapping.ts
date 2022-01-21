@@ -23,7 +23,15 @@ import { Add_metapoolCall, Add_pool_without_underlyingCall } from '../generated/
 
 export function handlePlainPoolDeployed(event: PlainPoolDeployed): void {
   log.debug('New factory plain pool deployed at {}', [event.transaction.hash.toHexString()])
-  createNewFactoryPool(12, false, ADDRESS_ZERO, event.block.timestamp, event.block.number, event.transaction.hash)
+  createNewFactoryPool(
+    12,
+    false,
+    ADDRESS_ZERO,
+    ADDRESS_ZERO,
+    event.block.timestamp,
+    event.block.number,
+    event.transaction.hash
+  )
 }
 
 export function handleAddRegistryV1MetaPool(call: Add_metapoolCall): void {
@@ -74,6 +82,7 @@ export function handleMetaPoolDeployed(event: MetaPoolDeployed): void {
     version,
     true,
     event.params.base_pool,
+    ADDRESS_ZERO,
     event.block.timestamp,
     event.block.number,
     event.transaction.hash

@@ -1,9 +1,11 @@
 import { Add_poolCall } from '../generated/CurveRegistryV2/CurveRegistryV2'
 import { log } from '@graphprotocol/graph-ts/index'
-import { createNewRegistryPool } from './services/pools'
+import { createNewFactoryPool, createNewRegistryPool } from './services/pools'
 import { ADDRESS_ZERO } from '../../../packages/constants'
 import { TokenExchange } from '../generated/templates/CurvePoolTemplateV2/CurvePoolV2'
 import { handleExchange } from './services/swaps'
+import { PlainPoolDeployed } from '../generated/CurveFactoryV12/CurveFactoryV12'
+import { CryptoPoolDeployed } from '../generated/CurveFactoryV20/CurveFactoryV20'
 
 export function handleAddRegistryV2Pool(call: Add_poolCall): void {
   log.debug('New registry v2 pool {} deployed at {}', [
@@ -19,6 +21,19 @@ export function handleAddRegistryV2Pool(call: Add_poolCall): void {
     call.block.timestamp,
     call.block.number,
     call.transaction.hash
+  )
+}
+
+export function handleCryptoPoolDeployed(event: CryptoPoolDeployed): void {
+  log.debug('New V2 factory crypto pool deployed at {}', [event.transaction.hash.toHexString()])
+  createNewFactoryPool(
+    20,
+    false,
+    ADDRESS_ZERO,
+    event.params.token,
+    event.block.timestamp,
+    event.block.number,
+    event.transaction.hash
   )
 }
 
