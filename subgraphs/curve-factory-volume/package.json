@@ -10,6 +10,7 @@
     "build": "graph build",
     "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ convex-community/curve-factory-volume",
     "deploy-hosted": "graph deploy --product hosted-service convex-community/curve-factory-volume",
+    "deploy-staging": "graph deploy --product hosted-service convex-community/curve-volume-staging",
     "deploy-studio": "graph deploy --studio curve-factory-volume",
     "create-local": "graph create --node http://localhost:8020/ convex/curve-factory-volume",
     "remove-local": "graph remove --node http://localhost:8020/ convex/curve-factory-volume",
