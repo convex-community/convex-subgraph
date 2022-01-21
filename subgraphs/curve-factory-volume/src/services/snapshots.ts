@@ -230,6 +230,12 @@ export function takePoolSnapshot(pool: Pool, timestamp: BigInt): void {
     }
     dailySnapshot.virtualPrice = vPrice
     dailySnapshot.baseApr = getPoolBaseApr(pool, dailySnapshot.virtualPrice, timestamp)
+    dailySnapshot.timestamp = time
+
+    pool.virtualPrice = vPrice
+    pool.baseApr = dailySnapshot.baseApr
+
+    pool.save()
     dailySnapshot.save()
   }
 }

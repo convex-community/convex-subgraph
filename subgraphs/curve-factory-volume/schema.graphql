@@ -31,6 +31,9 @@ type Pool @entity {
   cumulativeVolume: BigDecimal!
   cumulativeVolumeUSD: BigDecimal!
 
+  virtualPrice: BigDecimal!
+  baseApr: BigDecimal!
+
   creationDate: BigInt!
   creationTx: Bytes!
   creationBlock: BigInt!
@@ -64,6 +67,7 @@ type DailyPoolSnapshot @entity {
   pool: Pool!
   virtualPrice: BigDecimal!
   baseApr: BigDecimal!
+  timestamp: BigInt!
 }
 
 type HourlySwapVolumeSnapshot @entity {
