@@ -214,14 +214,21 @@ export function getPoolBaseApr(pool: Pool, currentVirtualPrice: BigDecimal, time
   return rate
 }
 
-export function takePoolSnapshot(pool: Pool, timestamp: BigInt) {
+export function takePoolSnapshot(pool: Pool, timestamp: BigInt): void {
   const time = getIntervalFromTimestamp(timestamp, DAY)
   const snapId = pool.id + '-' + time.toString()
   if (!DailyPoolSnapshot.load(snapId)) {
     const dailySnapshot = new DailyPoolSnapshot(snapId)
     dailySnapshot.pool = pool.id
     const poolContract = CurvePool.bind(Address.fromString(pool.id))
-    dailySnapshot.virtualPrice = poolContract.get_virtual_price().toBigDecimal()
+    const virtualPriceResult = poolContract.try_get_virtual_price()
+    let vPrice = BIG_DECIMAL_ZERO
+    if (virtualPriceResult.reverted) {
+      log.error('Unable to fetch virtual price for pool {}', [pool.id])
+    } else {
+      vPrice = virtualPriceResult.value.toBigDecimal()
+    }
+    dailySnapshot.virtualPrice = vPrice
     dailySnapshot.baseApr = getPoolBaseApr(pool, dailySnapshot.virtualPrice, timestamp)
     dailySnapshot.save()
   }
