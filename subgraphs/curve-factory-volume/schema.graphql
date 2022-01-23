@@ -40,7 +40,7 @@ type Pool @entity {
   creationTx: Bytes!
   creationBlock: BigInt!
 
-  hourlyPoolSnapshots: [HourlyPoolSnapshot!] @derivedFrom(field: "pool")
+  dailyPoolSnapshots: [DailyPoolSnapshot!] @derivedFrom(field: "pool")
 
   hourlySwapVolumeSnapshots: [HourlySwapVolumeSnapshot!] @derivedFrom(field: "pool")
   dailySwapVolumeSnapshots: [DailySwapVolumeSnapshot!] @derivedFrom(field: "pool")
@@ -64,7 +64,7 @@ type TokenSnapshot @entity {
   timestamp: BigInt!
 }
 
-type HourlyPoolSnapshot @entity {
+type DailyPoolSnapshot @entity {
   id: ID!
   pool: Pool!
   virtualPrice: BigDecimal!

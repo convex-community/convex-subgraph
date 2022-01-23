@@ -7,7 +7,7 @@ import {
   HourlyLiquidityVolumeSnapshot,
   DailyLiquidityVolumeSnapshot,
   WeeklyLiquidityVolumeSnapshot,
-  HourlyPoolSnapshot,
+  DailyPoolSnapshot,
 } from '../../generated/schema'
 import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
 import { DAY, getIntervalFromTimestamp, HOUR, WEEK } from '../../../../packages/utils/time'
@@ -206,7 +206,7 @@ export function getWeeklyLiquiditySnapshot(pool: Pool, timestamp: BigInt): Weekl
 
 export function getPoolBaseApr(pool: Pool, currentVirtualPrice: BigDecimal, timestamp: BigInt): BigDecimal {
   const yesterday = getIntervalFromTimestamp(timestamp.minus(DAY), DAY)
-  const previousSnapshot = HourlyPoolSnapshot.load(pool.id + '-' + yesterday.toString())
+  const previousSnapshot = DailyPoolSnapshot.load(pool.id + '-' + yesterday.toString())
   const previousSnapshotVPrice = previousSnapshot ? previousSnapshot.virtualPrice : BIG_DECIMAL_ZERO
   const rate =
     previousSnapshotVPrice == BIG_DECIMAL_ZERO
@@ -228,8 +228,8 @@ export function takePoolSnapshots(timestamp: BigInt): void {
       return
     }
     const snapId = pool.id + '-' + time.toString()
-    if (!HourlyPoolSnapshot.load(snapId)) {
-      const dailySnapshot = new HourlyPoolSnapshot(snapId)
+    if (!DailyPoolSnapshot.load(snapId)) {
+      const dailySnapshot = new DailyPoolSnapshot(snapId)
       dailySnapshot.pool = pool.id
       const poolContract = CurvePool.bind(Address.fromString(pool.id))
       const virtualPriceResult = poolContract.try_get_virtual_price()
