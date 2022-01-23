@@ -12,6 +12,8 @@ type Platform @entity {
   poolCountV12: BigInt!
   poolCountV20: BigInt!
   pools: [Pool!]! @derivedFrom(field: "platform")
+  poolAddresses: [Bytes!]!
+  latestPoolSnapshot: BigInt!
 }
 
 type Pool @entity {
@@ -38,7 +40,7 @@ type Pool @entity {
   creationTx: Bytes!
   creationBlock: BigInt!
 
-  dailyPoolSnapshots: [DailyPoolSnapshot!] @derivedFrom(field: "pool")
+  hourlyPoolSnapshots: [HourlyPoolSnapshot!] @derivedFrom(field: "pool")
 
   hourlySwapVolumeSnapshots: [HourlySwapVolumeSnapshot!] @derivedFrom(field: "pool")
   dailySwapVolumeSnapshots: [DailySwapVolumeSnapshot!] @derivedFrom(field: "pool")
@@ -62,7 +64,7 @@ type TokenSnapshot @entity {
   timestamp: BigInt!
 }
 
-type DailyPoolSnapshot @entity {
+type HourlyPoolSnapshot @entity {
   id: ID!
   pool: Pool!
   virtualPrice: BigDecimal!

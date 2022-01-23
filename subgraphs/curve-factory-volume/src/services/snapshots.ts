@@ -7,7 +7,7 @@ import {
   HourlyLiquidityVolumeSnapshot,
   DailyLiquidityVolumeSnapshot,
   WeeklyLiquidityVolumeSnapshot,
-  DailyPoolSnapshot,
+  HourlyPoolSnapshot,
 } from '../../generated/schema'
 import { Address, BigDecimal, BigInt, Bytes, log } from '@graphprotocol/graph-ts'
 import { DAY, getIntervalFromTimestamp, HOUR, WEEK } from '../../../../packages/utils/time'
@@ -25,6 +25,7 @@ import {
 import { bytesToAddress } from '../../../../packages/utils'
 import { Token } from '../../../locker/generated/schema'
 import { CurvePool } from '../../generated/templates/CurvePoolTemplate/CurvePool'
+import { getPlatform } from './platform'
 
 export function getForexUsdRate(token: string): BigDecimal {
   // returns the amount of USD 1 unit of the foreign currency is worth
@@ -205,7 +206,7 @@ export function getWeeklyLiquiditySnapshot(pool: Pool, timestamp: BigInt): Weekl
 
 export function getPoolBaseApr(pool: Pool, currentVirtualPrice: BigDecimal, timestamp: BigInt): BigDecimal {
   const yesterday = getIntervalFromTimestamp(timestamp.minus(DAY), DAY)
-  const previousSnapshot = DailyPoolSnapshot.load(pool.id + '-' + yesterday.toString())
+  const previousSnapshot = HourlyPoolSnapshot.load(pool.id + '-' + yesterday.toString())
   const previousSnapshotVPrice = previousSnapshot ? previousSnapshot.virtualPrice : BIG_DECIMAL_ZERO
   const rate =
     previousSnapshotVPrice == BIG_DECIMAL_ZERO
@@ -214,28 +215,39 @@ export function getPoolBaseApr(pool: Pool, currentVirtualPrice: BigDecimal, time
   return rate
 }
 
-export function takePoolSnapshot(pool: Pool, timestamp: BigInt): void {
+export function takePoolSnapshots(timestamp: BigInt): void {
+  const platform = getPlatform()
   const time = getIntervalFromTimestamp(timestamp, DAY)
-  const snapId = pool.id + '-' + time.toString()
-  if (!DailyPoolSnapshot.load(snapId)) {
-    const dailySnapshot = new DailyPoolSnapshot(snapId)
-    dailySnapshot.pool = pool.id
-    const poolContract = CurvePool.bind(Address.fromString(pool.id))
-    const virtualPriceResult = poolContract.try_get_virtual_price()
-    let vPrice = BIG_DECIMAL_ZERO
-    if (virtualPriceResult.reverted) {
-      log.error('Unable to fetch virtual price for pool {}', [pool.id])
-    } else {
-      vPrice = virtualPriceResult.value.toBigDecimal()
+  if (platform.latestPoolSnapshot == time) {
+    return
+  }
+  for (let i = 0; i < platform.poolAddresses.length; ++i) {
+    const poolAddress = platform.poolAddresses[i]
+    const pool = Pool.load(poolAddress.toHexString())
+    if (!pool) {
+      return
     }
-    dailySnapshot.virtualPrice = vPrice
-    dailySnapshot.baseApr = getPoolBaseApr(pool, dailySnapshot.virtualPrice, timestamp)
-    dailySnapshot.timestamp = time
+    const snapId = pool.id + '-' + time.toString()
+    if (!HourlyPoolSnapshot.load(snapId)) {
+      const dailySnapshot = new HourlyPoolSnapshot(snapId)
+      dailySnapshot.pool = pool.id
+      const poolContract = CurvePool.bind(Address.fromString(pool.id))
+      const virtualPriceResult = poolContract.try_get_virtual_price()
+      let vPrice = BIG_DECIMAL_ZERO
+      if (virtualPriceResult.reverted) {
+        log.error('Unable to fetch virtual price for pool {}', [pool.id])
+      } else {
+        vPrice = virtualPriceResult.value.toBigDecimal()
+      }
+      dailySnapshot.virtualPrice = vPrice
+      dailySnapshot.baseApr = getPoolBaseApr(pool, dailySnapshot.virtualPrice, timestamp)
+      dailySnapshot.timestamp = time
 
-    pool.virtualPrice = vPrice
-    pool.baseApr = dailySnapshot.baseApr
+      pool.virtualPrice = vPrice
+      pool.baseApr = dailySnapshot.baseApr
 
-    pool.save()
-    dailySnapshot.save()
+      pool.save()
+      dailySnapshot.save()
+    }
   }
 }

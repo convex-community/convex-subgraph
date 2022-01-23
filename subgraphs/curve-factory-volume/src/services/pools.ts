@@ -27,7 +27,6 @@ import { CurveFactoryV20 } from '../../generated/CurveFactoryV20/CurveFactoryV20
 export function createNewPool(
   poolAddress: Address,
   lpToken: Address,
-  platformId: string,
   name: string,
   symbol: string,
   poolType: string,
@@ -38,10 +37,16 @@ export function createNewPool(
   timestamp: BigInt,
   basePool: Address
 ): void {
+  const platform = getPlatform()
+  const pools = platform.poolAddresses
+  pools.push(poolAddress)
+  platform.poolAddresses = pools
+  platform.save()
+
   const pool = new Pool(poolAddress.toHexString())
   const poolContract = CurvePool.bind(poolAddress)
   pool.name = name
-  pool.platform = platformId
+  pool.platform = platform.id
   pool.lpToken = lpToken
   pool.symbol = symbol
   pool.metapool = metapool
@@ -123,7 +128,6 @@ export function createNewRegistryPool(
     createNewPool(
       poolAddress,
       lpToken,
-      CURVE_PLATFORM_ID,
       lpTokenContract.name(),
       lpTokenContract.symbol(),
       poolType,
@@ -190,7 +194,6 @@ export function createNewFactoryPool(
   createNewPool(
     factoryPool,
     lpToken == ADDRESS_ZERO ? factoryPool : lpToken,
-    platform.id,
     name,
     symbol,
     poolType,
