@@ -1,6 +1,6 @@
-import { createNewFactoryPool, createNewRegistryPool } from './services/pools'
+import { createNewFactoryPool, createNewPool, createNewRegistryPool } from './services/pools'
 import { handleExchange } from './services/swaps'
-import { ADDRESS_ZERO, BIG_INT_ONE, CURVE_FACTORY_V1_2 } from '../../../packages/constants'
+import { ADDRESS_ZERO, BIG_INT_ONE, CURVE_FACTORY_V1_2, LENDING } from '../../../packages/constants'
 import { Add_existing_metapoolsCall, PlainPoolDeployed } from '../generated/CurveFactoryV12/CurveFactoryV12'
 import { MetaPoolDeployed } from '../generated/CurveFactoryV10/CurveFactoryV10'
 import {
@@ -19,7 +19,14 @@ import {
   processRemoveLiquidityOneCall,
   processRemoveLiquidityImbalance,
 } from './services/liquidity'
-import { Add_metapoolCall, Add_pool_without_underlyingCall } from '../generated/CurveRegistryV1/CurveRegistryV1'
+import {
+  Add_metapoolCall,
+  Add_pool_without_underlyingCall,
+  Add_poolCall,
+} from '../generated/CurveRegistryV1/CurveRegistryV1'
+import { AddPoolCall } from '../../curve-pools/generated/Booster/Booster'
+import { ERC20 } from '../generated/CurveRegistryV1/ERC20'
+import { CurvePoolTemplate } from '../generated/templates'
 
 export function handlePlainPoolDeployed(event: PlainPoolDeployed): void {
   log.debug('New factory plain pool deployed at {}', [event.transaction.hash.toHexString()])
@@ -65,6 +72,28 @@ export function handleAddRegistryV1PlainPool(call: Add_pool_without_underlyingCa
     call.block.timestamp,
     call.block.number,
     call.transaction.hash
+  )
+}
+
+export function handleAddRegistryV1LendingPool(call: Add_poolCall): void {
+  log.debug('New lending pool {} added from registry at {}', [
+    call.inputs._pool.toHexString(),
+    call.transaction.hash.toHexString(),
+  ])
+  CurvePoolTemplate.create(call.inputs._pool)
+  const lpTokenContract = ERC20.bind(call.inputs._lp_token)
+  createNewPool(
+    call.inputs._pool,
+    call.inputs._lp_token,
+    lpTokenContract.name(),
+    lpTokenContract.symbol(),
+    LENDING,
+    false,
+    false,
+    call.block.number,
+    call.transaction.hash,
+    call.block.timestamp,
+    call.inputs._pool
   )
 }
 

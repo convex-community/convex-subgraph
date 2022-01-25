@@ -4,6 +4,7 @@ enum PoolType {
   FACTORY_V20
   REGISTRY_V1
   REGISTRY_V2
+  LENDING
 }
 
 type Platform @entity {

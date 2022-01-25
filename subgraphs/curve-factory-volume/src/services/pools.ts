@@ -23,6 +23,8 @@ import { CurvePool } from '../../generated/templates/CurvePoolTemplate/CurvePool
 import { CurvePoolCoin128 } from '../../generated/templates/CurvePoolTemplate/CurvePoolCoin128'
 import { ERC20 } from '../../generated/CurveRegistryV1/ERC20'
 import { CurveFactoryV20 } from '../../generated/CurveFactoryV20/CurveFactoryV20'
+import { CurveLendingPool } from '../../generated/CurveRegistryV1/CurveLendingPool'
+import { CurveLendingPoolCoin128 } from '../../generated/CurveRegistryV1/CurveLendingPoolCoin128'
 
 export function createNewPool(
   poolAddress: Address,
@@ -250,6 +252,53 @@ export function getBasePool(pool: Address): BasePool {
       coinDecimals.push(getDecimals(coinResult.value))
       i += 1
       coinResult = poolContract.try_coins(BigInt.fromI32(i))
+    }
+    basePool.coins = coins
+    basePool.coinDecimals = coinDecimals
+    basePool.save()
+  }
+  return basePool
+}
+
+export function getVirtualBaseLendingPool(pool: Address): BasePool {
+  // we're creating fake base pools for lending pools just to have
+  // an entity where we can store underlying coins and decimals
+  let basePool = BasePool.load(pool.toHexString())
+  if (!basePool) {
+    log.info('Adding new virtual base lending pool : {}', [pool.toHexString()])
+    basePool = new BasePool(pool.toHexString())
+    const poolContract = CurveLendingPool.bind(pool)
+    const coins = basePool.coins
+    const coinDecimals = basePool.coinDecimals
+    let i = 0
+    let coinResult = poolContract.try_underlying_coins(BigInt.fromI32(i))
+
+    if (coinResult.reverted) {
+      // some lending pools require an int128 for underlying coins
+      // e.g. 0x52ea46506b9cc5ef470c5bf89f17dc28bb35d85c
+      log.debug('Call to coins reverted for pool ({}), attempting 128 bytes call', [basePool.id])
+      const poolContract = CurveLendingPoolCoin128.bind(pool)
+      coinResult = poolContract.try_underlying_coins(BigInt.fromI32(i))
+      // needs to be repeated because can't assign a CurveLendingPoolCoin128 to
+      // poolContract which is CurveLendingPool
+      // TODO: see how to get around somehow
+      while (!coinResult.reverted) {
+        coins.push(coinResult.value)
+        coinDecimals.push(getDecimals(coinResult.value))
+        i += 1
+        coinResult = poolContract.try_underlying_coins(BigInt.fromI32(i))
+      }
+      basePool.coins = coins
+      basePool.coinDecimals = coinDecimals
+      basePool.save()
+      return basePool
+    }
+
+    while (!coinResult.reverted) {
+      coins.push(coinResult.value)
+      coinDecimals.push(getDecimals(coinResult.value))
+      i += 1
+      coinResult = poolContract.try_underlying_coins(BigInt.fromI32(i))
     }
     basePool.coins = coins
     basePool.coinDecimals = coinDecimals

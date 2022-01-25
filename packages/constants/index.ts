@@ -122,6 +122,7 @@ export const FACTORY_V12 = 'FACTORY_V12'
 export const FACTORY_V20 = 'FACTORY_V20'
 export const REGISTRY_V1 = 'REGISTRY_V1'
 export const REGISTRY_V2 = 'REGISTRY_V2'
+export const LENDING = 'LENDING'
 
 // The arrays are to map the asset types for the various curve pools
 // It's necessary because pools are often instantiated with the wrong asset type

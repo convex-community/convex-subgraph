@@ -115,6 +115,10 @@ dataSources:
           file: ./abis/CurveFactoryV12.json
         - name: CurvePool
           file: ./abis/CurvePool.json
+        - name: CurveLendingPool
+          file: ./abis/CurveLendingPool.json
+        - name: CurveLendingPoolCoin128
+          file: ./abis/CurveLendingPoolCoin128.json
         - name: CurvePoolCoin128
           file: ../../abis/CurvePoolCoin128.json
         - name: ERC20
@@ -124,8 +128,8 @@ dataSources:
           handler: handleAddRegistryV1MetaPool
         - function: add_pool_without_underlying(address,uint256,address,bytes32,uint256,uint256,bool,bool,string)
           handler: handleAddRegistryV1PlainPool
-        #- function: add_pool(address,uint256,address,bytes32,uint256,uint256,bool,bool,string)
-        #  handler: handleAddRegistryV1LendingPool
+        - function: add_pool(address,uint256,address,bytes32,uint256,uint256,bool,bool,string)
+          handler: handleAddRegistryV1LendingPool
       file: ./src/mapping.ts
   - kind: ethereum/contract
     name: CurveRegistryV2
@@ -147,6 +151,8 @@ dataSources:
           file: ./abis/CurveRegistryV2.json
         - name: CurvePool
           file: ./abis/CurvePool.json
+        - name: CurveLendingPool
+          file: ./abis/CurveLendingPool.json
         - name: CurvePoolV2
           file: ./abis/CurvePoolV2.json
         - name: ERC20
@@ -178,6 +184,10 @@ templates:
           file: ./abis/CurveFactoryV12.json
         - name: CurvePool
           file: ./abis/CurvePool.json
+        - name: CurveLendingPool
+          file: ./abis/CurveLendingPool.json
+        - name: CurveLendingPoolCoin128
+          file: ./abis/CurveLendingPoolCoin128.json
         - name: ERC20
           file: ../../abis/ERC20.json
         - name: Factory

@@ -8,8 +8,8 @@ import {
   getWeeklySwapSnapshot,
   takePoolSnapshots,
 } from './snapshots'
-import { BIG_DECIMAL_TWO, BIG_INT_ONE, FACTORY_V12 } from '../../../../packages/constants'
-import { getBasePool } from './pools'
+import { BIG_DECIMAL_TWO, BIG_INT_ONE, FACTORY_V12, LENDING } from '../../../../packages/constants'
+import { getBasePool, getVirtualBaseLendingPool } from './pools'
 import { bytesToAddress } from '../../../../packages/utils'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
 
@@ -35,7 +35,19 @@ export function handleExchange(
   let tokenSold: Bytes, tokenBought: Bytes
   let tokenSoldDecimals: BigInt, tokenBoughtDecimals: BigInt
 
-  if (exchangeUnderlying && soldId != 0) {
+  if (exchangeUnderlying && pool.poolType == LENDING) {
+    const basePool = getVirtualBaseLendingPool(bytesToAddress(pool.basePool))
+    if (soldId > basePool.coins.length) {
+      log.error('Undefined underlying sold Id {} for lending pool {} at tx {}', [
+        soldId.toString(),
+        pool.id,
+        txhash.toHexString(),
+      ])
+      return
+    }
+    tokenSold = basePool.coins[soldId]
+    tokenSoldDecimals = basePool.coinDecimals[soldId]
+  } else if (exchangeUnderlying && soldId != 0) {
     const underlyingSoldIndex = soldId - 1
     const basePool = getBasePool(bytesToAddress(pool.basePool))
     if (underlyingSoldIndex > basePool.coins.length) {
@@ -63,7 +75,19 @@ export function handleExchange(
     tokenSoldDecimals = pool.coinDecimals[soldId]
   }
 
-  if (exchangeUnderlying && boughtId != 0) {
+  if (exchangeUnderlying && pool.poolType == LENDING) {
+    const basePool = getVirtualBaseLendingPool(bytesToAddress(pool.basePool))
+    if (boughtId > basePool.coins.length) {
+      log.error('Undefined underlying bought Id {} for lending pool {} at tx {}', [
+        boughtId.toString(),
+        pool.id,
+        txhash.toHexString(),
+      ])
+      return
+    }
+    tokenBought = basePool.coins[boughtId]
+    tokenBoughtDecimals = basePool.coinDecimals[boughtId]
+  } else if (exchangeUnderlying && boughtId != 0) {
     const underlyingBoughtIndex = boughtId - 1
     const basePool = getBasePool(bytesToAddress(pool.basePool))
     if (underlyingBoughtIndex > basePool.coins.length) {
