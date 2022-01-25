@@ -60,13 +60,13 @@ export function getEthRateUniV3(token: Address): BigDecimal {
   const factory = FactoryV3.bind(UNI_V3_FACTORY_ADDRESS)
   let fee = 3000
   // first try the 0.3% pool
-  let pool = factory.getPool(token, WETH_ADDRESS, fee)
-  if (pool == ADDRESS_ZERO) {
+  let poolCall = factory.try_getPool(token, WETH_ADDRESS, fee)
+  if (poolCall.reverted || poolCall.value == ADDRESS_ZERO) {
     log.debug('No Uni v3 pair (.3%) found for {}', [token.toHexString()])
     // if it fails, try 1%
     fee = 10000
-    pool = factory.getPool(token, WETH_ADDRESS, fee)
-    if (pool == ADDRESS_ZERO) {
+    poolCall = factory.try_getPool(token, WETH_ADDRESS, fee)
+    if (poolCall.reverted || poolCall.value == ADDRESS_ZERO) {
       log.debug('No Uni v3 pair (1%) found for {}', [token.toHexString()])
       return BIG_DECIMAL_ZERO
     }
