@@ -11,6 +11,7 @@ import {
   CURVE_FACTORY_V1_2,
   CURVE_FACTORY_V2,
   CURVE_PLATFORM_ID,
+  EARLY_V2_POOLS,
   FACTORY_V10,
   FACTORY_V12,
   FACTORY_V20,
@@ -52,7 +53,7 @@ export function createNewPool(
   pool.lpToken = lpToken
   pool.symbol = symbol
   pool.metapool = metapool
-  pool.isV2 = isV2
+  pool.isV2 = EARLY_V2_POOLS.includes(poolAddress) ? true : isV2
   pool.address = poolAddress
   pool.creationBlock = block
   pool.creationTx = tx
