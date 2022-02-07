@@ -681,10 +681,6 @@
       {
         "name": "_name",
         "type": "string"
-      },
-      {
-        "name": "_base_pool",
-        "type": "address"
       }
     ],
     "outputs": []
