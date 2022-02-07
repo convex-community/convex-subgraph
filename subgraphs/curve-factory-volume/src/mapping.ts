@@ -1,6 +1,13 @@
 import { createNewFactoryPool, createNewPool, createNewRegistryPool } from './services/pools'
 import { handleExchange } from './services/swaps'
-import { ADDRESS_ZERO, BIG_INT_ONE, CURVE_FACTORY_V1_2, LENDING } from '../../../packages/constants'
+import {
+  ADDRESS_ZERO,
+  BIG_INT_ONE,
+  CURVE_FACTORY_V1_2,
+  EARLY_V2_POOLS,
+  LENDING,
+  TRIPOOL_ADDRESS,
+} from '../../../packages/constants'
 import { Add_existing_metapoolsCall, PlainPoolDeployed } from '../generated/CurveFactoryV12/CurveFactoryV12'
 import { MetaPoolDeployed } from '../generated/CurveFactoryV10/CurveFactoryV10'
 import {
@@ -24,7 +31,6 @@ import {
   Add_pool_without_underlyingCall,
   Add_poolCall,
 } from '../generated/CurveRegistryV1/CurveRegistryV1'
-import { AddPoolCall } from '../../curve-pools/generated/Booster/Booster'
 import { ERC20 } from '../generated/CurveRegistryV1/ERC20'
 import { CurvePoolTemplate } from '../generated/templates'
 
@@ -51,7 +57,24 @@ export function handleAddRegistryV1MetaPool(call: Add_metapoolCall): void {
     call.inputs._base_pool,
     call.inputs._lp_token,
     true,
-    false,
+    EARLY_V2_POOLS.includes(call.inputs._pool) ? true : false,
+    call.block.timestamp,
+    call.block.number,
+    call.transaction.hash
+  )
+}
+
+export function handleAddRegistryV1MetaPoolTriPool(call: Add_metapoolCall): void {
+  log.debug('New meta pool {} added from registry at {}', [
+    call.inputs._pool.toHexString(),
+    call.transaction.hash.toHexString(),
+  ])
+  createNewRegistryPool(
+    call.inputs._pool,
+    TRIPOOL_ADDRESS,
+    call.inputs._lp_token,
+    true,
+    EARLY_V2_POOLS.includes(call.inputs._pool) ? true : false,
     call.block.timestamp,
     call.block.number,
     call.transaction.hash
@@ -68,7 +91,7 @@ export function handleAddRegistryV1PlainPool(call: Add_pool_without_underlyingCa
     ADDRESS_ZERO,
     call.inputs._lp_token,
     false,
-    false,
+    EARLY_V2_POOLS.includes(call.inputs._pool) ? true : false,
     call.block.timestamp,
     call.block.number,
     call.transaction.hash
