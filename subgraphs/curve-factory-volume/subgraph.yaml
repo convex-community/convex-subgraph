@@ -129,7 +129,7 @@ dataSources:
         - function: add_metapool(address,uint256,address,uint256,string,address)
           handler: handleAddRegistryV1MetaPool
         - function: add_metapool(address,uint256,address,uint256,string)
-          handler: handleAddRegistryV1MetaPoolTriPool
+          handler: handleAddRegistryV1MetaPoolUnspecified
         - function: add_pool_without_underlying(address,uint256,address,bytes32,uint256,uint256,bool,bool,string)
           handler: handleAddRegistryV1PlainPool
         - function: add_pool(address,uint256,address,bytes32,uint256,uint256,bool,bool,string)
