@@ -65,7 +65,7 @@ export function handleAddRegistryV1MetaPool(call: Add_metapoolCall): void {
   )
 }
 
-export function handleAddRegistryV1MetaPoolTriPool(call: Add_metapoolCall): void {
+export function handleAddRegistryV1MetaPoolUnspecified(call: Add_metapoolCall): void {
   log.debug('New meta pool {} added from registry at {}', [
     call.inputs._pool.toHexString(),
     call.transaction.hash.toHexString(),
