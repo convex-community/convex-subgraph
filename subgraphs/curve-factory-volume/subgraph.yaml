@@ -119,6 +119,8 @@ dataSources:
           file: ./abis/CurveLendingPool.json
         - name: CurveLendingPoolCoin128
           file: ./abis/CurveLendingPoolCoin128.json
+        - name: MetaPool
+          file: ./abis/MetaPool.json
         - name: CurvePoolCoin128
           file: ../../abis/CurvePoolCoin128.json
         - name: ERC20
