@@ -55,6 +55,7 @@ export function handleStaked(event: Staked): void {
   lock.boostedAmount = event.params._boostedAmount
   lock.time = event.block.timestamp
   user.totalLocked = user.totalLocked.plus(lock.lockAmount)
+  user.totalLockedUSD = user.totalLockedUSD.plus(lock.amountUSD)
   user.save()
   lock.save()
   updateAggregatedLocks(lock.time, lock.lockAmount, lock.amountUSD)
