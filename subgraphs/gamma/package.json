@@ -1,0 +1,16 @@
+{
+  "name": "gamma",
+  "license": "UNLICENSED",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ convex-community/gamma",
+    "create-local": "graph create --node http://localhost:8020/ convex-community/gamma",
+    "remove-local": "graph remove --node http://localhost:8020/ convex-community/gamma",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 convex-community/gamma"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.22.3",
+    "@graphprotocol/graph-ts": "0.22.1"
+  }
+}
