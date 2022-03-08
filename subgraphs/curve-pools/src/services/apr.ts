@@ -18,6 +18,7 @@ import {
   EURT_ADDRESS,
   EUR_LP_TOKEN,
   EURS_ADDRESS,
+  SYNTH_TOKENS,
 } from 'const'
 
 import { ERC20 } from '../../generated/Booster/ERC20'
@@ -51,6 +52,16 @@ export function getV2LpTokenPrice(pool: Pool): BigDecimal {
       price = getForexUsdRate(ByteArray.fromHexString(EUR_LP_TOKEN) as Bytes)
     } else {
       price = getUsdRate(currentCoin)
+    }
+    // for wrapped tokens and synths, we use a mapping
+    // get the price of the original asset and multiply that by the pool's price oracle
+    if (price == BIG_DECIMAL_ZERO && SYNTH_TOKENS.has(currentCoin.toHexString())) {
+      price = getUsdRate(SYNTH_TOKENS[currentCoin.toHexString()])
+      const poolContract = CurvePool.bind(bytesToAddress(pool.swap))
+      const priceOracleResult = poolContract.try_price_oracle()
+      price = priceOracleResult.reverted
+        ? price
+        : price.times(priceOracleResult.value.toBigDecimal().div(BIG_DECIMAL_1E18))
     }
     // Some pools have WETH listed under "coins" but actually use native ETH
     // In case we encounter similar missing coins, we keep track of all
