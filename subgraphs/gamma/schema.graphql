@@ -1,0 +1,38 @@
+type Platform @entity {
+  id: ID!
+  pools: [Pool!]! @derivedFrom(field: "platform")
+  poolAddresses: [String!]!
+  factoryPoolCount: BigInt!
+  latestPoolSnapshot: BigInt!
+}
+
+
+type Pool @entity {
+  id: ID!
+  address: Bytes!
+  platform: Platform!
+  name: String!
+  lpToken: Bytes!
+  coins: [Bytes!]!
+  coinDecimals: [BigInt!]!
+  dailySnapshots: [DailySnapshot!] @derivedFrom(field: "pool")
+}
+
+
+type DailySnapshot @entity {
+  id: ID!
+  pool: Pool!
+  poolId: BigInt!
+  address: Bytes!
+  reserves: [BigInt!]!
+  pricesUsd: [BigDecimal!]!
+  reservesUsd: [BigDecimal!]!
+  lpTokenSupply: BigInt
+  timestamp: BigInt!
+}
+
+type TokenSnapshot @entity {
+  id: ID!
+  price: BigDecimal!
+  timestamp: BigInt!
+}
