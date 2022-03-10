@@ -1,7 +1,13 @@
 import { Address, BigInt, log } from '@graphprotocol/graph-ts'
 import { PoolAdded } from '../generated/CurveRegistryV2/CurveRegistryV2'
 import { DailySnapshot, Platform, Pool, TokenSnapshot } from '../generated/schema'
-import { BIG_INT_ONE, CURVE_PLATFORM_ID } from '../../../packages/constants'
+import {
+  BIG_DECIMAL_1E18,
+  BIG_DECIMAL_ZERO,
+  BIG_INT_ONE,
+  CURVE_PLATFORM_ID,
+  SYNTH_TOKENS,
+} from '../../../packages/constants'
 import { ERC20 } from '../generated/CurveRegistryV2/ERC20'
 import { getDecimals, getUsdRate } from '../../../packages/utils/pricing'
 import { CurvePoolTemplateV2 } from '../generated/templates'
@@ -100,13 +106,13 @@ export function takeSnapshot(timestamp: BigInt): void {
     if (!pool) {
       return
     }
-    const poolAddress = pool.address
+    const poolAddress = bytesToAddress(pool.address)
     const snapId = pool.id + '-' + time.toString()
     if (!DailySnapshot.load(snapId)) {
       const dailySnapshot = new DailySnapshot(snapId)
       dailySnapshot.pool = pool.id
       dailySnapshot.address = pool.address
-      const poolContract = CurvePoolV2.bind(bytesToAddress(pool.address))
+      const poolContract = CurvePoolV2.bind(poolAddress)
 
       const reserves = dailySnapshot.reserves
       const pricesUsd = dailySnapshot.pricesUsd
@@ -114,7 +120,7 @@ export function takeSnapshot(timestamp: BigInt): void {
       for (let j = 0; j < pool.coins.length; j++) {
         const balance = poolContract.balances(BigInt.fromI32(j))
         reserves.push(balance)
-        const priceSnapshot = getCryptoTokenSnapshot(bytesToAddress(pool.coins[j]), timestamp)
+        const priceSnapshot = getCryptoTokenSnapshot(bytesToAddress(pool.coins[j]), timestamp, poolAddress)
         const price = priceSnapshot.price
         pricesUsd.push(price)
         reservesUsd.push(balance.toBigDecimal().div(exponentToBigDecimal(pool.coinDecimals[j])).times(price))
@@ -131,14 +137,25 @@ export function takeSnapshot(timestamp: BigInt): void {
   }
 }
 
-export function getCryptoTokenSnapshot(asset: Address, timestamp: BigInt): TokenSnapshot {
+export function getCryptoTokenSnapshot(asset: Address, timestamp: BigInt, poolAddress: Address): TokenSnapshot {
   const hour = getIntervalFromTimestamp(timestamp, DAY)
   const snapshotId = asset.toHexString() + '-' + hour.toString()
   let snapshot = TokenSnapshot.load(snapshotId)
   if (!snapshot) {
     snapshot = new TokenSnapshot(snapshotId)
     snapshot.timestamp = hour
-    const price = getUsdRate(asset)
+    let price = getUsdRate(asset)
+    if (price == BIG_DECIMAL_ZERO && SYNTH_TOKENS.has(asset.toHexString())) {
+      log.warning('Invalid price found for {}', [asset.toHexString()])
+      price = getUsdRate(SYNTH_TOKENS[asset.toHexString()])
+      const poolContract = CurvePoolV2.bind(bytesToAddress(poolAddress))
+      const priceOracleResult = poolContract.try_price_oracle()
+      if (!priceOracleResult.reverted) {
+        price = price.times(priceOracleResult.value.toBigDecimal().div(BIG_DECIMAL_1E18))
+      } else {
+        log.warning('Price oracle reverted {}', [asset.toHexString()])
+      }
+    }
     snapshot.price = price
     snapshot.save()
   }
