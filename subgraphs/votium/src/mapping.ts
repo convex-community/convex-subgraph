@@ -20,7 +20,14 @@ export function handleUpdatedFee(event: UpdatedFee): void {
 }
 
 export function handleBribed(event: Bribed): void {
-  const bribe = new Bribe(event.transaction.hash.toHexString() + '-' + event.params._token.toHexString())
+  const bribe = new Bribe(
+    event.transaction.hash.toHexString() +
+      '-' +
+      event.params._token.toHexString() +
+      '-' +
+      event.params._choiceIndex.toString() +
+      event.params._amount.toString()
+  )
 
   bribe.epoch = event.params._proposal.toHexString()
   bribe.amount = event.params._amount
