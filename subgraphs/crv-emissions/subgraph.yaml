@@ -119,6 +119,8 @@ templates:
           handler: handleDeposit
         - event: UpdateLiquidityLimit(address,uint256,uint256,uint256,uint256)
           handler: handleUpdateLiquidityLimit
+        - event: UpdateLiquidityLimit(indexed address,uint256,uint256,uint256,uint256)
+          handler: handleUpdateLiquidityLimit
         - event: Withdraw(indexed address,uint256)
           handler: handleWithdraw
       file: ./src/mapping.ts
