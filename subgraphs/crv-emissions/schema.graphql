@@ -7,6 +7,32 @@ type Platform @entity {
   snapshotTimes: [SnapshotTime!] @derivedFrom(field: "platform")
 }
 
+type GaugeLiquidity @entity {
+  id: ID!
+  user: Bytes!
+  gauge: Gauge!
+  originalBalance: BigInt!
+  originalSupply: BigInt!
+  workingBalance: BigInt!
+  workingSupply: BigInt!
+  timestamp: BigInt!
+  block: BigInt!
+  transaction: Bytes!
+}
+
+type GaugeDeposit @entity {
+  id: ID!
+  gauge: Gauge!
+  provider: Bytes!
+  value: BigInt!
+}
+
+type GaugeWithdraw @entity {
+  id: ID!
+  gauge: Gauge!
+  provider: Bytes!
+  value: BigInt!
+}
 
 type Gauge @entity {
   id: ID!
