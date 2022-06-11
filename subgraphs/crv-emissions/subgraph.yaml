@@ -100,5 +100,29 @@ templates:
         - event: ClaimAdminFee(indexed address,uint256)
           handler: handleClaimAdminFee
       file: ./src/mapping.ts
+  - name: LiquidityGaugeTemplate
+    kind: ethereum/contract
+    network: mainnet
+    source:
+      abi: LiquidityGauge
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - GaugeLiquidity
+      abis:
+        - name: LiquidityGauge
+          file: ./abis/LiquidityGauge.json
+      eventHandlers:
+        - event: Deposit(indexed address,uint256)
+          handler: handleDeposit
+        - event: UpdateLiquidityLimit(address,uint256,uint256,uint256,uint256)
+          handler: handleUpdateLiquidityLimit
+        - event: UpdateLiquidityLimit(indexed address,uint256,uint256,uint256,uint256)
+          handler: handleUpdateLiquidityLimit
+        - event: Withdraw(indexed address,uint256)
+          handler: handleWithdraw
+      file: ./src/mapping.ts
 
 

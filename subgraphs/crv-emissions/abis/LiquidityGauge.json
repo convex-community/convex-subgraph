@@ -66,6 +66,38 @@
     "type": "event"
   },
   {
+    "name": "UpdateLiquidityLimit",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "user",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "original_balance",
+        "indexed": false
+      },
+      {
+        "type": "uint256",
+        "name": "original_supply",
+        "indexed": false
+      },
+      {
+        "type": "uint256",
+        "name": "working_balance",
+        "indexed": false
+      },
+      {
+        "type": "uint256",
+        "name": "working_supply",
+        "indexed": false
+      }
+    ],
+    "anonymous": false,
+    "type": "event"
+  },
+  {
     "outputs": [],
     "inputs": [
       {
