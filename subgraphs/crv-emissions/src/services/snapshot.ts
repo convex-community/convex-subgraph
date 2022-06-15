@@ -117,9 +117,8 @@ export function createAllSnapshots(timestamp: BigInt, block: BigInt): void {
 
       if (
         Address.fromString(gauge.pool) == ADDRESS_ZERO || // non-mainnet emissions
-        block.toI32() < 12667823
+        block.toI32() < 12667823 // no registry before this block
       ) {
-        // no registry before this block
         continue
       }
       const pool = getPool(Address.fromString(gauge.pool))
