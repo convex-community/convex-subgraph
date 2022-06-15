@@ -34,6 +34,7 @@ import { getPlatform } from './services/platform'
 import { recordFeeRevenue, takeWeeklyRevenueSnapshot } from './services/revenue'
 import { PoolCrvRewards } from '../generated/templates'
 import { CurveToken } from '../generated/Booster/CurveToken'
+import { getUser } from './services/user'
 
 export function handleAddPool(call: AddPoolCall): void {
   const platform = getPlatform()
@@ -137,7 +138,7 @@ export function handleShutdownPool(call: ShutdownPoolCall): void {
 // TODO: Merge logic with deposit logic
 export function handleWithdrawn(event: WithdrawnEvent): void {
   const withdrawal = new Withdrawal(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
-  withdrawal.user = event.params.user.toHexString()
+  withdrawal.user = getUser(event.params.user).id
   withdrawal.poolid = event.params.poolid.toString()
   withdrawal.amount = event.params.amount
   withdrawal.timestamp = event.block.timestamp
@@ -195,7 +196,7 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
 
 export function handleDeposited(event: DepositedEvent): void {
   const deposit = new Deposit(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
-  deposit.user = event.params.user.toHexString()
+  deposit.user = getUser(event.params.user).id
   deposit.poolid = event.params.poolid.toString()
   deposit.amount = event.params.amount
   deposit.timestamp = event.block.timestamp
