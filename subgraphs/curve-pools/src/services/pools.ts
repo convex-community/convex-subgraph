@@ -52,19 +52,6 @@ export function getPoolCoins(pool: Pool): void {
   pool.save()
 }
 
-export function getDailyPoolSnapshot(poolid: BigInt, name: string, timestamp: BigInt): DailyPoolSnapshot {
-  const time = getIntervalFromTimestamp(timestamp, DAY)
-  const snapId = name + '-' + poolid.toString() + '-' + time.toString()
-  let dailySnapshot = DailyPoolSnapshot.load(snapId)
-  if (!dailySnapshot) {
-    dailySnapshot = new DailyPoolSnapshot(snapId)
-    dailySnapshot.poolid = poolid.toString()
-    dailySnapshot.poolName = name.toString()
-    dailySnapshot.timestamp = time
-  }
-  return dailySnapshot
-}
-
 export function getPoolExtras(pool: Pool): void {
   switch (pool.stashVersion.toI32()) {
     case 1:

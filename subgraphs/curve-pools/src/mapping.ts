@@ -42,6 +42,7 @@ import { recordFeeRevenue, takeWeeklyRevenueSnapshot } from './services/revenue'
 import { PoolCrvRewards } from '../generated/templates'
 import { CurveToken } from '../generated/Booster/CurveToken'
 import { getUser } from './services/user'
+import { getDailyPoolSnapshot } from './services/snapshots'
 
 export function handleAddPool(call: AddPoolCall): void {
   const platform = getPlatform()
@@ -164,34 +165,9 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
     lpSupply == BIG_INT_ZERO ? BIG_DECIMAL_ONE : pool.lpTokenBalance.toBigDecimal().div(lpSupply.toBigDecimal())
   pool.tvl = pool.lpTokenBalance.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice)
 
-  // TODO: can be replaced by getDailyPoolSnapshot to DRY once AssemblyScript
-  // supports tuples as return values
-  const time = getIntervalFromTimestamp(event.block.timestamp, DAY)
-  const snapId = pool.name + '-' + withdrawal.poolid.toString() + '-' + time.toString()
-  let snapshot = DailyPoolSnapshot.load(snapId)
+  const snapshot = getDailyPoolSnapshot(pool, event.block.timestamp)
 
-  // we only do call-heavy calculations once upon snapshot creation
-  if (!snapshot) {
-    snapshot = new DailyPoolSnapshot(snapId)
-    snapshot.poolid = event.params.poolid.toString()
-    snapshot.poolName = pool.name
-    snapshot.timestamp = event.block.timestamp
-    const aprs = getPoolApr(pool, event.block.timestamp)
-    pool.crvApr = aprs[0]
-    pool.cvxApr = aprs[1]
-    pool.extraRewardsApr = aprs[2]
-    snapshot.lpTokenVirtualPrice = getLpTokenVirtualPrice(pool)
-    snapshot.lpTokenUSDPrice = pool.lpTokenUSDPrice
-    snapshot.crvApr = pool.crvApr
-    snapshot.cvxApr = pool.cvxApr
-    snapshot.extraRewardsApr = pool.extraRewardsApr
-    snapshot.lpTokenBalance = pool.lpTokenBalance
-    snapshot.curveTvlRatio = pool.curveTvlRatio
-
-    pool.baseApr = getPoolBaseApr(pool, snapshot.lpTokenVirtualPrice, event.block.timestamp)
-    snapshot.baseApr = pool.baseApr
-  }
-
+  pool.baseApr = snapshot.baseApr
   snapshot.tvl = pool.tvl
   snapshot.withdrawalCount = snapshot.withdrawalCount.plus(BIG_INT_ONE)
   snapshot.withdrawalVolume = snapshot.withdrawalVolume.plus(event.params.amount)
@@ -222,39 +198,9 @@ export function handleDeposited(event: DepositedEvent): void {
   log.debug('LP Token price USD for pool {}: {}', [pool.name, lpPrice.toString()])
   pool.tvl = pool.lpTokenBalance.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice)
 
-  // TODO: can be replaced by getDailyPoolSnapshot to DRY once AssemblyScript
-  // supports tuples as return values
-  const time = getIntervalFromTimestamp(event.block.timestamp, DAY)
-  const snapId = pool.name + '-' + deposit.poolid.toString() + '-' + time.toString()
-  let snapshot = DailyPoolSnapshot.load(snapId)
+  const snapshot = getDailyPoolSnapshot(pool, event.block.timestamp)
 
-  // we only do call-heavy calculations once upon snapshot creation
-  if (!snapshot) {
-    snapshot = new DailyPoolSnapshot(snapId)
-    snapshot.poolid = event.params.poolid.toString()
-    snapshot.poolName = pool.name
-    snapshot.timestamp = event.block.timestamp
-    const aprs = getPoolApr(pool, event.block.timestamp)
-    pool.crvApr = aprs[0]
-    pool.cvxApr = aprs[1]
-    pool.extraRewardsApr = aprs[2]
-    snapshot.lpTokenVirtualPrice = getLpTokenVirtualPrice(pool)
-    snapshot.lpTokenUSDPrice = pool.lpTokenUSDPrice
-    snapshot.crvApr = pool.crvApr
-    snapshot.cvxApr = pool.cvxApr
-    snapshot.extraRewardsApr = pool.extraRewardsApr
-    snapshot.lpTokenBalance = pool.lpTokenBalance
-    snapshot.curveTvlRatio = pool.curveTvlRatio
-    if (pool.isV2) {
-      const xcpProfits = getXcpProfitResult(pool)
-      snapshot.xcpProfit = xcpProfits[0]
-      snapshot.xcpProfitA = xcpProfits[1]
-      pool.baseApr = getV2PoolBaseApr(pool, snapshot.xcpProfit, snapshot.xcpProfitA, event.block.timestamp)
-    }
-    pool.baseApr = getPoolBaseApr(pool, snapshot.lpTokenVirtualPrice, event.block.timestamp)
-    snapshot.baseApr = pool.baseApr
-  }
-
+  pool.baseApr = snapshot.baseApr
   snapshot.tvl = pool.tvl
   snapshot.depositCount = snapshot.depositCount.plus(BIG_INT_ONE)
   snapshot.depositVolume = snapshot.depositVolume.plus(event.params.amount)

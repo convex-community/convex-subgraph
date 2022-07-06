@@ -27,7 +27,7 @@ import { getTokenAValueInTokenB, getUsdRate } from '../../../../packages/utils/p
 import { ChainlinkAggregator } from '../../generated/Booster/ChainlinkAggregator'
 import { Pool } from '../../generated/schema'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
-import { getDailyPoolSnapshot } from './pools'
+import { getDailyPoolSnapshot } from './snapshots'
 import { DAY } from '../../../../packages/utils/time'
 import { CurvePool } from '../../generated/Booster/CurvePool'
 
@@ -143,7 +143,7 @@ export function getV2PoolBaseApr(
   currentXcpProfitA: BigDecimal,
   timestamp: BigInt
 ): BigDecimal {
-  const previousSnapshot = getDailyPoolSnapshot(BigInt.fromString(pool.id), pool.name, timestamp.minus(DAY))
+  const previousSnapshot = getDailyPoolSnapshot(pool, timestamp.minus(DAY))
   if (!previousSnapshot) {
     return BIG_DECIMAL_ZERO
   }
@@ -169,7 +169,7 @@ export function getV2PoolBaseApr(
 }
 
 export function getPoolBaseApr(pool: Pool, currentVirtualPrice: BigDecimal, timestamp: BigInt): BigDecimal {
-  const previousDaySnapshot = getDailyPoolSnapshot(BigInt.fromString(pool.id), pool.name, timestamp.minus(DAY))
+  const previousDaySnapshot = getDailyPoolSnapshot(pool, timestamp.minus(DAY))
   const previousDayVPrice = previousDaySnapshot.lpTokenVirtualPrice
   const baseApr =
     previousDayVPrice == BIG_DECIMAL_ZERO
