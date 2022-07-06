@@ -9,7 +9,14 @@ import {
 } from '../generated/Booster/Booster'
 import { DailyPoolSnapshot, Pool } from '../generated/schema'
 import { Deposit, Withdrawal } from '../generated/schema'
-import { getLpTokenSupply, getPool, getPoolApr, getPoolCoins, getPoolExtras } from './services/pools'
+import {
+  getLpTokenSupply,
+  getPool,
+  getPoolApr,
+  getPoolCoins,
+  getPoolExtras,
+  getXcpProfitResult,
+} from './services/pools'
 import {
   ADDRESS_ZERO,
   CONVEX_PLATFORM_ID,
@@ -27,7 +34,7 @@ import {
 } from 'const'
 import { CurveRegistry } from '../generated/Booster/CurveRegistry'
 import { ERC20 } from '../generated/Booster/ERC20'
-import { getLpTokenPriceUSD, getLpTokenVirtualPrice, getPoolBaseApr } from './services/apr'
+import { getLpTokenPriceUSD, getLpTokenVirtualPrice, getPoolBaseApr, getV2PoolBaseApr } from './services/apr'
 import { Address, Bytes, DataSourceContext, log } from '@graphprotocol/graph-ts'
 import { getIntervalFromTimestamp, DAY } from '../../../packages/utils/time'
 import { getPlatform } from './services/platform'
@@ -238,7 +245,12 @@ export function handleDeposited(event: DepositedEvent): void {
     snapshot.extraRewardsApr = pool.extraRewardsApr
     snapshot.lpTokenBalance = pool.lpTokenBalance
     snapshot.curveTvlRatio = pool.curveTvlRatio
-
+    if (pool.isV2) {
+      const xcpProfits = getXcpProfitResult(pool)
+      snapshot.xcpProfit = xcpProfits[0]
+      snapshot.xcpProfitA = xcpProfits[1]
+      pool.baseApr = getV2PoolBaseApr(pool, snapshot.xcpProfit, snapshot.xcpProfitA, event.block.timestamp)
+    }
     pool.baseApr = getPoolBaseApr(pool, snapshot.lpTokenVirtualPrice, event.block.timestamp)
     snapshot.baseApr = pool.baseApr
   }

@@ -19,6 +19,7 @@ import {
   EUR_LP_TOKEN,
   EURS_ADDRESS,
   SYNTH_TOKENS,
+  BIG_DECIMAL_TWO,
 } from 'const'
 
 import { ERC20 } from '../../generated/Booster/ERC20'
@@ -134,6 +135,37 @@ export function getLpTokenVirtualPrice(pool: Pool): BigDecimal {
     }
   }
   return vPrice
+}
+
+export function getV2PoolBaseApr(
+  pool: Pool,
+  currentXcpProfit: BigDecimal,
+  currentXcpProfitA: BigDecimal,
+  timestamp: BigInt
+): BigDecimal {
+  const previousSnapshot = getDailyPoolSnapshot(BigInt.fromString(pool.id), pool.name, timestamp.minus(DAY))
+  if (!previousSnapshot) {
+    return BIG_DECIMAL_ZERO
+  }
+  const previousSnapshotXcpProfit = previousSnapshot.xcpProfit
+  // avoid creating an artificial apr jump if pool was just created
+  if (previousSnapshotXcpProfit == BIG_DECIMAL_ZERO) {
+    return BIG_DECIMAL_ZERO
+  }
+  const previousSnapshotXcpProfitA = previousSnapshot.xcpProfitA
+  const currentProfit = currentXcpProfit
+    .div(BIG_DECIMAL_TWO)
+    .plus(currentXcpProfitA.div(BIG_DECIMAL_TWO))
+    .plus(BIG_DECIMAL_1E18)
+    .div(BIG_DECIMAL_TWO)
+  const previousProfit = previousSnapshotXcpProfit
+    .div(BIG_DECIMAL_TWO)
+    .plus(previousSnapshotXcpProfitA.div(BIG_DECIMAL_TWO))
+    .plus(BIG_DECIMAL_1E18)
+    .div(BIG_DECIMAL_TWO)
+  const rate =
+    previousProfit == BIG_DECIMAL_ZERO ? BIG_DECIMAL_ZERO : currentProfit.minus(previousProfit).div(previousProfit)
+  return rate
 }
 
 export function getPoolBaseApr(pool: Pool, currentVirtualPrice: BigDecimal, timestamp: BigInt): BigDecimal {
