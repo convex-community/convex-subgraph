@@ -7,16 +7,9 @@ import {
   EarmarkRewardsCall,
   EarmarkFeesCall,
 } from '../generated/Booster/Booster'
-import { DailyPoolSnapshot, Pool } from '../generated/schema'
+import { Pool } from '../generated/schema'
 import { Deposit, Withdrawal } from '../generated/schema'
-import {
-  getLpTokenSupply,
-  getPool,
-  getPoolApr,
-  getPoolCoins,
-  getPoolExtras,
-  getXcpProfitResult,
-} from './services/pools'
+import { getLpTokenSupply, getPool, getPoolCoins, getPoolExtras } from './services/pools'
 import {
   ADDRESS_ZERO,
   CONVEX_PLATFORM_ID,
@@ -34,9 +27,8 @@ import {
 } from 'const'
 import { CurveRegistry } from '../generated/Booster/CurveRegistry'
 import { ERC20 } from '../generated/Booster/ERC20'
-import { getLpTokenPriceUSD, getLpTokenVirtualPrice, getPoolBaseApr, getV2PoolBaseApr } from './services/apr'
+import { getLpTokenPriceUSD } from './services/apr'
 import { Address, Bytes, DataSourceContext, log } from '@graphprotocol/graph-ts'
-import { getIntervalFromTimestamp, DAY } from '../../../packages/utils/time'
 import { getPlatform } from './services/platform'
 import { recordFeeRevenue, takeWeeklyRevenueSnapshot } from './services/revenue'
 import { PoolCrvRewards } from '../generated/templates'
@@ -143,7 +135,6 @@ export function handleShutdownPool(call: ShutdownPoolCall): void {
   pool.save()
 }
 
-// TODO: Merge logic with deposit logic
 export function handleWithdrawn(event: WithdrawnEvent): void {
   const withdrawal = new Withdrawal(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
   withdrawal.user = getUser(event.params.user).id
