@@ -28,6 +28,7 @@ import { ExtraRewardStashV32 } from '../../generated/Booster/ExtraRewardStashV32
 import { ExtraRewardStashV30 } from '../../generated/Booster/ExtraRewardStashV30'
 import { ERC20 } from '../../generated/Booster/ERC20'
 import { RedeemableKeep3r } from '../../generated/Booster/RedeemableKeep3r'
+import { CurvePoolV2 } from '../../generated/Booster/CurvePoolV2'
 
 export function getPool(pid: string): Pool {
   let pool = Pool.load(pid)
@@ -49,19 +50,6 @@ export function getPoolCoins(pool: Pool): void {
   }
   pool.coins = coins
   pool.save()
-}
-
-export function getDailyPoolSnapshot(poolid: BigInt, name: string, timestamp: BigInt): DailyPoolSnapshot {
-  const time = getIntervalFromTimestamp(timestamp, DAY)
-  const snapId = name + '-' + poolid.toString() + '-' + time.toString()
-  let dailySnapshot = DailyPoolSnapshot.load(snapId)
-  if (!dailySnapshot) {
-    dailySnapshot = new DailyPoolSnapshot(snapId)
-    dailySnapshot.poolid = poolid.toString()
-    dailySnapshot.poolName = name.toString()
-    dailySnapshot.timestamp = time
-  }
-  return dailySnapshot
 }
 
 export function getPoolExtras(pool: Pool): void {
@@ -251,6 +239,15 @@ export function getLpTokenSupply(lpToken: Bytes): BigInt {
     totalSupply = lpTokenSupplyResult.value
   }
   return totalSupply
+}
+
+export function getXcpProfitResult(pool: Pool): Array<BigDecimal> {
+  const poolContract = CurvePoolV2.bind(bytesToAddress(pool.swap))
+  const xcpProfitResult = poolContract.try_xcp_profit()
+  const xcpProfitAResult = poolContract.try_xcp_profit_a()
+  const xcpProfit = xcpProfitResult.reverted ? BIG_DECIMAL_ZERO : xcpProfitResult.value.toBigDecimal()
+  const xcpProfitA = xcpProfitAResult.reverted ? BIG_DECIMAL_ZERO : xcpProfitAResult.value.toBigDecimal()
+  return [xcpProfit, xcpProfitA]
 }
 
 export function getPoolApr(pool: Pool, timestamp: BigInt): Array<BigDecimal> {

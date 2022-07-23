@@ -126,6 +126,8 @@ type DailyPoolSnapshot @entity {
   lpTokenBalance: BigInt!
   lpTokenVirtualPrice: BigDecimal!
   lpTokenUSDPrice: BigDecimal!
+  xcpProfit: BigDecimal!
+  xcpProfitA: BigDecimal!
   tvl: BigDecimal!
   curveTvlRatio: BigDecimal!
   crvApr: BigDecimal!
