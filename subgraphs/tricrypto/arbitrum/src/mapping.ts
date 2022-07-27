@@ -8,7 +8,7 @@ import {
 } from '../generated/Tricrypto/Tricrypto'
 
 import { ETHID, WBTCID, USDTID, getPoolSnapshot, getPriceSnapshot } from './services/poolUtils'
-import { BIG_DECIMAL_1E18, BIG_DECIMAL_1E6, BIG_DECIMAL_1E8, BIG_DECIMAL_ONE } from '../../../packages/constants'
+import { BIG_DECIMAL_1E18, BIG_DECIMAL_1E6, BIG_DECIMAL_1E8, BIG_DECIMAL_ONE } from '../../../../packages/constants'
 
 export function handleTokenExchange(event: TokenExchange): void {
   const tricrypto2Snapshot = getPoolSnapshot(event)

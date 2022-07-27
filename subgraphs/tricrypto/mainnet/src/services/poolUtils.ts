@@ -8,7 +8,7 @@ import {
   TRICRYPTO2_LP_ADDRESS,
   BIG_INT_ONE,
   BIG_INT_ZERO,
-} from '../../../../packages/constants'
+} from '../../../../../packages/constants'
 import { BigInt } from '@graphprotocol/graph-ts/index'
 import { BigDecimal, ethereum } from '@graphprotocol/graph-ts'
 import { Tricrypto2 } from '../../generated/Tricrypto2/Tricrypto2'

@@ -8,7 +8,7 @@ import {
   BIG_INT_ZERO,
   TRICRYPTO_ARBITRUM_POOL_ADDRESS,
   TRICRYPTO_ARBITRUM_LP_TOKEN_ADDRESS,
-} from '../../../../packages/constants'
+} from '../../../../../packages/constants'
 
 import { BigInt } from '@graphprotocol/graph-ts/index'
 import { BigDecimal, ethereum } from '@graphprotocol/graph-ts'
