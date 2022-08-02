@@ -21,6 +21,7 @@ import {
   EURT_ADDRESS,
   EUR_LP_TOKEN,
   BIG_INT_ZERO,
+  EURS_ADDRESS,
 } from 'const'
 import { exponentToBigDecimal } from 'utils/maths'
 import { getBtcRate, getEthRate, getTokenAValueInTokenB, getUsdRate } from 'utils/pricing'
@@ -46,7 +47,7 @@ export function getV2LpTokenPrice(pool: Pool): BigDecimal {
     balance = balance.div(exponentToBigDecimal(decimals))
     let price = BIG_DECIMAL_ONE
     // handling edge cases that are not traded on Sushi
-    if (currentCoin == EURT_ADDRESS) {
+    if (currentCoin == EURT_ADDRESS || currentCoin == EURS_ADDRESS) {
       price = getForexUsdRate(ByteArray.fromHexString(EUR_LP_TOKEN) as Bytes)
     } else {
       price = getUsdRate(currentCoin)
