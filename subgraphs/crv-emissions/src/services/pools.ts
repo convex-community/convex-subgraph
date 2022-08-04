@@ -8,10 +8,6 @@ import {
   CURVE_PLATFORM_ID,
   CURVE_REGISTRY,
   CURVE_REGISTRY_V2,
-  EURS_USDC_LP_ADDRESS,
-  EURT_3CRV_LP_ADDRESS,
-  TRICRYPTO2_LP_ADDRESS,
-  TRICRYPTO_LP_ADDRESS,
   TRICRYPTO_LP_ADDRESSES,
   V2_SWAPS,
 } from '../../../../packages/constants'
@@ -30,6 +26,7 @@ export function getPool(lpToken: Address): Pool {
   if (!pool) {
     pool = new Pool(lpToken.toHexString())
     pool.lpToken = lpToken
+    pool.tvl = BIG_DECIMAL_ZERO
     let swapResult = curveRegistry.try_get_pool_from_lp_token(lpToken)
 
     // factory pools have lpToken = pool

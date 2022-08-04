@@ -106,6 +106,8 @@ export function createAllSnapshots(timestamp: BigInt, block: BigInt): void {
     emission.timestamp = thisWeek
     emission.block = block
     emission.gauge = gauge.id
+    emission.crvAmount = BIG_DECIMAL_ZERO
+    emission.value = BIG_DECIMAL_ZERO
     if (gaugeWeight) {
       const gaugeType = GaugeType.load(gauge.type)
       const gaugeTypeWeight = gaugeType ? gaugeType.weight.div(BIG_DECIMAL_1E18) : BIG_DECIMAL_ONE
@@ -135,6 +137,7 @@ export function createAllSnapshots(timestamp: BigInt, block: BigInt): void {
       snapshot.poolTokenPrice = getPoolTokenPrice(pool)
       const lpPrice = getLpTokenPriceUSD(pool)
       snapshot.tvl = snapshot.lpTokenSupply.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice)
+      snapshot.fees = BIG_DECIMAL_ZERO
       if (!pool.isV2) {
         const rate = getGrowthRate(pool, snapshot.virtualPrice, timestamp)
         snapshot.fees = previousTvl.times(rate).times(BigDecimal.fromString('2'))
