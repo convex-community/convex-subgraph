@@ -1,0 +1,39 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Tricrypto
+    network: arbitrum-one
+    source:
+      address: '0x960ea3e3c7fb317332d990873d354e18d7645590'
+      abi: Tricrypto
+      startBlock: 741883
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - TricryptoSnapshot
+        - AddLiquidityEvent
+        - RemoveLiquidityEvent
+        - ExchangeEvent
+        - ClaimAdminFeeEvent
+        - AssetPrice
+      abis:
+        - name: Tricrypto
+          file: ./abis/Tricrypto.json
+        - name: Crv3Crypto
+          file: ./abis/Crv3Crypto.json
+      eventHandlers:
+        - event: TokenExchange(indexed address,uint256,uint256,uint256,uint256)
+          handler: handleTokenExchange
+        - event: AddLiquidity(indexed address,uint256[3],uint256,uint256)
+          handler: handleAddLiquidity
+        - event: RemoveLiquidity(indexed address,uint256[3],uint256)
+          handler: handleRemoveLiquidity
+        - event: RemoveLiquidityOne(indexed address,uint256,uint256,uint256)
+          handler: handleRemoveLiquidityOne
+        - event: ClaimAdminFee(indexed address,uint256)
+          handler: handleClaimAdminFee
+      file: ./src/mapping.ts

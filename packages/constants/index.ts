@@ -93,6 +93,8 @@ export const EURS_USDC_LP_ADDRESS = Address.fromString(EURS_USDC_LP_TOKEN)
 export const EURT_3CRV_LP_ADDRESS = Address.fromString(EURT_USDT_LP_TOKEN)
 export const TRICRYPTO_LP_ADDRESSES = [TRICRYPTO_LP_ADDRESS, TRICRYPTO2_LP_ADDRESS]
 export const TRICRYPTO2_POOL_ADDRESS = Address.fromString('0xd51a44d3fae010294c616388b506acda1bfaae46')
+export const TRICRYPTO_ARBITRUM_POOL_ADDRESS = Address.fromString('0x960ea3e3c7fb317332d990873d354e18d7645590')
+export const TRICRYPTO_ARBITRUM_LP_TOKEN_ADDRESS = Address.fromString('0x8e0b8c8bb9db49a46697f3a5bb8a308e744821d2')
 
 // Pools that are v2 but were originally added to v1 registry
 export const EURT_USD_POOL = Address.fromString('0x9838eCcC42659FA8AA7daF2aD134b53984c9427b')
