@@ -253,25 +253,14 @@ export function getXcpProfitResult(pool: Pool): Array<BigDecimal> {
 export function getPoolApr(pool: Pool, timestamp: BigInt): Array<BigDecimal> {
   const vPrice = pool.isV2 ? getV2LpTokenPrice(pool) : getLpTokenVirtualPrice(pool)
   const rewardContract = BaseRewardPool.bind(bytesToAddress(pool.crvRewardsPool))
-  // TODO: getSupply function also to be used in CVXMint to DRY
+  const finishPeriodResult = rewardContract.try_periodFinish()
+  const finishPeriod = finishPeriodResult.reverted ? timestamp.plus(BIG_INT_ONE) : finishPeriodResult.value
   const supplyResult = rewardContract.try_totalSupply()
   const supply = supplyResult.reverted ? BIG_DECIMAL_ZERO : supplyResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
   const virtualSupply = supply.times(vPrice)
-  const rateResult = rewardContract.try_rewardRate()
-  const rate = rateResult.reverted ? BIG_DECIMAL_ZERO : rateResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
-  if (rateResult.reverted) {
-    log.warning('Failed to get CRV reward rate for {}', [pool.crvRewardsPool.toHexString()])
-  }
-  let crvPerUnderlying = BIG_DECIMAL_ZERO
-  if (virtualSupply.gt(BIG_DECIMAL_ZERO)) {
-    crvPerUnderlying = rate.div(virtualSupply)
-  }
-
-  const crvPerYear = crvPerUnderlying.times(BigDecimal.fromString('31536000'))
-  const cvxPerYear = getCvxMintAmount(crvPerYear)
-
   let cvxPrice: BigDecimal, crvPrice: BigDecimal
   let exchangeRate = BIG_DECIMAL_ONE
+
   if (FOREX_ORACLES.has(pool.lpToken.toHexString())) {
     exchangeRate = getForexUsdRate(pool.lpToken)
     cvxPrice = exchangeRate != BIG_DECIMAL_ZERO ? getUsdRate(CVX_ADDRESS).div(exchangeRate) : getUsdRate(CVX_ADDRESS)
@@ -282,8 +271,28 @@ export function getPoolApr(pool: Pool, timestamp: BigInt): Array<BigDecimal> {
     crvPrice = getTokenPriceForAssetType(CRV_ADDRESS, pool)
     log.debug('CRV {} Price {} Asset type {}', [pool.name, crvPrice.toString(), pool.assetType.toString()])
   }
-  const crvApr = crvPerYear.times(crvPrice)
-  const cvxApr = cvxPerYear.times(cvxPrice)
+
+  let crvApr = BIG_DECIMAL_ZERO
+  let cvxApr = BIG_DECIMAL_ZERO
+  if (timestamp < finishPeriod) {
+    // TODO: getSupply function also to be used in CVXMint to DRY
+
+    const rateResult = rewardContract.try_rewardRate()
+    const rate = rateResult.reverted ? BIG_DECIMAL_ZERO : rateResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
+    if (rateResult.reverted) {
+      log.warning('Failed to get CRV reward rate for {}', [pool.crvRewardsPool.toHexString()])
+    }
+    let crvPerUnderlying = BIG_DECIMAL_ZERO
+    if (virtualSupply.gt(BIG_DECIMAL_ZERO)) {
+      crvPerUnderlying = rate.div(virtualSupply)
+    }
+
+    const crvPerYear = crvPerUnderlying.times(BigDecimal.fromString('31536000'))
+    const cvxPerYear = getCvxMintAmount(crvPerYear)
+
+    crvApr = crvPerYear.times(crvPrice)
+    cvxApr = cvxPerYear.times(cvxPrice)
+  }
 
   let extraRewardsApr = BIG_DECIMAL_ZERO
   // look for updates to extra rewards
