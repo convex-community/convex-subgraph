@@ -17,7 +17,7 @@ export const BIG_INT_ONE = BigInt.fromString('1')
 export const BIG_INT_1E18 = BigInt.fromString('1000000000000000000')
 
 export const SECONDS_PER_YEAR = BigDecimal.fromString('31536000')
-
+export const T_TOKEN = '0xcdf7028ceab81fa0c6971208e83fa7872994bee5'
 export const RKP3R_TOKEN = '0xEdB67Ee1B171c4eC66E6c10EC43EDBbA20FaE8e9'
 export const RKP3R_ADDRESS = Address.fromString(RKP3R_TOKEN)
 export const CVX_TOKEN = '0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B'
@@ -69,9 +69,20 @@ FOREX_ORACLES.set(GBP_LP_TOKEN, Address.fromString('0x5c0Ab2d9b5a7ed9f470386e82B
 FOREX_ORACLES.set(AUD_LP_TOKEN, Address.fromString('0x77F9710E7d0A19669A13c055F62cd80d313dF022'))
 FOREX_ORACLES.set(CHF_LP_TOKEN, Address.fromString('0x449d117117838fFA61263B61dA6301AA2a88B13A'))
 
-// handle wrapped tokens and synths in v2 pools
-export const SYNTH_TOKENS = new Map<string, Address>()
-SYNTH_TOKENS.set(CVXFXS_TOKEN, Address.fromString(FXS_TOKEN))
+// handle tokens that only only trade on Curve
+// maps to other token on curve pool that can be priced elswhere
+// and token indice to know whether to invert price oracle or not
+class OracleInfo {
+  pricingToken: Address
+  tokenIndex: i32
+  constructor(pricingToken: Address, tokenIndex: i32) {
+    this.pricingToken = pricingToken
+    this.tokenIndex = tokenIndex
+  }
+}
+export const CURVE_ONLY_TOKENS = new Map<string, OracleInfo>()
+CURVE_ONLY_TOKENS.set(CVXFXS_TOKEN, new OracleInfo(Address.fromString(FXS_TOKEN), 1))
+CURVE_ONLY_TOKENS.set(T_TOKEN, new OracleInfo(WETH_ADDRESS, 1))
 
 export const SUSHISWAP_WETH_USDT_PAIR_ADDRESS = Address.fromString('0x06da0fd433c1a5d7a4faa01111c044910a184553')
 export const SUSHI_FACTORY_ADDRESS = Address.fromString('0xc0aee478e3658e2610c5f7a4a2e1777ce9e4f2ac')

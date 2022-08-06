@@ -18,7 +18,7 @@ import {
   EURT_ADDRESS,
   EUR_LP_TOKEN,
   EURS_ADDRESS,
-  SYNTH_TOKENS,
+  CURVE_ONLY_TOKENS,
   BIG_DECIMAL_TWO,
   BIG_INT_ZERO,
 } from 'const'
@@ -57,13 +57,17 @@ export function getV2LpTokenPrice(pool: Pool): BigDecimal {
     }
     // for wrapped tokens and synths, we use a mapping
     // get the price of the original asset and multiply that by the pool's price oracle
-    if (price == BIG_DECIMAL_ZERO && SYNTH_TOKENS.has(currentCoin.toHexString())) {
-      price = getUsdRate(SYNTH_TOKENS[currentCoin.toHexString()])
+    if (price == BIG_DECIMAL_ZERO && CURVE_ONLY_TOKENS.has(currentCoin.toHexString())) {
+      const oracleInfo = CURVE_ONLY_TOKENS[currentCoin.toHexString()]
+      price = getUsdRate(oracleInfo.pricingToken)
       const poolContract = CurvePool.bind(bytesToAddress(pool.swap))
       const priceOracleResult = poolContract.try_price_oracle()
-      price = priceOracleResult.reverted
-        ? price
-        : price.times(priceOracleResult.value.toBigDecimal().div(BIG_DECIMAL_1E18))
+      let priceOracle = priceOracleResult.reverted
+        ? BIG_DECIMAL_ONE
+        : priceOracleResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
+      priceOracle =
+        oracleInfo.tokenIndex == 1 && priceOracle != BIG_DECIMAL_ZERO ? priceOracle : BIG_DECIMAL_ONE.div(priceOracle)
+      price = price.times(priceOracle)
     }
     // Some pools have WETH listed under "coins" but actually use native ETH
     // In case we encounter similar missing coins, we keep track of all
