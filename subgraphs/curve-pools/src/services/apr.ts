@@ -20,6 +20,7 @@ import {
   EURS_ADDRESS,
   SYNTH_TOKENS,
   BIG_DECIMAL_TWO,
+  BIG_INT_ZERO,
 } from 'const'
 
 import { ERC20 } from '../../generated/Booster/ERC20'
@@ -143,7 +144,7 @@ export function getV2PoolBaseApr(
   currentXcpProfitA: BigDecimal,
   timestamp: BigInt
 ): BigDecimal {
-  const previousSnapshot = getDailyPoolSnapshot(pool, timestamp.minus(DAY))
+  const previousSnapshot = getDailyPoolSnapshot(pool, timestamp.minus(DAY), BIG_INT_ZERO)
   if (!previousSnapshot) {
     return BIG_DECIMAL_ZERO
   }
@@ -169,7 +170,7 @@ export function getV2PoolBaseApr(
 }
 
 export function getPoolBaseApr(pool: Pool, currentVirtualPrice: BigDecimal, timestamp: BigInt): BigDecimal {
-  const previousDaySnapshot = getDailyPoolSnapshot(pool, timestamp.minus(DAY))
+  const previousDaySnapshot = getDailyPoolSnapshot(pool, timestamp.minus(DAY), BIG_INT_ZERO)
   const previousDayVPrice = previousDaySnapshot.lpTokenVirtualPrice
   const baseApr =
     previousDayVPrice == BIG_DECIMAL_ZERO

@@ -5,7 +5,7 @@ import { getPoolApr, getXcpProfitResult } from './pools'
 import { getLpTokenVirtualPrice, getPoolBaseApr, getV2PoolBaseApr } from './apr'
 import { getPlatform } from './platform'
 
-export function getDailyPoolSnapshot(pool: Pool, timestamp: BigInt): DailyPoolSnapshot {
+export function getDailyPoolSnapshot(pool: Pool, timestamp: BigInt, block: BigInt): DailyPoolSnapshot {
   const time = getIntervalFromTimestamp(timestamp, DAY)
   const snapId = pool.name + '-' + pool.poolid.toString() + '-' + time.toString()
   let snapshot = DailyPoolSnapshot.load(snapId)
@@ -33,17 +33,18 @@ export function getDailyPoolSnapshot(pool: Pool, timestamp: BigInt): DailyPoolSn
     } else {
       snapshot.baseApr = getPoolBaseApr(pool, snapshot.lpTokenVirtualPrice, timestamp)
     }
+    snapshot.block = block
     snapshot.save()
   }
   return snapshot
 }
 
-export function takePoolSnapshots(timestamp: BigInt): void {
+export function takePoolSnapshots(timestamp: BigInt, block: BigInt): void {
   const platform = getPlatform()
   for (let i = 0; i < platform.poolCount.toI32(); ++i) {
     const pool = Pool.load(i.toString())
     if (pool && pool.active) {
-      getDailyPoolSnapshot(pool, timestamp)
+      getDailyPoolSnapshot(pool, timestamp, block)
     }
   }
 }
