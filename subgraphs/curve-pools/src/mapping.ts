@@ -35,6 +35,7 @@ import { PoolCrvRewards } from '../generated/templates'
 import { CurveToken } from '../generated/Booster/CurveToken'
 import { getUser } from './services/user'
 import { getDailyPoolSnapshot, takePoolSnapshots } from './services/snapshots'
+import { inferAssetType } from './services/utils'
 
 export function handleAddPool(call: AddPoolCall): void {
   const platform = getPlatform()
@@ -113,7 +114,7 @@ export function handleAddPool(call: AddPoolCall): void {
   getPoolCoins(pool)
   log.info('New pool added {} at block {}', [pool.name, call.block.number.toString()])
 
-  pool.assetType = ASSET_TYPES.has(swap.toHexString()) ? ASSET_TYPES.get(swap.toHexString()) : 0
+  pool.assetType = pool.isV2 ? 4 : inferAssetType(swap.toHexString(), pool.name)
   pool.gauge = call.inputs._gauge
   pool.stashVersion = call.inputs._stashVersion
   // Initialize minor version at -1
