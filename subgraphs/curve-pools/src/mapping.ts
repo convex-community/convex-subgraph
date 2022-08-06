@@ -34,7 +34,7 @@ import { recordFeeRevenue, takeWeeklyRevenueSnapshot } from './services/revenue'
 import { PoolCrvRewards } from '../generated/templates'
 import { CurveToken } from '../generated/Booster/CurveToken'
 import { getUser } from './services/user'
-import { getDailyPoolSnapshot } from './services/snapshots'
+import { getDailyPoolSnapshot, takePoolSnapshots } from './services/snapshots'
 
 export function handleAddPool(call: AddPoolCall): void {
   const platform = getPlatform()
@@ -148,6 +148,9 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
     return
   }
   pool.lpTokenBalance = pool.lpTokenBalance.minus(withdrawal.amount)
+  pool.save()
+  takePoolSnapshots(event.block.timestamp)
+
   const lpPrice = getLpTokenPriceUSD(pool)
   log.debug('LP Token price USD for pool {}: {}', [pool.name, lpPrice.toString()])
   pool.lpTokenUSDPrice = lpPrice

@@ -3,6 +3,7 @@ import { BigInt } from '@graphprotocol/graph-ts'
 import { getIntervalFromTimestamp, DAY } from '../../../../packages/utils/time'
 import { getPoolApr, getXcpProfitResult } from './pools'
 import { getLpTokenVirtualPrice, getPoolBaseApr, getV2PoolBaseApr } from './apr'
+import { getPlatform } from './platform'
 
 export function getDailyPoolSnapshot(pool: Pool, timestamp: BigInt): DailyPoolSnapshot {
   const time = getIntervalFromTimestamp(timestamp, DAY)
@@ -35,4 +36,14 @@ export function getDailyPoolSnapshot(pool: Pool, timestamp: BigInt): DailyPoolSn
     snapshot.save()
   }
   return snapshot
+}
+
+export function takePoolSnapshots(timestamp: BigInt): void {
+  const platform = getPlatform()
+  for (let i = 0; i < platform.poolCount.toI32(); ++i) {
+    const pool = Pool.load(i.toString())
+    if (pool && pool.active) {
+      getDailyPoolSnapshot(pool, timestamp)
+    }
+  }
 }
