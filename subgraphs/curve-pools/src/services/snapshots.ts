@@ -10,6 +10,7 @@ export function getDailyPoolSnapshot(pool: Pool, timestamp: BigInt, block: BigIn
   const snapId = pool.name + '-' + pool.poolid.toString() + '-' + time.toString()
   let snapshot = DailyPoolSnapshot.load(snapId)
   if (!snapshot) {
+    log.info('Taking pool snapshot for pool {} ({}), block: {}', [pool.name, pool.swap.toHexString(), block.toString()])
     snapshot = new DailyPoolSnapshot(snapId)
     snapshot.poolid = pool.poolid.toString()
     snapshot.poolName = pool.name

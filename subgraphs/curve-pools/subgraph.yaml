@@ -94,4 +94,3 @@ templates:
         - function: queueNewRewards(uint256)
           handler: handleNewRewardsQueued
       file: ./src/mapping-rewards.ts
-

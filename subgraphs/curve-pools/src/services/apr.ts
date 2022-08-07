@@ -26,10 +26,10 @@ import {
 import { ERC20 } from '../../generated/Booster/ERC20'
 import { getTokenAValueInTokenB, getUsdRate } from '../../../../packages/utils/pricing'
 import { ChainlinkAggregator } from '../../generated/Booster/ChainlinkAggregator'
-import { Pool } from '../../generated/schema'
+import { DailyPoolSnapshot, Pool } from '../../generated/schema'
 import { exponentToBigDecimal } from '../../../../packages/utils/maths'
 import { getDailyPoolSnapshot } from './snapshots'
-import { DAY } from '../../../../packages/utils/time'
+import { DAY, getIntervalFromTimestamp } from '../../../../packages/utils/time'
 import { CurvePool } from '../../generated/Booster/CurvePool'
 
 export function getV2LpTokenPrice(pool: Pool): BigDecimal {
@@ -142,13 +142,19 @@ export function getLpTokenVirtualPrice(pool: Pool): BigDecimal {
   return vPrice
 }
 
+function getPreviousDaySnapshot(pool: Pool, timestamp: BigInt): DailyPoolSnapshot | null {
+  const yesterday = getIntervalFromTimestamp(timestamp.minus(DAY), DAY)
+  const snapId = pool.name + '-' + pool.poolid.toString() + '-' + yesterday.toString()
+  return DailyPoolSnapshot.load(snapId)
+}
+
 export function getV2PoolBaseApr(
   pool: Pool,
   currentXcpProfit: BigDecimal,
   currentXcpProfitA: BigDecimal,
   timestamp: BigInt
 ): BigDecimal {
-  const previousSnapshot = getDailyPoolSnapshot(pool, timestamp.minus(DAY), BIG_INT_ZERO)
+  const previousSnapshot = getPreviousDaySnapshot(pool, timestamp)
   if (!previousSnapshot) {
     return BIG_DECIMAL_ZERO
   }
@@ -174,13 +180,13 @@ export function getV2PoolBaseApr(
 }
 
 export function getPoolBaseApr(pool: Pool, currentVirtualPrice: BigDecimal, timestamp: BigInt): BigDecimal {
-  const previousDaySnapshot = getDailyPoolSnapshot(pool, timestamp.minus(DAY), BIG_INT_ZERO)
-  const previousDayVPrice = previousDaySnapshot.lpTokenVirtualPrice
-  const baseApr =
-    previousDayVPrice == BIG_DECIMAL_ZERO
+  const previousSnapshot = getPreviousDaySnapshot(pool, timestamp.minus(DAY))
+  const previousSnapshotVPrice = previousSnapshot ? previousSnapshot.lpTokenVirtualPrice : BIG_DECIMAL_ZERO
+  const rate =
+    previousSnapshotVPrice == BIG_DECIMAL_ZERO
       ? BIG_DECIMAL_ZERO
-      : currentVirtualPrice.minus(previousDayVPrice).div(previousDayVPrice).times(BigDecimal.fromString('365')) // 365 days
-  return baseApr
+      : currentVirtualPrice.minus(previousSnapshotVPrice).div(previousSnapshotVPrice)
+  return rate
 }
 
 export function getLpTokenPriceUSD(pool: Pool): BigDecimal {
