@@ -29,6 +29,7 @@ export function getDailyPoolSnapshot(pool: Pool, timestamp: BigInt, block: BigIn
     pool.crvApr = aprs[0]
     pool.cvxApr = aprs[1]
     pool.extraRewardsApr = aprs[2]
+    pool.save()
 
     snapshot.lpTokenBalance = pool.lpTokenBalance
     snapshot.curveTvlRatio = pool.curveTvlRatio
