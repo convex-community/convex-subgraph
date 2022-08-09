@@ -135,6 +135,7 @@ type DailyPoolSnapshot @entity {
   extraRewardsApr: BigDecimal!
   baseApr: BigDecimal!
   timestamp: BigInt!
+  block: BigInt!
 }
 
 type PoolReward @entity {

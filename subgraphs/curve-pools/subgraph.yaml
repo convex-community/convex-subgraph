@@ -23,7 +23,7 @@ dataSources:
         - Platform
       abis:
         - name: Booster
-          file: ./abis/Booster.json
+          file: ../../abis/Booster.json
         - name: CurveRegistry
           file: ../../abis/CurveRegistry.json
         - name: CurveToken
@@ -94,4 +94,3 @@ templates:
         - function: queueNewRewards(uint256)
           handler: handleNewRewardsQueued
       file: ./src/mapping-rewards.ts
-

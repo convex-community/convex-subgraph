@@ -34,7 +34,8 @@ import { recordFeeRevenue, takeWeeklyRevenueSnapshot } from './services/revenue'
 import { PoolCrvRewards } from '../generated/templates'
 import { CurveToken } from '../generated/Booster/CurveToken'
 import { getUser } from './services/user'
-import { getDailyPoolSnapshot } from './services/snapshots'
+import { getDailyPoolSnapshot, takePoolSnapshots } from './services/snapshots'
+import { inferAssetType } from './services/utils'
 
 export function handleAddPool(call: AddPoolCall): void {
   const platform = getPlatform()
@@ -113,7 +114,7 @@ export function handleAddPool(call: AddPoolCall): void {
   getPoolCoins(pool)
   log.info('New pool added {} at block {}', [pool.name, call.block.number.toString()])
 
-  pool.assetType = ASSET_TYPES.has(swap.toHexString()) ? ASSET_TYPES.get(swap.toHexString()) : 0
+  pool.assetType = pool.isV2 ? 4 : inferAssetType(swap.toHexString(), pool.name)
   pool.gauge = call.inputs._gauge
   pool.stashVersion = call.inputs._stashVersion
   // Initialize minor version at -1
@@ -148,21 +149,23 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
     return
   }
   pool.lpTokenBalance = pool.lpTokenBalance.minus(withdrawal.amount)
-  const lpPrice = getLpTokenPriceUSD(pool)
-  log.debug('LP Token price USD for pool {}: {}', [pool.name, lpPrice.toString()])
-  pool.lpTokenUSDPrice = lpPrice
+  pool.save()
+  takePoolSnapshots(event.block.timestamp, event.block.number)
+
   const lpSupply = getLpTokenSupply(pool.lpToken)
   pool.curveTvlRatio =
     lpSupply == BIG_INT_ZERO ? BIG_DECIMAL_ONE : pool.lpTokenBalance.toBigDecimal().div(lpSupply.toBigDecimal())
-  pool.tvl = pool.lpTokenBalance.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice)
 
-  const snapshot = getDailyPoolSnapshot(pool, event.block.timestamp)
+  const snapshot = getDailyPoolSnapshot(pool, event.block.timestamp, event.block.number)
+  pool.tvl = pool.lpTokenBalance.toBigDecimal().div(BIG_DECIMAL_1E18).times(snapshot.lpTokenUSDPrice)
 
   pool.baseApr = snapshot.baseApr
   snapshot.tvl = pool.tvl
   snapshot.withdrawalCount = snapshot.withdrawalCount.plus(BIG_INT_ONE)
   snapshot.withdrawalVolume = snapshot.withdrawalVolume.plus(event.params.amount)
-  snapshot.withdrawalValue = snapshot.withdrawalValue.plus(event.params.amount.toBigDecimal().times(lpPrice))
+  snapshot.withdrawalValue = snapshot.withdrawalValue.plus(
+    event.params.amount.toBigDecimal().times(snapshot.lpTokenUSDPrice)
+  )
 
   pool.save()
   snapshot.save()
@@ -181,21 +184,21 @@ export function handleDeposited(event: DepositedEvent): void {
     return
   }
   pool.lpTokenBalance = pool.lpTokenBalance.plus(deposit.amount)
+  pool.save()
+  takePoolSnapshots(event.block.timestamp, event.block.number)
+
   const lpSupply = getLpTokenSupply(pool.lpToken)
   pool.curveTvlRatio =
     lpSupply == BIG_INT_ZERO ? BIG_DECIMAL_ONE : pool.lpTokenBalance.toBigDecimal().div(lpSupply.toBigDecimal())
-  const lpPrice = getLpTokenPriceUSD(pool)
-  pool.lpTokenUSDPrice = lpPrice
-  log.debug('LP Token price USD for pool {}: {}', [pool.name, lpPrice.toString()])
-  pool.tvl = pool.lpTokenBalance.toBigDecimal().div(BIG_DECIMAL_1E18).times(lpPrice)
 
-  const snapshot = getDailyPoolSnapshot(pool, event.block.timestamp)
+  const snapshot = getDailyPoolSnapshot(pool, event.block.timestamp, event.block.number)
+  pool.tvl = pool.lpTokenBalance.toBigDecimal().div(BIG_DECIMAL_1E18).times(snapshot.lpTokenUSDPrice)
 
   pool.baseApr = snapshot.baseApr
   snapshot.tvl = pool.tvl
   snapshot.depositCount = snapshot.depositCount.plus(BIG_INT_ONE)
   snapshot.depositVolume = snapshot.depositVolume.plus(event.params.amount)
-  snapshot.depositValue = snapshot.depositValue.plus(event.params.amount.toBigDecimal().times(lpPrice))
+  snapshot.depositValue = snapshot.depositValue.plus(event.params.amount.toBigDecimal().times(snapshot.lpTokenUSDPrice))
 
   pool.save()
   snapshot.save()
