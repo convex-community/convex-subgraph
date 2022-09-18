@@ -32,6 +32,7 @@ export function getDailyPoolSnapshot(pool: Pool, timestamp: BigInt, block: BigIn
     pool.save()
 
     snapshot.lpTokenBalance = pool.lpTokenBalance
+    snapshot.tvl = pool.tvl
     snapshot.curveTvlRatio = pool.curveTvlRatio
     if (pool.isV2) {
       const xcpProfits = getXcpProfitResult(pool)
