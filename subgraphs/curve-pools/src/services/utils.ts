@@ -5,7 +5,7 @@ export function inferAssetType(curvePool: string, poolName: string): i32 {
     return ASSET_TYPES.get(curvePool)
   }
   const description = poolName.toUpperCase()
-  const stables = ['USD', 'DAI', 'MIM', 'TETHER']
+  const stables = ['USD', 'DAI', 'MIM', 'TETHER', 'FRAX']
   for (let i = 0; i < stables.length; i++) {
     if (description.indexOf(stables[i]) >= 0) {
       return 0
