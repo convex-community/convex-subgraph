@@ -16,3 +16,11 @@ export function exponentToBigInt(decimals: BigInt): BigInt {
   }
   return bd
 }
+
+export function pow(base: BigDecimal, exp: i32): BigDecimal {
+  let res = BigDecimal.fromString('1')
+  for (let i = 0; i < exp; i++) {
+    res = res.times(base)
+  }
+  return res
+}

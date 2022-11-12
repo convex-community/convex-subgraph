@@ -1,6 +1,8 @@
 import { DailyPoolSnapshot, Pool } from '../../generated/schema'
 import { BigInt, log } from '@graphprotocol/graph-ts'
 import { getIntervalFromTimestamp, DAY } from '../../../../packages/utils/time'
+import { pow } from '../../../../packages/utils/maths'
+import { BIG_DECIMAL_ONE } from '../../../../packages/constants'
 import { getPoolApr, getXcpProfitResult } from './pools'
 import { getLpTokenPriceUSD, getLpTokenVirtualPrice, getPoolBaseApr, getV2PoolBaseApr } from './apr'
 import { getPlatform } from './platform'
@@ -42,6 +44,8 @@ export function getDailyPoolSnapshot(pool: Pool, timestamp: BigInt, block: BigIn
     } else {
       snapshot.baseApr = getPoolBaseApr(pool, snapshot.lpTokenVirtualPrice, timestamp)
     }
+    // annualize Apr
+    snapshot.baseApr = pow(BIG_DECIMAL_ONE.plus(snapshot.baseApr), 365).minus(BIG_DECIMAL_ONE)
     snapshot.block = block
     snapshot.save()
   }
