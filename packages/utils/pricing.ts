@@ -5,6 +5,8 @@ import {
   BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
   BIG_INT_ZERO,
+  CRV_FRAX_ADDRESS,
+  FRAXBP_ADDRESS,
   SUSHI_FACTORY_ADDRESS,
   THREE_CRV_ADDRESS,
   UNI_FACTORY_ADDRESS,
@@ -20,6 +22,7 @@ import { ERC20 } from 'curve-pools/generated/Booster/ERC20'
 import { exponentToBigDecimal, exponentToBigInt } from './maths'
 import { FactoryV3 } from 'curve-pools/generated/Booster/FactoryV3'
 import { Quoter } from 'curve-pools/generated/Booster/Quoter'
+import { CurvePool } from 'curve-pools/generated/Booster/CurvePool'
 
 export function getEthRate(token: Address): BigDecimal {
   let eth = BIG_DECIMAL_ONE
@@ -102,10 +105,24 @@ export function getTokenAValueInTokenB(tokenA: Address, tokenB: Address): BigDec
   return ethRateA.div(ethRateB).times(exponentToBigDecimal(decimalsA)).div(exponentToBigDecimal(decimalsB))
 }
 
+export function getFraxBpVirtualPrice(): BigDecimal {
+  const poolContract = CurvePool.bind(FRAXBP_ADDRESS)
+  const virtualPriceResult = poolContract.try_get_virtual_price()
+  let vPrice = BIG_DECIMAL_ONE
+  if (virtualPriceResult.reverted) {
+    log.warning('Unable to fetch virtual price for FraxBP', [])
+  } else {
+    vPrice = virtualPriceResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
+  }
+  return vPrice
+}
+
 export function getUsdRate(token: Address): BigDecimal {
   const usdt = BIG_DECIMAL_ONE
 
-  if (token != USDT_ADDRESS && token != THREE_CRV_ADDRESS) {
+  if (token == CRV_FRAX_ADDRESS) {
+    return getFraxBpVirtualPrice()
+  } else if (token != USDT_ADDRESS && token != THREE_CRV_ADDRESS) {
     return getTokenAValueInTokenB(token, USDT_ADDRESS)
   }
   return usdt

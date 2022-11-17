@@ -207,3 +207,7 @@ ASSET_TYPES.set('0xfbdca68601f835b27790d98bbb8ec7f05fdeaa9b', 2)
 export const V2_SWAPS = new Map<string, string>()
 V2_SWAPS.set('0x3b6831c0077a1e44ed0a21841c3bc4dc11bce833', '0x9838eCcC42659FA8AA7daF2aD134b53984c9427b')
 V2_SWAPS.set('0x3d229e1b4faab62f621ef2f6a610961f7bd7b23b', '0x98a7F18d4E56Cfe84E3D081B40001B3d5bD3eB8B')
+
+export const CRV_FRAX = '0x3175df0976dfa876431c2e9ee6bc45b65d3473cc'
+export const CRV_FRAX_ADDRESS = Address.fromString(CRV_FRAX)
+export const FRAXBP_ADDRESS = Address.fromString('0xdcef968d416a41cdac0ed8702fac8128a64241a2')
