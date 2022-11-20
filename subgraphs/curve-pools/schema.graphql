@@ -1,147 +1,247 @@
-type Platform @entity {
+type Pool @entity {
+  """ Entity ID """
   id: ID!
-  poolCount: BigInt!
-  curvePools: [Pool!]! @derivedFrom(field: "platform")
-  revenue: [RevenueWeeklySnapshot!] @derivedFrom(field: "platform")
-  feeRevenue: [FeeRevenue!]! @derivedFrom(field: "platform")
+  """ Pool ID in the Convex Booster contract """
+  poolid: BigInt!
+  """ Platform """
+  platform: Platform!
+  """ Pool name """
+  name: String!
+  """ Pool LP token address """
+  lpToken: Bytes! #address
+  """ Pool LP token balance """
+  lpTokenBalance: BigInt!
+  """ Pool LP token price in USD """
+  lpTokenUSDPrice: BigDecimal!
+  """ Convex receipt token """
+  token: Bytes! #address
+  """ Pool gauge address """
+  gauge: Bytes! #address
+  """ CRV Rewards contract """
+  crvRewardsPool: Bytes! #address
+  """ Pool stash reward contract """
+  stash: Bytes! #address
+  """ Pool stash reward contract version """
+  stashVersion: BigInt!
+  """ Pool stash reward contract minor version """
+  stashMinorVersion: BigInt!
+  """ Whether the pool is active """
+  active: Boolean!
+  """ Whether the pool is v2 """
+  isV2: Boolean!
+  """ Pool creation date """
+  creationDate: BigInt!
+  """ Pool creation block """
+  creationBlock: BigInt!
+  """ Pool TVL in USD """
+  tvl: BigDecimal!
+  """ Percentage of Curve LP token staked on Convex for that pool """
+  curveTvlRatio: BigDecimal!
+  """ Pool CRV APR """
+  crvApr: BigDecimal!
+  """ Pool CVX APR """
+  cvxApr: BigDecimal!
+  """ Pool's extra rewards APR (other tokens) """
+  extraRewardsApr: BigDecimal!
+  """ Pool's base APR (from Curve) """
+  baseApr: BigDecimal!
+  """ Deposits """
+  deposits: [Deposit!] @derivedFrom(field: "poolid")
+  """ Withdrawals """
+  withdrawals: [Withdrawal!] @derivedFrom(field: "poolid")
+  """ CRV Rewards """
+  crvRewards: [PoolReward!] @derivedFrom(field: "poolid")
+  """ Curve pool contract address """
+  swap: Bytes! #address
+  """ Underlying asset type (USD, BTC...) """
+  assetType: Int!
+  """ Extra reward contracts """
+  extras: [String!]!
+  """ Extra reward contracts """
+  extraRewards: [ExtraReward!] @derivedFrom(field: "poolid")
+  """ Pool coins """
+  coins: [Bytes!]! #address
+  """ Pool snapshots """
+  snapshots: [DailyPoolSnapshot!] @derivedFrom(field: "poolid")
+}
+
+type DailyPoolSnapshot @entity {
+  """ Entity ID """
+  id: ID!
+  """ Platform """
+  poolid: Pool!
+  """ Pool name """
+  poolName: String!
+  """ Number of withdrawals """
+  withdrawalCount: BigInt!
+  """ Number of deposits """
+  depositCount: BigInt!
+  """ Total amount of LP tokens withdrawn """
+  withdrawalVolume: BigInt!
+  """ Total amount of LP tokens deposited """
+  depositVolume: BigInt!
+  """ Total USD value of withdrawals """
+  withdrawalValue: BigDecimal!
+  """ Total USD value of deposits """
+  depositValue: BigDecimal!
+  """ Pool LP token balance """
+  lpTokenBalance: BigInt!
+  """ Pool LP token virtual price """
+  lpTokenVirtualPrice: BigDecimal!
+  """ Pool LP token price in USD """
+  lpTokenUSDPrice: BigDecimal!
+  """ Pool xcpProfit """
+  xcpProfit: BigDecimal!
+  """ Pool xcpProfitA """
+  xcpProfitA: BigDecimal!
+  """ Pool TVL in USD """
+  tvl: BigDecimal!
+  """ Percentage of Curve LP token staked on Convex for that pool """
+  curveTvlRatio: BigDecimal!
+  """ Pool CRV APR """
+  crvApr: BigDecimal!
+  """ Pool CVX APR """
+  cvxApr: BigDecimal!
+  """ Pool's extra rewards APR (other tokens) """
+  extraRewardsApr: BigDecimal!
+  """ Pool's base APR (from Curve) """
+  baseApr: BigDecimal!
+  """ Snapshot timestamp """
+  timestamp: BigInt!
+  """ Snapshot block """
+  block: BigInt!
 }
 
 type RevenueWeeklySnapshot @entity {
   id: ID!
   platform: Platform!
-  " weekly values"
-  crvRevenueToLpProvidersAmount: BigInt! # pool.crvRewards
-  crvRevenueToCvxCrvStakersAmount: BigInt! # lockRewards
-  crvRevenueToCvxStakersAmount: BigInt! # stakerRewards
-  crvRevenueToCallersAmount: BigInt! # call incentive
-  crvRevenueToPlatformAmount: BigInt! # to treasury
+  """ Weekly revenue distributed to LP Providers in CRV (CRV rewards) """
+  crvRevenueToLpProvidersAmount: BigInt!
+  """ Weekly revenue distributed to CvxCrv Stakers in CRV ('Lock' rewards)"""
+  crvRevenueToCvxCrvStakersAmount: BigInt!
+  """ Weekly revenue distributed to CVX stakers """
+  crvRevenueToCvxStakersAmount: BigInt!
+  """ Weekly revenue distributed as caller incentives (for harvests) """
+  crvRevenueToCallersAmount: BigInt!
+  """ Weekly revenue going to treasury """
+  crvRevenueToPlatformAmount: BigInt!
+  """ Total weekly revenue from Curve Pools """
   totalCrvRevenue: BigInt!
-  " cumulative "
-  crvRevenueToLpProvidersAmountCumulative: BigInt! # pool.crvRewards
-  crvRevenueToCvxCrvStakersAmountCumulative: BigInt! # lockRewards
-  crvRevenueToCvxStakersAmountCumulative: BigInt! # stakerRewards
+  """ Cumulative revenue distributed to LP Providers in CRV """
+  crvRevenueToLpProvidersAmountCumulative: BigInt!
+  """ Cumulative revenue distributed to CvxCrv Stakers in CRV ('Lock' rewards)"""
+  crvRevenueToCvxCrvStakersAmountCumulative: BigInt!
+  """ Cumulative revenue distributed to CVX stakers """
+  crvRevenueToCvxStakersAmountCumulative: BigInt!
+  """ Cumulative revenue distributed as caller incentives (for harvests) """
   crvRevenueToCallersAmountCumulative: BigInt!
+  """ Cumulative revenue going to treasury """
   crvRevenueToPlatformAmountCumulative: BigInt!
+  """ Total cumulative revenue """
   totalCrvRevenueCumulative: BigInt!
-  " crv USD price as (price_at_time_of_previous_snapshot + price_at_time_of_snapshot) / 2 "
+  """ crv USD price as (price_at_time_of_previous_snapshot + price_at_time_of_snapshot) / 2 """
   crvPrice: BigDecimal!
+  """ Snapshot timestamp """
   timestamp: BigInt!
+  """ Extra token rewards """
   extraTokenRewards: [ExtraTokenReward!]! @derivedFrom(field: "revenueSnapshot")
 }
 
 type FeeRevenue @entity {
+  """ Entity ID """
   id: ID!
+  """ Platform """
   platform: Platform!
+  """ Fee revenue amount """
   amount: BigInt!
+  """ Snapshot timestamp """
   timestamp: BigInt!
 }
 
 type ExtraTokenReward @entity {
+  """ Entity ID """
   id: ID!
+  """ Revenue snapshots """
   revenueSnapshot: RevenueWeeklySnapshot!
+  """ Token address """
   token: Bytes! #address
+  """ Reward amount """
   amount: BigInt!
+  """ Reward USD value """
   value: BigDecimal!
 }
 
 type Deposit @entity {
+  """ Entity ID """
   id: ID!
+  """ Depositing user address """
   user: User! # address
+  """ Convex booster id of the pool """
   poolid: Pool!
+  """ Deposit amount """
   amount: BigInt! # uint256
+  """ Deposit timestamp """
   timestamp: BigInt!
 }
 
 type Withdrawal @entity {
+  """ Entity ID """
   id: ID!
+  """ Withdrawing user address """
   user: User! # address
+  """ Convex booster id of the pool """
   poolid: Pool!
+  """ Withdrawal amount """
   amount: BigInt! # uint256
+  """ Withdrawal timestamp """
   timestamp: BigInt!
 }
 
 
 type User @entity {
+  """ Entity ID """
   id: ID!
+  """ User address """
   address: Bytes!
+  """ User withdrawals """
   withdrawals: [Withdrawal!] @derivedFrom(field: "user")
+  """ User deposits """
   deposits: [Deposit!] @derivedFrom(field: "user")
 }
 
 type ExtraReward @entity {
+  """ Entity ID """
   id: ID!
+  """ Convex booster id of the pool """
   poolid: Pool!
+  """ Contract address handling the extra reward """
   contract: Bytes! #address
+  """ Token the extra reward is given in """
   token: Bytes! #address
-}
-
-type Pool @entity {
-  id: ID!
-  poolid: BigInt!
-  platform: Platform!
-  name: String!
-  lpToken: Bytes! #address
-  lpTokenBalance: BigInt!
-  lpTokenUSDPrice: BigDecimal!
-  token: Bytes! #address
-  gauge: Bytes! #address
-  crvRewardsPool: Bytes! #address
-  stash: Bytes! #address
-  stashVersion: BigInt!
-  stashMinorVersion: BigInt!
-  active: Boolean!
-  isV2: Boolean!
-  creationDate: BigInt!
-  creationBlock: BigInt!
-  tvl: BigDecimal!
-  curveTvlRatio: BigDecimal!
-  crvApr: BigDecimal!
-  cvxApr: BigDecimal!
-  extraRewardsApr: BigDecimal!
-  baseApr: BigDecimal!
-  deposits: [Deposit!] @derivedFrom(field: "poolid")
-  withdrawals: [Withdrawal!] @derivedFrom(field: "poolid")
-  crvRewards: [PoolReward!] @derivedFrom(field: "poolid")
-  " Curve swap pool "
-  swap: Bytes! #address
-  " Underlying asset type (USD, BTC...) "
-  assetType: Int!
-  " Extra reward contracts "
-  extras: [String!]!
-  extraRewards: [ExtraReward!] @derivedFrom(field: "poolid")
-  coins: [Bytes!]! #address
-  snapshots: [DailyPoolSnapshot!] @derivedFrom(field: "poolid")
-}
-
-type DailyPoolSnapshot @entity {
-  id: ID!
-  poolid: Pool!
-  poolName: String!
-  withdrawalCount: BigInt!
-  depositCount: BigInt!
-  withdrawalVolume: BigInt!
-  depositVolume: BigInt!
-  withdrawalValue: BigDecimal!
-  depositValue: BigDecimal!
-  lpTokenBalance: BigInt!
-  lpTokenVirtualPrice: BigDecimal!
-  lpTokenUSDPrice: BigDecimal!
-  xcpProfit: BigDecimal!
-  xcpProfitA: BigDecimal!
-  tvl: BigDecimal!
-  curveTvlRatio: BigDecimal!
-  crvApr: BigDecimal!
-  cvxApr: BigDecimal!
-  extraRewardsApr: BigDecimal!
-  baseApr: BigDecimal!
-  timestamp: BigInt!
-  block: BigInt!
 }
 
 type PoolReward @entity {
+  """ Entity ID """
   id: ID!
+  """ Convex booster id of the pool """
   poolid: Pool!
+  """ Staking contract address """
   contract: Bytes!
+  """ CRV rewards amount """
   crvRewards: BigInt!
+  """ Timestamp """
   timestamp: BigInt!
+}
+
+type Platform @entity {
+  """ Entity ID """
+  id: ID!
+  """ Number of pools """
+  poolCount: BigInt!
+  """ Pools """
+  curvePools: [Pool!]! @derivedFrom(field: "platform")
+  """ Revenue snapshots """
+  revenue: [RevenueWeeklySnapshot!] @derivedFrom(field: "platform")
+  """ Historical fee snapshots """
+  feeRevenue: [FeeRevenue!]! @derivedFrom(field: "platform")
 }
