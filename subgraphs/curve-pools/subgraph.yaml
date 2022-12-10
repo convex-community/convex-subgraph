@@ -58,6 +58,10 @@ dataSources:
           file: ../../abis/BaseRewardPool.json
         - name: RedeemableKeep3r
           file: ../../abis/RedeemableKeep3r.json
+        - name: YToken
+          file: ../../abis/YToken.json
+        - name: CToken
+          file: ../../abis/CToken.json
 
       eventHandlers:
         - event: Deposited(indexed address,indexed uint256,uint256)

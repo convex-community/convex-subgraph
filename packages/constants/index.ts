@@ -211,3 +211,36 @@ V2_SWAPS.set('0x3d229e1b4faab62f621ef2f6a610961f7bd7b23b', '0x98a7F18d4E56Cfe84E
 export const CRV_FRAX = '0x3175df0976dfa876431c2e9ee6bc45b65d3473cc'
 export const CRV_FRAX_ADDRESS = Address.fromString(CRV_FRAX)
 export const FRAXBP_ADDRESS = Address.fromString('0xdcef968d416a41cdac0ed8702fac8128a64241a2')
+
+// Lending pools using cTokens have their balance labelled in cTokens
+// which must be converted to underlying using each token's exchange
+// rate and decimals. We keep this list to handle these edge cases
+export const CTOKENS = [
+  '0x8e595470ed749b85c6f7669de83eae304c2ec68f',
+  '0x76eb2fe28b36b3ee97f3adae0c69606eedb2a37c',
+  '0x48759f220ed983db51fa7a8c0d2aab8f3ce4166a',
+  '0x5d3a536e4d6dbd6114cc1ead35777bab948e3643',
+  '0x39aa39c021dfbae8fac545936693ac917d5e7563',
+]
+
+export const CTOKEN_POOLS = [
+  '0xa2b47e3d5c44877cca798226b7b8118f9bfb7a56',
+  '0x8925d9d9b4569d737a48499def3f67baa5a144b9',
+  '0x79a8c46dea5ada233abaffd40f3a0a2b1e5a4f27',
+  '0x52ea46506b9cc5ef470c5bf89f17dc28bb35d85c',
+  '0x45f783cce6b7ff23b2ab2d70e416cdb7d6055f51',
+  '0x2dded6da1bf5dbdf597c45fcfaa3194e53ecfeaf',
+]
+
+export const YTOKEN_POOLS = ['0x45f783cce6b7ff23b2ab2d70e416cdb7d6055f51', '0x79a8c46dea5ada233abaffd40f3a0a2b1e5a4f27']
+
+export const YTOKENS = [
+  '0x16de59092dae5ccf4a1e6439d611fd0653f0bd01',
+  '0xd6ad7a6750a7593e092a9b218d66c0a814a3436e',
+  '0x83f798e925bcd4017eb265844fddabb448f1707d',
+  '0x73a052500105205d34daf004eab301916da8190f',
+  '0xc2cb1040220768554cf699b0d863a3cd4324ce32',
+  '0x26ea744e5b887e5205727f55dfbe8685e3b21951',
+  '0xe6354ed5bc4b393a5aad09f21c46e101e692d447',
+  '0x04bc0ab673d88ae9dbc9da2380cb6b79c4bca9ae',
+]
