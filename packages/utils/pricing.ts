@@ -6,6 +6,7 @@ import {
   BIG_DECIMAL_ZERO,
   BIG_INT_ZERO,
   CRV_FRAX_ADDRESS,
+  CTOKENS,
   FRAXBP_ADDRESS,
   SUSHI_FACTORY_ADDRESS,
   THREE_CRV_ADDRESS,
@@ -15,10 +16,13 @@ import {
   USDT_ADDRESS,
   WBTC_ADDRESS,
   WETH_ADDRESS,
+  YTOKENS,
 } from 'const'
 import { Factory } from 'curve-pools/generated/Booster/Factory'
 import { Pair } from 'curve-pools/generated/Booster/Pair'
 import { ERC20 } from 'curve-pools/generated/Booster/ERC20'
+import { CToken } from 'curve-pools/generated/Booster/CToken'
+import { YToken } from 'curve-pools/generated/Booster/YToken'
 import { exponentToBigDecimal, exponentToBigInt } from './maths'
 import { FactoryV3 } from 'curve-pools/generated/Booster/FactoryV3'
 import { Quoter } from 'curve-pools/generated/Booster/Quoter'
@@ -117,6 +121,36 @@ export function getFraxBpVirtualPrice(): BigDecimal {
   return vPrice
 }
 
+export function getCTokenExchangeRate(token: Address): BigDecimal {
+  const ctoken = CToken.bind(token)
+  const underlyingResult = ctoken.try_underlying()
+  const exchangeRateResult = ctoken.try_exchangeRateStored()
+  if (underlyingResult.reverted || exchangeRateResult.reverted) {
+    // if fail we use the beginning rate
+    log.error('Failed to get underlying or rate for ctoken {}', [token.toHexString()])
+    return BigDecimal.fromString('0.02')
+  }
+  const underlying = underlyingResult.value
+  const exchangeRate = exchangeRateResult.value
+  const underlyingDecimalsResult = ERC20.bind(underlying).try_decimals()
+  const underlyingDecimals = underlyingDecimalsResult.reverted ? 18 : underlyingDecimalsResult.value
+  // scaling formula: https://compound.finance/docs/ctokens
+  const rateScale = exponentToBigDecimal(BigInt.fromI32(10 + underlyingDecimals))
+  return exchangeRate.toBigDecimal().div(rateScale)
+}
+
+export function getYTokenExchangeRate(token: Address): BigDecimal {
+  const yToken = YToken.bind(token)
+  const pricePerShareResult = yToken.try_getPricePerFullShare()
+  if (pricePerShareResult.reverted) {
+    // if fail we use 1
+    log.error('Failed to get underlying or rate for yToken {}', [token.toHexString()])
+    return BIG_DECIMAL_ONE
+  }
+  const exchangeRate = pricePerShareResult.value
+  return exchangeRate.toBigDecimal().div(BIG_DECIMAL_1E18)
+}
+
 export function getUsdRate(token: Address): BigDecimal {
   const usdt = BIG_DECIMAL_ONE
 
@@ -124,6 +158,10 @@ export function getUsdRate(token: Address): BigDecimal {
     return getFraxBpVirtualPrice()
   } else if (token != USDT_ADDRESS && token != THREE_CRV_ADDRESS) {
     return getTokenAValueInTokenB(token, USDT_ADDRESS)
+  } else if (CTOKENS.includes(token.toHexString())) {
+    return getCTokenExchangeRate(token)
+  } else if (YTOKENS.includes(token.toHexString())) {
+    return getYTokenExchangeRate(token)
   }
   return usdt
 }
