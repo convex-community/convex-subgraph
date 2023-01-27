@@ -103,17 +103,20 @@ export function getForexUsdRate(lpToken: Bytes): BigDecimal {
   return conversionRate
 }
 
-export function getTokenValueInLpUnderlyingToken(token: Address, lpToken: Address): BigDecimal {
+export function getTokenValueInLpUnderlyingToken(token: Address, pool: Pool): BigDecimal {
+  const lpToken = pool.lpToken
   if (lpToken == LINK_LP_TOKEN_ADDRESS) {
     return getTokenAValueInTokenB(token, LINK_ADDRESS)
   } else if (lpToken == Address.fromString(CVX_CRV_LP_TOKEN)) {
     return getTokenAValueInTokenB(token, CRV_ADDRESS)
+  } else if (pool.coins.length > 0) {
+    return getTokenAValueInTokenB(token, bytesToAddress(pool.coins[0]))
   }
   return BIG_DECIMAL_ONE
 }
 
-export function getLpUnderlyingTokenValueInOtherToken(lpToken: Address, token: Address): BigDecimal {
-  return BIG_DECIMAL_ONE.div(getTokenValueInLpUnderlyingToken(token, lpToken))
+export function getLpUnderlyingTokenValueInOtherToken(pool: Pool, token: Address): BigDecimal {
+  return BIG_DECIMAL_ONE.div(getTokenValueInLpUnderlyingToken(token, pool))
 }
 
 export function getLpTokenVirtualPrice(pool: Pool): BigDecimal {
@@ -207,6 +210,6 @@ export function getLpTokenPriceUSD(pool: Pool): BigDecimal {
     case 2: // BTC
       return vPrice.times(getUsdRate(WBTC_ADDRESS))
     case 3:
-      return vPrice.times(getLpUnderlyingTokenValueInOtherToken(lpTokenAddress, USDT_ADDRESS)) //quoteInSpecifiedToken(USDT_ADDRESS, pool.lpToken).times(exponentToBigDecimal(BigInt.fromI32(12))))
+      return vPrice.times(getLpUnderlyingTokenValueInOtherToken(pool, USDT_ADDRESS)) //quoteInSpecifiedToken(USDT_ADDRESS, pool.lpToken).times(exponentToBigDecimal(BigInt.fromI32(12))))
   }
 }

@@ -214,10 +214,7 @@ export function getTokenPriceForAssetType(token: Address, pool: Pool): BigDecima
   if (token == RKP3R_ADDRESS) {
     return getRKp3rPrice()
   }
-  if (pool.assetType == 0 || pool.assetType == 4) {
-    // USD
-    return getUsdRate(token)
-  } else if (pool.assetType == 1) {
+  if (pool.assetType == 1) {
     // ETH
     return getEthRate(token)
   } else if (pool.assetType == 2) {
@@ -225,7 +222,7 @@ export function getTokenPriceForAssetType(token: Address, pool: Pool): BigDecima
     return getBtcRate(token)
   } else {
     // Other
-    return getTokenValueInLpUnderlyingToken(token, bytesToAddress(pool.lpToken))
+    return getUsdRate(token)
   }
 }
 

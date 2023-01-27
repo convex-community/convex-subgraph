@@ -105,7 +105,10 @@ export function getTokenAValueInTokenB(tokenA: Address, tokenB: Address): BigDec
   const decimalsB = getDecimals(tokenB)
   const ethRateA = getEthRate(tokenA).times(BIG_DECIMAL_1E18)
   const ethRateB = getEthRate(tokenB).times(BIG_DECIMAL_1E18)
-
+  if (ethRateB == BIG_DECIMAL_ZERO) {
+    log.error('Zero value rate found for {}', [tokenB.toHexString()])
+    return BIG_DECIMAL_ONE
+  }
   return ethRateA.div(ethRateB).times(exponentToBigDecimal(decimalsA)).div(exponentToBigDecimal(decimalsB))
 }
 
