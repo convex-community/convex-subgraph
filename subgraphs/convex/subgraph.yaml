@@ -78,6 +78,29 @@ dataSources:
         - function: earmarkFees()
           handler: handleEarmarkFees
       file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: VotiumBribe
+    network: mainnet
+    source:
+      address: "0x19BBC3463Dd8d07f55438014b021Fb457EBD4595"
+      abi: Votium
+      startBlock: 13209937
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - RevenueWeeklySnapshot
+      abis:
+        - name: Votium
+          file: ./abis/Votium.json
+      eventHandlers:
+        - event: Bribed(address,uint256,indexed bytes32,uint256)
+          handler: handleBribed
+        - event: UpdatedFee(uint256)
+          handler: handleUpdatedFee
+      file: ./src/mapping-bribes.ts
+
 templates:
   - name: PoolCrvRewards
     kind: ethereum/contract

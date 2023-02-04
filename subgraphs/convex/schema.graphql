@@ -116,31 +116,35 @@ type RevenueWeeklySnapshot @entity {
   id: ID!
   platform: Platform!
   """ Weekly revenue distributed to LP Providers in CRV (CRV rewards) """
-  crvRevenueToLpProvidersAmount: BigInt!
+  crvRevenueToLpProvidersAmount: BigDecimal!
   """ Weekly revenue distributed to CvxCrv Stakers in CRV ('Lock' rewards)"""
-  crvRevenueToCvxCrvStakersAmount: BigInt!
+  crvRevenueToCvxCrvStakersAmount: BigDecimal!
   """ Weekly revenue distributed to CVX stakers """
-  crvRevenueToCvxStakersAmount: BigInt!
+  crvRevenueToCvxStakersAmount: BigDecimal!
   """ Weekly revenue distributed as caller incentives (for harvests) """
-  crvRevenueToCallersAmount: BigInt!
+  crvRevenueToCallersAmount: BigDecimal!
   """ Weekly revenue going to treasury """
-  crvRevenueToPlatformAmount: BigInt!
+  crvRevenueToPlatformAmount: BigDecimal!
   """ Total weekly revenue from Curve Pools """
-  totalCrvRevenue: BigInt!
+  totalCrvRevenue: BigDecimal!
   """ Cumulative revenue distributed to LP Providers in CRV """
-  crvRevenueToLpProvidersAmountCumulative: BigInt!
+  crvRevenueToLpProvidersAmountCumulative: BigDecimal!
   """ Cumulative revenue distributed to CvxCrv Stakers in CRV ('Lock' rewards)"""
-  crvRevenueToCvxCrvStakersAmountCumulative: BigInt!
+  crvRevenueToCvxCrvStakersAmountCumulative: BigDecimal!
   """ Cumulative revenue distributed to CVX stakers """
-  crvRevenueToCvxStakersAmountCumulative: BigInt!
+  crvRevenueToCvxStakersAmountCumulative: BigDecimal!
   """ Cumulative revenue distributed as caller incentives (for harvests) """
-  crvRevenueToCallersAmountCumulative: BigInt!
+  crvRevenueToCallersAmountCumulative: BigDecimal!
   """ Cumulative revenue going to treasury """
-  crvRevenueToPlatformAmountCumulative: BigInt!
+  crvRevenueToPlatformAmountCumulative: BigDecimal!
   """ Total cumulative revenue """
-  totalCrvRevenueCumulative: BigInt!
+  totalCrvRevenueCumulative: BigDecimal!
   """ crv USD price as (price_at_time_of_previous_snapshot + price_at_time_of_snapshot) / 2 """
   crvPrice: BigDecimal!
+  """ Revenue accrued from Votium bribes """
+  bribeRevenue: BigDecimal!
+  """ Cumulative revenue accrued from Votium bribes """
+  cumulativeBribeRevenue: BigDecimal!
   """ Snapshot timestamp """
   timestamp: BigInt!
   """ Extra token rewards """
@@ -244,4 +248,6 @@ type Platform @entity {
   revenue: [RevenueWeeklySnapshot!] @derivedFrom(field: "platform")
   """ Historical fee snapshots """
   feeRevenue: [FeeRevenue!]! @derivedFrom(field: "platform")
+  """ Votium bribe fee """
+  bribeFee: BigInt!
 }
