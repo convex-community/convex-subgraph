@@ -94,6 +94,22 @@ dataSources:
       abis:
         - name: Votium
           file: ./abis/Votium.json
+        - name: YToken
+          file: ../../abis/YToken.json
+        - name: CToken
+          file: ../../abis/CToken.json
+        - name: ERC20
+          file: ../../abis/ERC20.json
+        - name: Factory
+          file: ../../abis/UniswapV2Factory.json
+        - name: Pair
+          file: ../../abis/UniswapV2Pair.json
+        - name: FactoryV3
+          file: ../../abis/UniswapV3Factory.json
+        - name: Quoter
+          file: ../../abis/UniswapV3Quoter.json
+        - name: ChainlinkAggregator
+          file: ../../abis/CLAggregator.json
       eventHandlers:
         - event: Bribed(address,uint256,indexed bytes32,uint256)
           handler: handleBribed
