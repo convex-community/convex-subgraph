@@ -185,10 +185,11 @@ export function getV2PoolBaseApr(
 export function getPoolBaseApr(pool: Pool, currentVirtualPrice: BigDecimal, timestamp: BigInt): BigDecimal {
   const previousSnapshot = getPreviousDaySnapshot(pool, timestamp.minus(DAY))
   const previousSnapshotVPrice = previousSnapshot ? previousSnapshot.lpTokenVirtualPrice : BIG_DECIMAL_ZERO
-  const rate =
-    previousSnapshotVPrice == BIG_DECIMAL_ZERO
+  let rate =
+    previousSnapshotVPrice == BIG_DECIMAL_ZERO || currentVirtualPrice == BIG_DECIMAL_ZERO
       ? BIG_DECIMAL_ZERO
       : currentVirtualPrice.minus(previousSnapshotVPrice).div(previousSnapshotVPrice)
+  rate = rate.gt(BIG_DECIMAL_ONE) ? BIG_DECIMAL_ZERO : rate
   return rate
 }
 
