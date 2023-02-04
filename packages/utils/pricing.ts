@@ -18,15 +18,15 @@ import {
   WETH_ADDRESS,
   YTOKENS,
 } from 'const'
-import { Factory } from 'curve-pools/generated/Booster/Factory'
-import { Pair } from 'curve-pools/generated/Booster/Pair'
-import { ERC20 } from 'curve-pools/generated/Booster/ERC20'
-import { CToken } from 'curve-pools/generated/Booster/CToken'
-import { YToken } from 'curve-pools/generated/Booster/YToken'
+import { Factory } from 'convex/generated/Booster/Factory'
+import { Pair } from 'convex/generated/Booster/Pair'
+import { ERC20 } from 'convex/generated/Booster/ERC20'
+import { CToken } from 'convex/generated/Booster/CToken'
+import { YToken } from 'convex/generated/Booster/YToken'
 import { exponentToBigDecimal, exponentToBigInt } from './maths'
-import { FactoryV3 } from 'curve-pools/generated/Booster/FactoryV3'
-import { Quoter } from 'curve-pools/generated/Booster/Quoter'
-import { CurvePool } from 'curve-pools/generated/Booster/CurvePool'
+import { FactoryV3 } from 'convex/generated/Booster/FactoryV3'
+import { Quoter } from 'convex/generated/Booster/Quoter'
+import { CurvePool } from 'convex/generated/Booster/CurvePool'
 
 export function getEthRate(token: Address): BigDecimal {
   let eth = BIG_DECIMAL_ONE

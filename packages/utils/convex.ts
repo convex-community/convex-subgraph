@@ -1,10 +1,12 @@
 import { BigDecimal } from '@graphprotocol/graph-ts/index'
-import { ERC20 } from 'curve-pools/generated/Booster/ERC20'
+import { ERC20 } from 'convex/generated/Booster/ERC20'
 import {
-  BIG_DECIMAL_1E18, BIG_DECIMAL_ZERO,
+  BIG_DECIMAL_1E18,
+  BIG_DECIMAL_ZERO,
   CVX_ADDRESS,
   CVX_CLIFF_COUNT,
-  CVX_CLIFF_SIZE, CVX_MAX_SUPPLY
+  CVX_CLIFF_SIZE,
+  CVX_MAX_SUPPLY,
 } from '../constants'
 
 export function getCvxMintAmount(crvEarned: BigDecimal): BigDecimal {
