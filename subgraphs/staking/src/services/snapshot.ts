@@ -1,8 +1,8 @@
 import { DailySnapshot, ExtraRewardApr, StakingContract } from '../../generated/schema'
 import { Address, BigInt, log } from '@graphprotocol/graph-ts'
-import { DAY, getIntervalFromTimestamp } from '../../../../packages/utils/time'
+import { DAY, getIntervalFromTimestamp } from 'utils/time'
 import { getCvxStakingApr, getCvxCrvStakingApr } from './apr'
-import { BIG_DECIMAL_ZERO, CVX_REWARDS, CVXCRV_REWARDS, THREE_CRV_TOKEN } from '../../../../packages/constants'
+import { BIG_DECIMAL_ZERO, CVX_REWARDS, CVXCRV_REWARDS, THREE_CRV_TOKEN } from 'const'
 
 export function createSnapShot(contract: StakingContract, timestamp: BigInt): DailySnapshot {
   const day = getIntervalFromTimestamp(timestamp, DAY)

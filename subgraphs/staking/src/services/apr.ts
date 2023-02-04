@@ -9,9 +9,9 @@ import {
   LOCK_FEES_ADDRESS,
   SECONDS_PER_YEAR,
   THREEPOOL_ADDRESS,
-} from '../../../../packages/constants'
-import { getUsdRate } from '../../../../packages/utils/pricing'
-import { getCvxMintAmount } from '../../../../packages/utils/convex'
+} from 'const'
+import { getUsdRate } from 'utils/pricing'
+import { getCvxMintAmount } from 'utils/convex'
 import { VirtualBalanceRewardPool } from '../../generated/CvxCrvStakingRewards/VirtualBalanceRewardPool'
 import { BaseRewardPool } from '../../generated/CvxCrvStakingRewards/BaseRewardPool'
 import { CurvePool } from '../../generated/CvxCrvStakingRewards/CurvePool'

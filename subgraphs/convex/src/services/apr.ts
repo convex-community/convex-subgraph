@@ -24,12 +24,11 @@ import {
 } from 'const'
 
 import { ERC20 } from '../../generated/Booster/ERC20'
-import { getTokenAValueInTokenB, getUsdRate } from '../../../../packages/utils/pricing'
+import { getTokenAValueInTokenB, getUsdRate } from 'utils/pricing'
 import { ChainlinkAggregator } from '../../generated/Booster/ChainlinkAggregator'
 import { DailyPoolSnapshot, Pool } from '../../generated/schema'
-import { exponentToBigDecimal } from '../../../../packages/utils/maths'
-import { getDailyPoolSnapshot } from './snapshots'
-import { DAY, getIntervalFromTimestamp } from '../../../../packages/utils/time'
+import { exponentToBigDecimal } from 'utils/maths'
+import { DAY, getIntervalFromTimestamp } from 'utils/time'
 import { CurvePool } from '../../generated/Booster/CurvePool'
 
 export function getV2LpTokenPrice(pool: Pool): BigDecimal {

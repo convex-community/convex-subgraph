@@ -113,10 +113,6 @@ export const EURS_USDC_POOL = Address.fromString('0x98a7F18d4E56Cfe84E3D081B4000
 export const TRICRYPTO_V1_POOL = Address.fromString('0x80466c64868E1ab14a1Ddf27A676C3fcBE638Fe5')
 export const EARLY_V2_POOLS = [TRICRYPTO2_POOL_ADDRESS, EURS_USDC_POOL, EURT_USD_POOL]
 
-export const CVX_CLIFF_SIZE = BigDecimal.fromString('100000') // * 1e18; //new cliff every 100,000 tokens
-export const CVX_CLIFF_COUNT = BigDecimal.fromString('1000') // 1,000 cliffs
-export const CVX_MAX_SUPPLY = BigDecimal.fromString('100000000') // * 1e18; //100 mil max supply
-
 export const DENOMINATOR = BigInt.fromI32(10000)
 export const CVX_REWARDS = '0xcf50b810e57ac33b91dcf525c6ddd9881b139332'
 export const CVX_REWARDS_ADDRESS = Address.fromString(CVX_REWARDS)

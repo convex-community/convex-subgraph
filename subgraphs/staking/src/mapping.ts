@@ -3,8 +3,8 @@ import { Staked, Withdrawn } from '../generated/CvxCrvStakingRewards/BaseRewardP
 import { getStakingContract } from './services/contracts'
 import { Deposit, Withdrawal } from '../generated/schema'
 
-import { getUsdRate } from '../../../packages/utils/pricing'
-import { BIG_DECIMAL_1E18, STAKING_TOKENS } from '../../../packages/constants'
+import { getUsdRate } from 'utils/pricing'
+import { BIG_DECIMAL_1E18, STAKING_TOKENS } from 'const'
 import { createSnapShot } from './services/snapshot'
 import { User } from '../../locker/generated/schema'
 
