@@ -112,7 +112,7 @@ type DailyPoolSnapshot @entity {
   block: BigInt!
 }
 
-type RevenueWeeklySnapshot @entity {
+type RevenueDailySnapshot @entity {
   id: ID!
   platform: Platform!
   """ Weekly revenue distributed to LP Providers in CRV (CRV rewards) """
@@ -166,7 +166,7 @@ type ExtraTokenReward @entity {
   """ Entity ID """
   id: ID!
   """ Revenue snapshots """
-  revenueSnapshot: RevenueWeeklySnapshot!
+  revenueSnapshot: RevenueDailySnapshot!
   """ Token address """
   token: Bytes! #address
   """ Reward amount """
@@ -245,7 +245,7 @@ type Platform @entity {
   """ Pools """
   curvePools: [Pool!]! @derivedFrom(field: "platform")
   """ Revenue snapshots """
-  revenue: [RevenueWeeklySnapshot!] @derivedFrom(field: "platform")
+  revenue: [RevenueDailySnapshot!] @derivedFrom(field: "platform")
   """ Historical fee snapshots """
   feeRevenue: [FeeRevenue!]! @derivedFrom(field: "platform")
   """ Votium bribe fee """

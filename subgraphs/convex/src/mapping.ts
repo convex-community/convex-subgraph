@@ -30,7 +30,7 @@ import { ERC20 } from '../generated/Booster/ERC20'
 import { getLpTokenPriceUSD } from './services/apr'
 import { Address, Bytes, DataSourceContext, log } from '@graphprotocol/graph-ts'
 import { getPlatform } from './services/platform'
-import { recordFeeRevenue, takeWeeklyRevenueSnapshot } from './services/revenue'
+import { recordFeeRevenue, takeDailyRevenueSnapshot } from './services/revenue'
 import { PoolCrvRewards } from '../generated/templates'
 import { CurveToken } from '../generated/Booster/CurveToken'
 import { getUser } from './services/user'
@@ -205,7 +205,7 @@ export function handleDeposited(event: DepositedEvent): void {
 }
 
 export function handleEarmarkRewards(call: EarmarkRewardsCall): void {
-  takeWeeklyRevenueSnapshot(call.block.timestamp)
+  takeDailyRevenueSnapshot(call.block.timestamp)
 }
 
 export function handleEarmarkFees(call: EarmarkFeesCall): void {

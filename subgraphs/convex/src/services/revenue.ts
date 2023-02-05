@@ -12,14 +12,14 @@ import {
   BIG_DECIMAL_1E18,
 } from 'const'
 import { Booster } from '../../generated/Booster/Booster'
-import { getIntervalFromTimestamp, WEEK } from 'utils/time'
-import { FeeRevenue, RevenueWeeklySnapshot } from '../../generated/schema'
+import { DAY, getIntervalFromTimestamp } from 'utils/time'
+import { FeeRevenue, RevenueDailySnapshot } from '../../generated/schema'
 import { getUsdRate } from 'utils/pricing'
 
-export function getRevenueWeeklySnapshot(week: string): RevenueWeeklySnapshot {
-  let revenueSnapshot = RevenueWeeklySnapshot.load(week)
+export function getRevenueDailySnapshot(day: string): RevenueDailySnapshot {
+  let revenueSnapshot = RevenueDailySnapshot.load(day)
   if (!revenueSnapshot) {
-    revenueSnapshot = new RevenueWeeklySnapshot(week)
+    revenueSnapshot = new RevenueDailySnapshot(day)
     revenueSnapshot.crvRevenueToLpProvidersAmount = BigDecimal.zero()
     revenueSnapshot.crvRevenueToCvxCrvStakersAmount = BigDecimal.zero()
     revenueSnapshot.crvRevenueToCvxStakersAmount = BigDecimal.zero()
@@ -50,36 +50,36 @@ export function getHistoricalRewards(contract: Address): BigInt {
   return histRewards
 }
 
-export function takeWeeklyRevenueSnapshot(timestamp: BigInt): void {
-  const week = getIntervalFromTimestamp(timestamp, WEEK)
-  let crvRevenue = RevenueWeeklySnapshot.load(week.toString())
+export function takeDailyRevenueSnapshot(timestamp: BigInt): void {
+  const day = getIntervalFromTimestamp(timestamp, DAY)
+  let crvRevenue = RevenueDailySnapshot.load(day.toString())
   if (!crvRevenue) {
-    const previousWeek = getIntervalFromTimestamp(timestamp.minus(WEEK), WEEK)
-    const previousWeekRevenue = RevenueWeeklySnapshot.load(previousWeek.toString())
-    const prevLpRewards = previousWeekRevenue
-      ? previousWeekRevenue.crvRevenueToLpProvidersAmountCumulative
+    const previousDay = getIntervalFromTimestamp(timestamp.minus(DAY), DAY)
+    const previousDayRevenue = RevenueDailySnapshot.load(previousDay.toString())
+    const prevLpRewards = previousDayRevenue
+      ? previousDayRevenue.crvRevenueToLpProvidersAmountCumulative
       : BIG_DECIMAL_ZERO
-    const prevCvxCrvStakerRewards = previousWeekRevenue
-      ? previousWeekRevenue.crvRevenueToCvxCrvStakersAmountCumulative
+    const prevCvxCrvStakerRewards = previousDayRevenue
+      ? previousDayRevenue.crvRevenueToCvxCrvStakersAmountCumulative
       : BIG_DECIMAL_ZERO
-    const prevCvxStakerRewards = previousWeekRevenue
-      ? previousWeekRevenue.crvRevenueToCvxStakersAmountCumulative
+    const prevCvxStakerRewards = previousDayRevenue
+      ? previousDayRevenue.crvRevenueToCvxStakersAmountCumulative
       : BIG_DECIMAL_ZERO
-    const prevTotalRevenueWeeklySnapshot = previousWeekRevenue
-      ? previousWeekRevenue.totalCrvRevenueCumulative
+    const prevTotalRevenueDailySnapshot = previousDayRevenue
+      ? previousDayRevenue.totalCrvRevenueCumulative
       : BIG_DECIMAL_ZERO
-    const prevCallersRewards = previousWeekRevenue
-      ? previousWeekRevenue.crvRevenueToCallersAmountCumulative
+    const prevCallersRewards = previousDayRevenue
+      ? previousDayRevenue.crvRevenueToCallersAmountCumulative
       : BIG_DECIMAL_ZERO
-    const prevPlatformRewards = previousWeekRevenue ? previousWeekRevenue.crvRevenueToPlatformAmount : BIG_DECIMAL_ZERO
-    const prevCrvPrice = previousWeekRevenue ? previousWeekRevenue.crvPrice : BIG_DECIMAL_ZERO
+    const prevPlatformRewards = previousDayRevenue ? previousDayRevenue.crvRevenueToPlatformAmount : BIG_DECIMAL_ZERO
+    const prevCrvPrice = previousDayRevenue ? previousDayRevenue.crvPrice : BIG_DECIMAL_ZERO
     const currentCrvPrice = getUsdRate(CRV_ADDRESS)
     const crvPrice =
       prevCrvPrice == BIG_DECIMAL_ZERO
         ? currentCrvPrice
         : currentCrvPrice.plus(prevCrvPrice).div(BigDecimal.fromString('2'))
 
-    crvRevenue = getRevenueWeeklySnapshot(week.toString())
+    crvRevenue = getRevenueDailySnapshot(day.toString())
     crvRevenue.crvPrice = crvPrice
     crvRevenue.platform = CONVEX_PLATFORM_ID
     const contract = Booster.bind(BOOSTER_ADDRESS)
@@ -87,7 +87,7 @@ export function takeWeeklyRevenueSnapshot(timestamp: BigInt): void {
       .toBigDecimal()
       .div(BIG_DECIMAL_1E18)
       .times(crvPrice)
-    const weeklyCvxCrvStakerRewards = historicalCvxCrvStakerRewards.minus(prevCvxCrvStakerRewards)
+    const dailyCvxCrvStakerRewards = historicalCvxCrvStakerRewards.minus(prevCvxCrvStakerRewards)
 
     const lockIncentive = contract.lockIncentive().toBigDecimal()
     const callIncentive = contract.earmarkIncentive().toBigDecimal()
@@ -96,18 +96,18 @@ export function takeWeeklyRevenueSnapshot(timestamp: BigInt): void {
 
     const decimalDenominator = DENOMINATOR.toBigDecimal()
 
-    const weeklyCrvTotalRevenue = weeklyCvxCrvStakerRewards.times(decimalDenominator).div(lockIncentive)
-    crvRevenue.totalCrvRevenue = weeklyCrvTotalRevenue
-    crvRevenue.crvRevenueToCvxCrvStakersAmount = weeklyCvxCrvStakerRewards
+    const dailyCrvTotalRevenue = dailyCvxCrvStakerRewards.times(decimalDenominator).div(lockIncentive)
+    crvRevenue.totalCrvRevenue = dailyCrvTotalRevenue
+    crvRevenue.crvRevenueToCvxCrvStakersAmount = dailyCvxCrvStakerRewards
 
-    crvRevenue.crvRevenueToCvxStakersAmount = weeklyCrvTotalRevenue.times(stakerIncentive).div(decimalDenominator)
-    crvRevenue.crvRevenueToCallersAmount = weeklyCrvTotalRevenue.times(callIncentive).div(decimalDenominator)
-    crvRevenue.crvRevenueToPlatformAmount = weeklyCrvTotalRevenue.times(platformFee).div(decimalDenominator)
-    crvRevenue.crvRevenueToLpProvidersAmount = weeklyCrvTotalRevenue
+    crvRevenue.crvRevenueToCvxStakersAmount = dailyCrvTotalRevenue.times(stakerIncentive).div(decimalDenominator)
+    crvRevenue.crvRevenueToCallersAmount = dailyCrvTotalRevenue.times(callIncentive).div(decimalDenominator)
+    crvRevenue.crvRevenueToPlatformAmount = dailyCrvTotalRevenue.times(platformFee).div(decimalDenominator)
+    crvRevenue.crvRevenueToLpProvidersAmount = dailyCrvTotalRevenue
       .minus(crvRevenue.crvRevenueToPlatformAmount)
       .minus(crvRevenue.crvRevenueToCallersAmount)
       .minus(crvRevenue.crvRevenueToCvxStakersAmount)
-      .minus(weeklyCvxCrvStakerRewards)
+      .minus(dailyCvxCrvStakerRewards)
 
     crvRevenue.crvRevenueToLpProvidersAmountCumulative = prevLpRewards.plus(crvRevenue.crvRevenueToLpProvidersAmount)
     crvRevenue.crvRevenueToCvxCrvStakersAmountCumulative = prevCvxCrvStakerRewards.plus(
@@ -118,7 +118,7 @@ export function takeWeeklyRevenueSnapshot(timestamp: BigInt): void {
     )
     crvRevenue.crvRevenueToCallersAmountCumulative = prevCallersRewards.plus(crvRevenue.crvRevenueToCallersAmount)
     crvRevenue.crvRevenueToPlatformAmountCumulative = prevPlatformRewards.plus(crvRevenue.crvRevenueToPlatformAmount)
-    crvRevenue.totalCrvRevenueCumulative = prevTotalRevenueWeeklySnapshot.plus(weeklyCrvTotalRevenue)
+    crvRevenue.totalCrvRevenueCumulative = prevTotalRevenueDailySnapshot.plus(dailyCrvTotalRevenue)
     crvRevenue.timestamp = timestamp
 
     crvRevenue.save()
