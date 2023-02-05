@@ -1,6 +1,7 @@
 import { QueueNewRewardsCall } from '../generated/templates/PoolCrvRewards/BaseRewardPool'
 import { dataSource } from '@graphprotocol/graph-ts'
 import { PoolReward } from '../generated/schema'
+import { updateDailyRevenueSnapshotForCrv } from './services/revenue'
 
 export function handleNewRewardsQueued(call: QueueNewRewardsCall): void {
   const context = dataSource.context()
@@ -10,4 +11,6 @@ export function handleNewRewardsQueued(call: QueueNewRewardsCall): void {
   reward.timestamp = call.block.timestamp
   reward.contract = call.to
   reward.save()
+
+  updateDailyRevenueSnapshotForCrv(call.inputs._rewards, call.block.timestamp)
 }

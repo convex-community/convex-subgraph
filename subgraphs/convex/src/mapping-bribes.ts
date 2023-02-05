@@ -19,17 +19,9 @@ export function handleBribed(event: Bribed): void {
   const bribeValue = event.params._amount.toBigDecimal().div(exponentToBigDecimal(decimals)).times(bribeTokenPrice)
 
   const day = getIntervalFromTimestamp(event.block.timestamp, DAY)
-  const revenueSnapshot = getRevenueDailySnapshot(day.toString())
-
-  const previousDay = getIntervalFromTimestamp(event.block.timestamp.minus(DAY), DAY)
-  const previousDayRevenue = RevenueDailySnapshot.load(previousDay.toString())
-
-  const prevCumulativeBribeRevenue = previousDayRevenue ? previousDayRevenue.cumulativeBribeRevenue : BigDecimal.zero()
+  const revenueSnapshot = getRevenueDailySnapshot(day)
 
   revenueSnapshot.bribeRevenue = revenueSnapshot.bribeRevenue.plus(bribeValue)
-  revenueSnapshot.cumulativeBribeRevenue =
-    revenueSnapshot.cumulativeBribeRevenue == BigDecimal.zero()
-      ? prevCumulativeBribeRevenue
-      : revenueSnapshot.cumulativeBribeRevenue.plus(bribeValue)
+  revenueSnapshot.bribeRevenueCumulative = revenueSnapshot.bribeRevenueCumulative.plus(bribeValue)
   revenueSnapshot.save()
 }

@@ -4,7 +4,6 @@ import {
   AddPoolCall,
   Booster,
   ShutdownPoolCall,
-  EarmarkRewardsCall,
   EarmarkFeesCall,
 } from '../generated/Booster/Booster'
 import { Pool } from '../generated/schema'
@@ -27,10 +26,9 @@ import {
 } from 'const'
 import { CurveRegistry } from '../generated/Booster/CurveRegistry'
 import { ERC20 } from '../generated/Booster/ERC20'
-import { getLpTokenPriceUSD } from './services/apr'
 import { Address, Bytes, DataSourceContext, log } from '@graphprotocol/graph-ts'
 import { getPlatform } from './services/platform'
-import { recordFeeRevenue, takeDailyRevenueSnapshot } from './services/revenue'
+import { recordFeeRevenue } from './services/revenue'
 import { PoolCrvRewards } from '../generated/templates'
 import { CurveToken } from '../generated/Booster/CurveToken'
 import { getUser } from './services/user'
@@ -202,10 +200,6 @@ export function handleDeposited(event: DepositedEvent): void {
 
   pool.save()
   snapshot.save()
-}
-
-export function handleEarmarkRewards(call: EarmarkRewardsCall): void {
-  takeDailyRevenueSnapshot(call.block.timestamp)
 }
 
 export function handleEarmarkFees(call: EarmarkFeesCall): void {

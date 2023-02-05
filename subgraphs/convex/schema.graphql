@@ -115,22 +115,30 @@ type DailyPoolSnapshot @entity {
 type RevenueDailySnapshot @entity {
   id: ID!
   platform: Platform!
-  """ Weekly revenue distributed to LP Providers in CRV (CRV rewards) """
+  """ Daily revenue distributed to LP Providers in USD (CRV rewards) """
   crvRevenueToLpProvidersAmount: BigDecimal!
-  """ Weekly revenue distributed to CvxCrv Stakers in CRV ('Lock' rewards)"""
+  """ Daily CVX distributed to LP Providers in USD (pro-rata CRV rewards)"""
+  cvxRevenueToLpProvidersAmount: BigDecimal!
+  """ Daily CRV revenue distributed to CvxCrv Stakers in USD ('Lock' rewards)"""
   crvRevenueToCvxCrvStakersAmount: BigDecimal!
-  """ Weekly revenue distributed to CVX stakers """
+  """ Daily CVX revenue distributed to CvxCrv Stakers in USD ('Lock' rewards)"""
+  cvxRevenueToCvxCrvStakersAmount: BigDecimal!
+  """ Daily revenue distributed to CVX stakers """
   crvRevenueToCvxStakersAmount: BigDecimal!
-  """ Weekly revenue distributed as caller incentives (for harvests) """
+  """ Daily revenue distributed as caller incentives (for harvests) """
   crvRevenueToCallersAmount: BigDecimal!
-  """ Weekly revenue going to treasury """
+  """ Daily revenue going to treasury """
   crvRevenueToPlatformAmount: BigDecimal!
-  """ Total weekly revenue from Curve Pools """
+  """ Total Daily revenue from Curve Pools in USD """
   totalCrvRevenue: BigDecimal!
-  """ Cumulative revenue distributed to LP Providers in CRV """
+  """ Cumulative CRV revenue distributed to LP Providers in USD """
   crvRevenueToLpProvidersAmountCumulative: BigDecimal!
-  """ Cumulative revenue distributed to CvxCrv Stakers in CRV ('Lock' rewards)"""
+  """ Cumulative CVX revenue distributed to LP Providers in USD """
+  cvxRevenueToLpProvidersAmountCumulative: BigDecimal!
+  """ Cumulative CRV revenue distributed to CvxCrv Stakers in USD ('Lock' rewards)"""
   crvRevenueToCvxCrvStakersAmountCumulative: BigDecimal!
+  """ Cumulative CVX revenue distributed to CvxCrv Stakers in USD ('Lock' rewards)"""
+  cvxRevenueToCvxCrvStakersAmountCumulative: BigDecimal!
   """ Cumulative revenue distributed to CVX stakers """
   crvRevenueToCvxStakersAmountCumulative: BigDecimal!
   """ Cumulative revenue distributed as caller incentives (for harvests) """
@@ -144,7 +152,7 @@ type RevenueDailySnapshot @entity {
   """ Revenue accrued from Votium bribes """
   bribeRevenue: BigDecimal!
   """ Cumulative revenue accrued from Votium bribes """
-  cumulativeBribeRevenue: BigDecimal!
+  bribeRevenueCumulative: BigDecimal!
   """ Snapshot timestamp """
   timestamp: BigInt!
   """ Extra token rewards """

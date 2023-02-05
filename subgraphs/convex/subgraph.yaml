@@ -73,8 +73,6 @@ dataSources:
           handler: handleAddPool
         - function: shutdownPool(uint256)
           handler: handleShutdownPool
-        - function: earmarkRewards(uint256)
-          handler: handleEarmarkRewards
         - function: earmarkFees()
           handler: handleEarmarkFees
       file: ./src/mapping.ts
@@ -133,6 +131,24 @@ templates:
       abis:
         - name: BaseRewardPool
           file: ../../abis/BaseRewardPool.json
+        - name: Booster
+          file: ../../abis/Booster.json
+        - name: YToken
+          file: ../../abis/YToken.json
+        - name: CToken
+          file: ../../abis/CToken.json
+        - name: ERC20
+          file: ../../abis/ERC20.json
+        - name: Factory
+          file: ../../abis/UniswapV2Factory.json
+        - name: Pair
+          file: ../../abis/UniswapV2Pair.json
+        - name: FactoryV3
+          file: ../../abis/UniswapV3Factory.json
+        - name: Quoter
+          file: ../../abis/UniswapV3Quoter.json
+        - name: ChainlinkAggregator
+          file: ../../abis/CLAggregator.json
       callHandlers:
         - function: queueNewRewards(uint256)
           handler: handleNewRewardsQueued
