@@ -147,8 +147,10 @@ type RevenueDailySnapshot @entity {
   crvRevenueToPlatformAmountCumulative: BigDecimal!
   """ Total cumulative revenue """
   totalCrvRevenueCumulative: BigDecimal!
-  """ crv USD price as (price_at_time_of_previous_snapshot + price_at_time_of_snapshot) / 2 """
+  """ crv USD price """
   crvPrice: BigDecimal!
+  """ cvx USD price """
+  cvxPrice: BigDecimal!
   """ Revenue accrued from Votium bribes """
   bribeRevenue: BigDecimal!
   """ Cumulative revenue accrued from Votium bribes """

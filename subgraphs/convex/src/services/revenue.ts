@@ -21,11 +21,11 @@ import { getUsdRate } from 'utils/pricing'
 
 export function getRevenueDailySnapshot(day: BigInt): RevenueDailySnapshot {
   let revenueSnapshot = RevenueDailySnapshot.load(day.toString())
-  const previousDay = getIntervalFromTimestamp(day.minus(DAY), DAY)
-  const previousDayRevenue = RevenueDailySnapshot.load(previousDay.toString())
 
   if (!revenueSnapshot) {
     revenueSnapshot = new RevenueDailySnapshot(day.toString())
+    const previousDay = getIntervalFromTimestamp(day.minus(DAY), DAY)
+    const previousDayRevenue = RevenueDailySnapshot.load(previousDay.toString())
     revenueSnapshot.crvRevenueToLpProvidersAmount = BigDecimal.zero()
     revenueSnapshot.cvxRevenueToLpProvidersAmount = BigDecimal.zero()
     revenueSnapshot.crvRevenueToCvxCrvStakersAmount = BigDecimal.zero()
@@ -94,15 +94,12 @@ export function updateDailyRevenueSnapshotForCrv(amount: BigInt, timestamp: BigI
   // total rev obtained from the pool is rev distributed to the pool / (1 - total fees applied)
   const dailyCrvTotalRevenue = amount.toBigDecimal().div(lpShare).div(BIG_DECIMAL_1E18).times(currentCrvPrice)
   // amount of CVX that could be minted from the CRV amount
-  const dailyCvxMinted = getCvxMintAmount(amount.toBigDecimal().div(lpShare))
-    .div(BIG_DECIMAL_1E18)
-    .times(currentCvxPrice)
+  const dailyCvxMinted = getCvxMintAmount(amount.toBigDecimal().div(lpShare)).times(currentCvxPrice)
 
-  dayRevenue.totalCrvRevenue = dailyCrvTotalRevenue
   const crvRevenueToCvxCrvStakersAmount = dailyCrvTotalRevenue.times(lockIncentive)
   const cvxRevenueToCvxCrvStakersAmount = dailyCvxMinted.times(lockIncentive)
-  const crvRevenueToCallersAmount = dailyCrvTotalRevenue.times(callIncentive).div(decimalDenominator)
-  const crvRevenueToPlatformAmount = dailyCrvTotalRevenue.times(platformFee).div(decimalDenominator)
+  const crvRevenueToCallersAmount = dailyCrvTotalRevenue.times(callIncentive)
+  const crvRevenueToPlatformAmount = dailyCrvTotalRevenue.times(platformFee)
   const crvRevenueToLpProvidersAmount = amount.toBigDecimal().div(BIG_DECIMAL_1E18).times(currentCrvPrice)
   const cvxRevenueToLpProvidersAmount = dailyCvxMinted.times(lpShare)
 
@@ -137,7 +134,8 @@ export function updateDailyRevenueSnapshotForCrv(amount: BigInt, timestamp: BigI
     dayRevenue.cvxRevenueToLpProvidersAmountCumulative.plus(cvxRevenueToLpProvidersAmount)
 
   dayRevenue.timestamp = timestamp
-
+  dayRevenue.crvPrice = currentCrvPrice
+  dayRevenue.cvxPrice = currentCvxPrice
   dayRevenue.save()
 }
 
