@@ -17,11 +17,12 @@ export function handleBribed(event: Bribed): void {
   const bribeTokenPrice = getUsdRate(event.params._token)
   const decimals = getDecimals(event.params._token)
   const bribeValue = event.params._amount.toBigDecimal().div(exponentToBigDecimal(decimals)).times(bribeTokenPrice)
-
+  const platform = getPlatform()
   const day = getIntervalFromTimestamp(event.block.timestamp, DAY)
   const revenueSnapshot = getRevenueDailySnapshot(day)
 
   revenueSnapshot.bribeRevenue = revenueSnapshot.bribeRevenue.plus(bribeValue)
-  revenueSnapshot.bribeRevenueCumulative = revenueSnapshot.bribeRevenueCumulative.plus(bribeValue)
+  platform.totalBribeRevenue = platform.totalBribeRevenue.plus(bribeValue)
+  platform.save()
   revenueSnapshot.save()
 }

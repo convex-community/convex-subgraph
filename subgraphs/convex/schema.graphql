@@ -131,30 +131,12 @@ type RevenueDailySnapshot @entity {
   crvRevenueToPlatformAmount: BigDecimal!
   """ Total Daily revenue from Curve Pools in USD """
   totalCrvRevenue: BigDecimal!
-  """ Cumulative CRV revenue distributed to LP Providers in USD """
-  crvRevenueToLpProvidersAmountCumulative: BigDecimal!
-  """ Cumulative CVX revenue distributed to LP Providers in USD """
-  cvxRevenueToLpProvidersAmountCumulative: BigDecimal!
-  """ Cumulative CRV revenue distributed to CvxCrv Stakers in USD ('Lock' rewards)"""
-  crvRevenueToCvxCrvStakersAmountCumulative: BigDecimal!
-  """ Cumulative CVX revenue distributed to CvxCrv Stakers in USD ('Lock' rewards)"""
-  cvxRevenueToCvxCrvStakersAmountCumulative: BigDecimal!
-  """ Cumulative revenue distributed to CVX stakers """
-  crvRevenueToCvxStakersAmountCumulative: BigDecimal!
-  """ Cumulative revenue distributed as caller incentives (for harvests) """
-  crvRevenueToCallersAmountCumulative: BigDecimal!
-  """ Cumulative revenue going to treasury """
-  crvRevenueToPlatformAmountCumulative: BigDecimal!
-  """ Total cumulative revenue """
-  totalCrvRevenueCumulative: BigDecimal!
   """ crv USD price """
   crvPrice: BigDecimal!
   """ cvx USD price """
   cvxPrice: BigDecimal!
   """ Revenue accrued from Votium bribes """
   bribeRevenue: BigDecimal!
-  """ Cumulative revenue accrued from Votium bribes """
-  bribeRevenueCumulative: BigDecimal!
   """ Snapshot timestamp """
   timestamp: BigInt!
   """ Extra token rewards """
@@ -260,4 +242,22 @@ type Platform @entity {
   feeRevenue: [FeeRevenue!]! @derivedFrom(field: "platform")
   """ Votium bribe fee """
   bribeFee: BigInt!
+  """ Cumulative CRV revenue distributed to LP Providers in USD """
+  totalCrvRevenueToLpProviders: BigDecimal!
+  """ Cumulative CVX revenue distributed to LP Providers in USD """
+  totalCvxRevenueToLpProviders: BigDecimal!
+  """ Cumulative CRV revenue distributed to CvxCrv Stakers in USD ('Lock' rewards)"""
+  totalCrvRevenueToCvxCrvStakers: BigDecimal!
+  """ Cumulative CVX revenue distributed to CvxCrv Stakers in USD ('Lock' rewards)"""
+  totalCvxRevenueToCvxCrvStakers: BigDecimal!
+  """ Cumulative revenue distributed to CVX stakers """
+  totalCrvRevenueToCvxStakers: BigDecimal!
+  """ Cumulative revenue distributed as caller incentives (for harvests) """
+  totalCrvRevenueToCallers: BigDecimal!
+  """ Cumulative revenue going to treasury """
+  totalCrvRevenueToPlatform: BigDecimal!
+  """ Total cumulative revenue """
+  totalCrvRevenue: BigDecimal!
+  """ Cumulative revenue accrued from Votium bribes """
+  totalBribeRevenue: BigDecimal!
 }

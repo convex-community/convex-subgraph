@@ -18,6 +18,7 @@ import { getCvxMintAmount } from 'utils/convex'
 import { DAY, getIntervalFromTimestamp } from 'utils/time'
 import { FeeRevenue, RevenueDailySnapshot } from '../../generated/schema'
 import { getUsdRate } from 'utils/pricing'
+import { getPlatform } from './platform'
 
 export function getRevenueDailySnapshot(day: BigInt): RevenueDailySnapshot {
   let revenueSnapshot = RevenueDailySnapshot.load(day.toString())
@@ -34,31 +35,6 @@ export function getRevenueDailySnapshot(day: BigInt): RevenueDailySnapshot {
     revenueSnapshot.crvRevenueToCallersAmount = BigDecimal.zero()
     revenueSnapshot.crvRevenueToPlatformAmount = BigDecimal.zero()
     revenueSnapshot.totalCrvRevenue = BigDecimal.zero()
-    if (previousDayRevenue) {
-      revenueSnapshot.crvRevenueToLpProvidersAmountCumulative =
-        previousDayRevenue.crvRevenueToLpProvidersAmountCumulative
-      revenueSnapshot.cvxRevenueToLpProvidersAmountCumulative =
-        previousDayRevenue.cvxRevenueToLpProvidersAmountCumulative
-      revenueSnapshot.crvRevenueToCvxCrvStakersAmountCumulative =
-        previousDayRevenue.crvRevenueToCvxCrvStakersAmountCumulative
-      revenueSnapshot.cvxRevenueToCvxCrvStakersAmountCumulative =
-        previousDayRevenue.cvxRevenueToCvxCrvStakersAmountCumulative
-      revenueSnapshot.crvRevenueToCvxStakersAmountCumulative = previousDayRevenue.crvRevenueToCvxStakersAmountCumulative
-      revenueSnapshot.crvRevenueToCallersAmountCumulative = previousDayRevenue.crvRevenueToCallersAmountCumulative
-      revenueSnapshot.crvRevenueToPlatformAmountCumulative = previousDayRevenue.crvRevenueToPlatformAmountCumulative
-      revenueSnapshot.totalCrvRevenueCumulative = previousDayRevenue.totalCrvRevenueCumulative
-      revenueSnapshot.bribeRevenueCumulative = previousDayRevenue.bribeRevenueCumulative
-    } else {
-      revenueSnapshot.crvRevenueToLpProvidersAmountCumulative = BigDecimal.zero()
-      revenueSnapshot.cvxRevenueToLpProvidersAmountCumulative = BigDecimal.zero()
-      revenueSnapshot.crvRevenueToCvxCrvStakersAmountCumulative = BigDecimal.zero()
-      revenueSnapshot.cvxRevenueToCvxCrvStakersAmountCumulative = BigDecimal.zero()
-      revenueSnapshot.crvRevenueToCvxStakersAmountCumulative = BigDecimal.zero()
-      revenueSnapshot.crvRevenueToCallersAmountCumulative = BigDecimal.zero()
-      revenueSnapshot.crvRevenueToPlatformAmountCumulative = BigDecimal.zero()
-      revenueSnapshot.totalCrvRevenueCumulative = BigDecimal.zero()
-      revenueSnapshot.bribeRevenueCumulative = BigDecimal.zero()
-    }
     revenueSnapshot.crvPrice = BigDecimal.zero()
     revenueSnapshot.bribeRevenue = BigDecimal.zero()
     revenueSnapshot.timestamp = BigInt.zero()
@@ -83,6 +59,7 @@ export function updateDailyRevenueSnapshotForCrv(amount: BigInt, timestamp: BigI
   const decimalDenominator = DENOMINATOR.toBigDecimal()
   const currentCrvPrice = getUsdRate(CRV_ADDRESS)
   const currentCvxPrice = getUsdRate(CVX_ADDRESS)
+  const platform = getPlatform()
 
   const lockIncentive = contract.lockIncentive().toBigDecimal().div(decimalDenominator)
   const callIncentive = contract.earmarkIncentive().toBigDecimal().div(decimalDenominator)
@@ -94,7 +71,9 @@ export function updateDailyRevenueSnapshotForCrv(amount: BigInt, timestamp: BigI
   // total rev obtained from the pool is rev distributed to the pool / (1 - total fees applied)
   const dailyCrvTotalRevenue = amount.toBigDecimal().div(lpShare).div(BIG_DECIMAL_1E18).times(currentCrvPrice)
   // amount of CVX that could be minted from the CRV amount
-  const dailyCvxMinted = getCvxMintAmount(amount.toBigDecimal().div(lpShare)).times(currentCvxPrice)
+  const dailyCvxMinted = getCvxMintAmount(amount.toBigDecimal().div(lpShare).div(BIG_DECIMAL_1E18)).times(
+    currentCvxPrice
+  )
 
   const crvRevenueToCvxCrvStakersAmount = dailyCrvTotalRevenue.times(lockIncentive)
   const cvxRevenueToCvxCrvStakersAmount = dailyCvxMinted.times(lockIncentive)
@@ -117,21 +96,18 @@ export function updateDailyRevenueSnapshotForCrv(amount: BigInt, timestamp: BigI
   dayRevenue.cvxRevenueToLpProvidersAmount =
     dayRevenue.cvxRevenueToLpProvidersAmount.plus(cvxRevenueToLpProvidersAmount)
 
-  dayRevenue.totalCrvRevenueCumulative = dayRevenue.totalCrvRevenueCumulative.plus(dailyCrvTotalRevenue)
-  dayRevenue.crvRevenueToCvxCrvStakersAmountCumulative = dayRevenue.crvRevenueToCvxCrvStakersAmountCumulative.plus(
+  platform.totalCrvRevenue = platform.totalCrvRevenue.plus(dailyCrvTotalRevenue)
+  platform.totalCrvRevenueToCvxCrvStakers = platform.totalCrvRevenueToCvxCrvStakers.plus(
     crvRevenueToCvxCrvStakersAmount
   )
-  dayRevenue.cvxRevenueToCvxCrvStakersAmountCumulative = dayRevenue.cvxRevenueToCvxCrvStakersAmountCumulative.plus(
+  platform.totalCvxRevenueToCvxCrvStakers = platform.totalCvxRevenueToCvxCrvStakers.plus(
     cvxRevenueToCvxCrvStakersAmount
   )
-  dayRevenue.crvRevenueToCallersAmountCumulative =
-    dayRevenue.crvRevenueToCallersAmountCumulative.plus(crvRevenueToCallersAmount)
-  dayRevenue.crvRevenueToPlatformAmountCumulative =
-    dayRevenue.crvRevenueToPlatformAmountCumulative.plus(crvRevenueToPlatformAmount)
-  dayRevenue.crvRevenueToLpProvidersAmountCumulative =
-    dayRevenue.crvRevenueToLpProvidersAmountCumulative.plus(crvRevenueToLpProvidersAmount)
-  dayRevenue.cvxRevenueToLpProvidersAmountCumulative =
-    dayRevenue.cvxRevenueToLpProvidersAmountCumulative.plus(cvxRevenueToLpProvidersAmount)
+  platform.totalCrvRevenueToCallers = platform.totalCrvRevenueToCallers.plus(crvRevenueToCallersAmount)
+  platform.totalCrvRevenueToPlatform = platform.totalCrvRevenueToPlatform.plus(crvRevenueToPlatformAmount)
+  platform.totalCrvRevenueToLpProviders = platform.totalCrvRevenueToLpProviders.plus(crvRevenueToLpProvidersAmount)
+  platform.totalCvxRevenueToLpProviders = platform.totalCvxRevenueToLpProviders.plus(cvxRevenueToLpProvidersAmount)
+  platform.save()
 
   dayRevenue.timestamp = timestamp
   dayRevenue.crvPrice = currentCrvPrice
