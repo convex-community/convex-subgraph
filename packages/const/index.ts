@@ -208,6 +208,11 @@ export const CRV_FRAX = '0x3175df0976dfa876431c2e9ee6bc45b65d3473cc'
 export const CRV_FRAX_ADDRESS = Address.fromString(CRV_FRAX)
 export const FRAXBP_ADDRESS = Address.fromString('0xdcef968d416a41cdac0ed8702fac8128a64241a2')
 
+// Fee addresses for Frax Convex
+
+export const FEE_REGISTRY = '0xC9aCB83ADa68413a6Aa57007BC720EE2E2b3C46D'
+export const FEE_REGISTRY_ADDRESS = Address.fromString(FEE_REGISTRY)
+
 // Lending pools using cTokens have their balance labelled in cTokens
 // which must be converted to underlying using each token's exchange
 // rate and decimals. We keep this list to handle these edge cases

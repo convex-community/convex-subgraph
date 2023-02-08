@@ -129,12 +129,27 @@ type RevenueDailySnapshot @entity {
   crvRevenueToCallersAmount: BigDecimal!
   """ Daily revenue going to treasury """
   crvRevenueToPlatformAmount: BigDecimal!
-  """ Total Daily revenue from Curve Pools in USD """
+  """ Total Daily revenue from CRV in USD """
   totalCrvRevenue: BigDecimal!
+  """ Daily FXS revenue distributed to CVX stakers """
+  fxsRevenueToCvxStakersAmount: BigDecimal!
+  """ Daily FXS revenue distributed to CvxFXS Stakers in USD"""
+  fxsRevenueToCvxFxsStakersAmount: BigDecimal!
+  """ Daily FXS distributed to LP Providers in USD """
+  fxsRevenueToLpProvidersAmount: BigDecimal!
+  """ Daily FXS revenue distributed as caller incentives (for harvests) """
+  fxsRevenueToCallersAmount: BigDecimal!
+  """ Daily FXS revenue going to treasury """
+  fxsRevenueToPlatformAmount: BigDecimal!
+  """ Total Daily revenue from FXS in USD """
+  totalFxsRevenue: BigDecimal!
+
   """ crv USD price """
   crvPrice: BigDecimal!
   """ cvx USD price """
   cvxPrice: BigDecimal!
+  """ fxs USD price """
+  fxsPrice: BigDecimal!
   """ Revenue accrued from Votium bribes """
   bribeRevenue: BigDecimal!
   """ Snapshot timestamp """
@@ -246,18 +261,30 @@ type Platform @entity {
   totalCrvRevenueToLpProviders: BigDecimal!
   """ Cumulative CVX revenue distributed to LP Providers in USD """
   totalCvxRevenueToLpProviders: BigDecimal!
+  """ Cumulative FXS revenue distributed to LP Providers in USD """
+  totalFxsRevenueToLpProviders: BigDecimal!
   """ Cumulative CRV revenue distributed to CvxCrv Stakers in USD ('Lock' rewards)"""
   totalCrvRevenueToCvxCrvStakers: BigDecimal!
   """ Cumulative CVX revenue distributed to CvxCrv Stakers in USD ('Lock' rewards)"""
   totalCvxRevenueToCvxCrvStakers: BigDecimal!
+  """ Cumulative FXS revenue distributed to CvxFxs Stakers in USD """
+  totalFxsRevenueToCvxFxsStakers: BigDecimal!
   """ Cumulative revenue distributed to CVX stakers """
   totalCrvRevenueToCvxStakers: BigDecimal!
+  """ Cumulative revenue distributed to CVX stakers """
+  totalFxsRevenueToCvxStakers: BigDecimal!
   """ Cumulative revenue distributed as caller incentives (for harvests) """
   totalCrvRevenueToCallers: BigDecimal!
+  """ Cumulative revenue distributed as caller incentives (for harvests) """
+  totalFxsRevenueToCallers: BigDecimal!
   """ Cumulative revenue going to treasury """
   totalCrvRevenueToPlatform: BigDecimal!
-  """ Total cumulative revenue """
+  """ Cumulative revenue going to treasury """
+  totalFxsRevenueToPlatform: BigDecimal!
+  """ Total cumulative revenue from CRV """
   totalCrvRevenue: BigDecimal!
+  """ Total cumulative revenue from FXS """
+  totalFxsRevenue: BigDecimal!
   """ Cumulative revenue accrued from Votium bribes """
   totalBribeRevenue: BigDecimal!
 }

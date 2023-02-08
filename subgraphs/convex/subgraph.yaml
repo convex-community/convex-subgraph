@@ -1,4 +1,4 @@
-specVersion: 0.0.2
+specVersion: 0.0.4
 schema:
   file: ./schema.graphql
 dataSources:
@@ -114,6 +114,45 @@ dataSources:
         - event: UpdatedFee(uint256)
           handler: handleUpdatedFee
       file: ./src/mapping-bribes.ts
+  - kind: ethereum/contract
+    name: FeeDeposit
+    network: mainnet
+    source:
+      address: "0xcBec22233Dad5E15AB9c02CAA4d914F3c97323f7"
+      abi: FeeDeposit
+      startBlock: 14765185
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - RevenueDailySnapshot
+        - Platform
+      abis:
+        - name: FeeDeposit
+          file: ./abis/FeeDeposit.json
+        - name: FeeRegistry
+          file: ./abis/FeeRegistry.json
+        - name: YToken
+          file: ../../abis/YToken.json
+        - name: CToken
+          file: ../../abis/CToken.json
+        - name: ERC20
+          file: ../../abis/ERC20.json
+        - name: Factory
+          file: ../../abis/UniswapV2Factory.json
+        - name: Pair
+          file: ../../abis/UniswapV2Pair.json
+        - name: FactoryV3
+          file: ../../abis/UniswapV3Factory.json
+        - name: Quoter
+          file: ../../abis/UniswapV3Quoter.json
+        - name: ChainlinkAggregator
+          file: ../../abis/CLAggregator.json
+      eventHandlers:
+        - event: RewardsDistributed(indexed address,uint256)
+          handler: handleRewardsDistributed
+      file: ./src/mapping-fxs-deposits.ts
 
 templates:
   - name: PoolCrvRewards
