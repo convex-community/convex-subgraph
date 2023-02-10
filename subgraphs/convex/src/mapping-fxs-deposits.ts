@@ -10,7 +10,7 @@ export function handleRewardsDistributed(event: RewardsDistributed): void {
   const registry = FeeRegistry.bind(FEE_REGISTRY_ADDRESS)
   const deposit = FeeDeposit.bind(event.address)
   const decimalDenominator = DENOMINATOR.toBigDecimal()
-  const amount = event.params.amount.toBigDecimal()
+  const amount = event.params.amount.toBigDecimal().div(BIG_DECIMAL_1E18)
 
   const platform = getPlatform()
   const day = getIntervalFromTimestamp(event.block.timestamp, DAY)
@@ -29,7 +29,7 @@ export function handleRewardsDistributed(event: RewardsDistributed): void {
   const fxsRevenueToCallers = wholeFeeAmount.minus(amount)
 
   // infer total revenue from it
-  const totalFxsRevenue = amount.div(lpShare).div(BIG_DECIMAL_1E18).times(tokenPrice)
+  const totalFxsRevenue = amount.div(lpShare).times(tokenPrice)
   const fxsRevenueToLpProviders = totalFxsRevenue.minus(amount)
 
   // calc other amounts

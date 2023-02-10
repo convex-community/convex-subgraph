@@ -25,19 +25,7 @@ export function getRevenueDailySnapshot(day: BigInt): RevenueDailySnapshot {
 
   if (!revenueSnapshot) {
     revenueSnapshot = new RevenueDailySnapshot(day.toString())
-    const previousDay = getIntervalFromTimestamp(day.minus(DAY), DAY)
-    const previousDayRevenue = RevenueDailySnapshot.load(previousDay.toString())
-    revenueSnapshot.crvRevenueToLpProvidersAmount = BigDecimal.zero()
-    revenueSnapshot.cvxRevenueToLpProvidersAmount = BigDecimal.zero()
-    revenueSnapshot.crvRevenueToCvxCrvStakersAmount = BigDecimal.zero()
-    revenueSnapshot.cvxRevenueToCvxCrvStakersAmount = BigDecimal.zero()
-    revenueSnapshot.crvRevenueToCvxStakersAmount = BigDecimal.zero()
-    revenueSnapshot.crvRevenueToCallersAmount = BigDecimal.zero()
-    revenueSnapshot.crvRevenueToPlatformAmount = BigDecimal.zero()
-    revenueSnapshot.totalCrvRevenue = BigDecimal.zero()
-    revenueSnapshot.crvPrice = BigDecimal.zero()
-    revenueSnapshot.bribeRevenue = BigDecimal.zero()
-    revenueSnapshot.timestamp = BigInt.zero()
+    revenueSnapshot.save()
   }
   return revenueSnapshot
 }
@@ -75,6 +63,7 @@ export function updateDailyRevenueSnapshotForCrv(amount: BigInt, timestamp: BigI
     currentCvxPrice
   )
 
+  const crvRevenueToCvxStakersAmount = dailyCrvTotalRevenue.times(stakerIncentive)
   const crvRevenueToCvxCrvStakersAmount = dailyCrvTotalRevenue.times(lockIncentive)
   const cvxRevenueToCvxCrvStakersAmount = dailyCvxMinted.times(lockIncentive)
   const crvRevenueToCallersAmount = dailyCrvTotalRevenue.times(callIncentive)
@@ -83,6 +72,8 @@ export function updateDailyRevenueSnapshotForCrv(amount: BigInt, timestamp: BigI
   const cvxRevenueToLpProvidersAmount = dailyCvxMinted.times(lpShare)
 
   dayRevenue.totalCrvRevenue = dayRevenue.totalCrvRevenue.plus(dailyCrvTotalRevenue)
+
+  dayRevenue.crvRevenueToCvxStakersAmount = dayRevenue.crvRevenueToCvxStakersAmount.plus(crvRevenueToCvxStakersAmount)
   dayRevenue.crvRevenueToCvxCrvStakersAmount = dayRevenue.crvRevenueToCvxCrvStakersAmount.plus(
     crvRevenueToCvxCrvStakersAmount
   )
@@ -103,6 +94,7 @@ export function updateDailyRevenueSnapshotForCrv(amount: BigInt, timestamp: BigI
   platform.totalCvxRevenueToCvxCrvStakers = platform.totalCvxRevenueToCvxCrvStakers.plus(
     cvxRevenueToCvxCrvStakersAmount
   )
+  platform.totalCrvRevenueToCvxStakers = platform.totalCrvRevenueToCvxStakers.plus(crvRevenueToCvxStakersAmount)
   platform.totalCrvRevenueToCallers = platform.totalCrvRevenueToCallers.plus(crvRevenueToCallersAmount)
   platform.totalCrvRevenueToPlatform = platform.totalCrvRevenueToPlatform.plus(crvRevenueToPlatformAmount)
   platform.totalCrvRevenueToLpProviders = platform.totalCrvRevenueToLpProviders.plus(crvRevenueToLpProvidersAmount)
