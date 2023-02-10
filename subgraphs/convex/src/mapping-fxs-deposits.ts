@@ -1,7 +1,7 @@
 import { getPlatform } from './services/platform'
 import { getUsdRate } from 'utils/pricing'
 import { getIntervalFromTimestamp, DAY } from 'utils/time'
-import { getRevenueDailySnapshot } from './services/revenue'
+import { getDailyRevenueSnapshot } from './services/revenue'
 import { FeeDeposit, RewardsDistributed } from '../generated/FeeDeposit/FeeDeposit'
 import { FeeRegistry } from '../generated/FeeDeposit/FeeRegistry'
 import { BIG_DECIMAL_1E18, BIG_DECIMAL_ONE, DENOMINATOR, FEE_REGISTRY_ADDRESS } from 'const'
@@ -14,7 +14,7 @@ export function handleRewardsDistributed(event: RewardsDistributed): void {
 
   const platform = getPlatform()
   const day = getIntervalFromTimestamp(event.block.timestamp, DAY)
-  const revenueSnapshot = getRevenueDailySnapshot(day)
+  const revenueSnapshot = getDailyRevenueSnapshot(day)
 
   const callIncentive = deposit.callIncentive().toBigDecimal().div(decimalDenominator)
   const stakerIncentive = registry.cvxIncentive().toBigDecimal().div(decimalDenominator)

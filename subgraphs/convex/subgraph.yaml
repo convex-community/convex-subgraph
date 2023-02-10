@@ -19,7 +19,7 @@ dataSources:
         - Withdrawal
         - User
         - ExtraReward
-        - RevenueDailySnapshot
+        - DailyRevenueSnapshot
         - Platform
       abis:
         - name: Booster
@@ -88,7 +88,7 @@ dataSources:
       apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
-        - RevenueDailySnapshot
+        - DailyRevenueSnapshot
       abis:
         - name: Votium
           file: ./abis/Votium.json
@@ -126,7 +126,7 @@ dataSources:
       apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
-        - RevenueDailySnapshot
+        - DailyRevenueSnapshot
         - Platform
       abis:
         - name: FeeDeposit

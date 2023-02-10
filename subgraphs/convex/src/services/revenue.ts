@@ -16,15 +16,15 @@ import {
 import { Booster } from '../../generated/Booster/Booster'
 import { getCvxMintAmount } from 'utils/convex'
 import { DAY, getIntervalFromTimestamp } from 'utils/time'
-import { FeeRevenue, RevenueDailySnapshot } from '../../generated/schema'
+import { FeeRevenue, DailyRevenueSnapshot } from '../../generated/schema'
 import { getUsdRate } from 'utils/pricing'
 import { getPlatform } from './platform'
 
-export function getRevenueDailySnapshot(day: BigInt): RevenueDailySnapshot {
-  let revenueSnapshot = RevenueDailySnapshot.load(day.toString())
+export function getDailyRevenueSnapshot(day: BigInt): DailyRevenueSnapshot {
+  let revenueSnapshot = DailyRevenueSnapshot.load(day.toString())
 
   if (!revenueSnapshot) {
-    revenueSnapshot = new RevenueDailySnapshot(day.toString())
+    revenueSnapshot = new DailyRevenueSnapshot(day.toString())
     revenueSnapshot.save()
   }
   return revenueSnapshot
@@ -42,7 +42,7 @@ export function getHistoricalRewards(contract: Address): BigInt {
 
 export function updateDailyRevenueSnapshotForCrv(amount: BigInt, timestamp: BigInt): void {
   const day = getIntervalFromTimestamp(timestamp, DAY)
-  const dayRevenue = getRevenueDailySnapshot(day)
+  const dayRevenue = getDailyRevenueSnapshot(day)
   const contract = Booster.bind(BOOSTER_ADDRESS)
   const decimalDenominator = DENOMINATOR.toBigDecimal()
   const currentCrvPrice = getUsdRate(CRV_ADDRESS)

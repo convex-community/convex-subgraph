@@ -3,8 +3,8 @@ import { Bribed, UpdatedFee } from '../generated/VotiumBribe/Votium'
 import { getDecimals, getUsdRate } from 'utils/pricing'
 import { exponentToBigDecimal } from 'utils/maths'
 import { getIntervalFromTimestamp, DAY } from 'utils/time'
-import { getRevenueDailySnapshot } from './services/revenue'
-import { RevenueDailySnapshot } from '../generated/schema'
+import { getDailyRevenueSnapshot } from './services/revenue'
+import { DailyRevenueSnapshot } from '../generated/schema'
 import { BigDecimal } from '@graphprotocol/graph-ts'
 
 export function handleUpdatedFee(event: UpdatedFee): void {
@@ -19,7 +19,7 @@ export function handleBribed(event: Bribed): void {
   const bribeValue = event.params._amount.toBigDecimal().div(exponentToBigDecimal(decimals)).times(bribeTokenPrice)
   const platform = getPlatform()
   const day = getIntervalFromTimestamp(event.block.timestamp, DAY)
-  const revenueSnapshot = getRevenueDailySnapshot(day)
+  const revenueSnapshot = getDailyRevenueSnapshot(day)
 
   revenueSnapshot.bribeRevenue = revenueSnapshot.bribeRevenue.plus(bribeValue)
   platform.totalBribeRevenue = platform.totalBribeRevenue.plus(bribeValue)
