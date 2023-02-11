@@ -92,6 +92,8 @@ dataSources:
       abis:
         - name: Votium
           file: ./abis/Votium.json
+        - name: CurvePool
+          file: ../../abis/CurvePool.json
         - name: YToken
           file: ../../abis/YToken.json
         - name: CToken
@@ -133,6 +135,8 @@ dataSources:
           file: ./abis/FeeDeposit.json
         - name: FeeRegistry
           file: ./abis/FeeRegistry.json
+        - name: CurvePool
+          file: ../../abis/CurvePool.json
         - name: YToken
           file: ../../abis/YToken.json
         - name: CToken
@@ -215,6 +219,8 @@ templates:
           file: ../../abis/BaseRewardPool.json
         - name: Booster
           file: ../../abis/Booster.json
+        - name: CurvePool
+          file: ../../abis/CurvePool.json
         - name: YToken
           file: ../../abis/YToken.json
         - name: CToken

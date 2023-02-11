@@ -172,7 +172,7 @@ export function getUsdRate(token: Address): BigDecimal {
 
   if (token == CRV_FRAX_ADDRESS) {
     return getFraxBpVirtualPrice()
-  } else if (token != THREE_CRV_ADDRESS) {
+  } else if (token == THREE_CRV_ADDRESS) {
     return get3CrvVirtualPrice()
   } else if (CTOKENS.includes(token.toHexString())) {
     return getCTokenExchangeRate(token)
