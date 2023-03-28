@@ -48,6 +48,8 @@ dataSources:
           file: ../../abis/ExtraRewardStashV30.json
         - name: ExtraRewardStashV32
           file: ../../abis/ExtraRewardStashV32.json
+        - name: ExtraRewardStashV33
+          file: ../../abis/ExtraRewardStashV33.json
         - name: ExtraRewardStashV2
           file: ../../abis/ExtraRewardStashV2.json
         - name: ExtraRewardStashV1

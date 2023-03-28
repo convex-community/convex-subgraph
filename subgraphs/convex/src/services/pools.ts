@@ -34,6 +34,7 @@ import { ExtraRewardStashV32 } from '../../generated/Booster/ExtraRewardStashV32
 import { ExtraRewardStashV30 } from '../../generated/Booster/ExtraRewardStashV30'
 import { ERC20 } from '../../generated/Booster/ERC20'
 import { CurvePoolV2 } from '../../generated/Booster/CurvePoolV2'
+import { ExtraRewardStashV33 } from '../../generated/Booster/ExtraRewardStashV33'
 
 export function getPool(pid: string): Pool {
   let pool = Pool.load(pid)
@@ -149,7 +150,7 @@ export function getPoolExtrasV30(pool: Pool): void {
 }
 
 export function getPoolExtrasV3(pool: Pool): void {
-  const stashContract = ExtraRewardStashV32.bind(bytesToAddress(pool.stash))
+  let stashContract = ExtraRewardStashV32.bind(bytesToAddress(pool.stash))
 
   // determine what minor version of version 3 contracts we are using
   // if it hasn't been determined before.
@@ -166,6 +167,8 @@ export function getPoolExtrasV3(pool: Pool): void {
         minorVersion = 1
       } else if (suffix == '.2') {
         minorVersion = 2
+      } else if (suffix == '.3') {
+        minorVersion = 3
       }
       pool.stashMinorVersion = BigInt.fromI32(minorVersion)
       pool.save()
@@ -176,8 +179,11 @@ export function getPoolExtrasV3(pool: Pool): void {
     getPoolExtrasV30(pool)
     return
   }
+  if (pool.stashMinorVersion == BigInt.fromI32(3)) {
+    stashContract = ExtraRewardStashV33.bind(bytesToAddress(pool.stash))
+  }
 
-  // v3.1 and above share the same ABI
+  // v3.1 and v3.2 share the same ABI
   const tokenCountResult = stashContract.try_tokenCount()
   const tokenCount = tokenCountResult.reverted ? BigInt.fromI32(pool.extras.length) : tokenCountResult.value
   if (tokenCountResult.reverted) {
