@@ -149,8 +149,35 @@ export function getPoolExtrasV30(pool: Pool): void {
   }
 }
 
+export function getPoolExtrasV33(pool: Pool): void {
+  const stashContract = ExtraRewardStashV33.bind(bytesToAddress(pool.stash))
+  const tokenCountResult = stashContract.try_tokenCount()
+  const tokenCount = tokenCountResult.reverted ? BigInt.fromI32(pool.extras.length) : tokenCountResult.value
+  // we only add new rewards if tokenCount is different from what we already know
+  for (let i = pool.extras.length; i < tokenCount.toI32(); i++) {
+    const tokenListResult = stashContract.try_tokenList(BigInt.fromI32(i))
+    if (tokenListResult.reverted) {
+      log.warning('Failed to get token list from {}', [pool.stash.toHexString()])
+      continue
+    }
+    const tokenInfoResult = stashContract.try_tokenInfo(tokenListResult.value)
+    if (tokenInfoResult.reverted) {
+      log.warning('Failed to get token info for {}', [tokenListResult.value.toHexString()])
+      continue
+    }
+    const rewardToken = tokenInfoResult.value.value0
+    const rewardContract = tokenInfoResult.value.value1
+    if (rewardToken != ADDRESS_ZERO || rewardContract != ADDRESS_ZERO) {
+      const extras = pool.extras
+      extras.push(createNewExtraReward(pool.poolid, rewardContract, rewardToken))
+      pool.extras = extras
+      pool.save()
+    }
+  }
+}
+
 export function getPoolExtrasV3(pool: Pool): void {
-  let stashContract = ExtraRewardStashV32.bind(bytesToAddress(pool.stash))
+  const stashContract = ExtraRewardStashV32.bind(bytesToAddress(pool.stash))
 
   // determine what minor version of version 3 contracts we are using
   // if it hasn't been determined before.
@@ -175,12 +202,15 @@ export function getPoolExtrasV3(pool: Pool): void {
     }
   }
 
+  // we need separate functions even though it's repetitive
+  // since we can't reassign stashContract to a different type
   if (pool.stashMinorVersion == BIG_INT_ZERO) {
     getPoolExtrasV30(pool)
     return
   }
   if (pool.stashMinorVersion == BigInt.fromI32(3)) {
-    stashContract = ExtraRewardStashV33.bind(bytesToAddress(pool.stash))
+    getPoolExtrasV33(pool)
+    return
   }
 
   // v3.1 and v3.2 share the same ABI
