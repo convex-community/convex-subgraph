@@ -5,7 +5,6 @@ import { bytesToAddress } from 'utils'
 import {
   ADDRESS_ZERO,
   BIG_DECIMAL_1E18,
-  BIG_DECIMAL_1E6,
   BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
   BIG_INT_MINUS_ONE,
@@ -13,19 +12,10 @@ import {
   BIG_INT_ZERO,
   CRV_ADDRESS,
   CVX_ADDRESS,
-  FOREX_ORACLES,
-  RKP3R_ADDRESS,
 } from 'const'
-import { getBtcRate, getEthRate, getUsdRate } from 'utils/pricing'
-import { getIntervalFromTimestamp, DAY } from 'utils/time'
+import { getUsdRate } from 'utils/pricing'
 import { CurvePool } from '../../generated/Booster/CurvePool'
-import {
-  getForexUsdRate,
-  getLpTokenPriceUSD,
-  getLpTokenVirtualPrice,
-  getTokenValueInLpUnderlyingToken,
-  getV2LpTokenPrice,
-} from './apr'
+import { getLpTokenPriceUSD } from './apr'
 import { getCvxMintAmount } from 'utils/convex'
 import { ExtraRewardStashV2 } from '../../generated/Booster/ExtraRewardStashV2'
 import { ExtraRewardStashV1 } from '../../generated/Booster/ExtraRewardStashV1'
@@ -270,18 +260,10 @@ export function getPoolApr(pool: Pool, timestamp: BigInt): Array<BigDecimal> {
   const supplyResult = rewardContract.try_totalSupply()
   const supply = supplyResult.reverted ? BIG_DECIMAL_ZERO : supplyResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
   const virtualSupply = supply.times(vPrice)
-  let cvxPrice: BigDecimal, crvPrice: BigDecimal
-  let exchangeRate = BIG_DECIMAL_ONE
+  const exchangeRate = BIG_DECIMAL_ONE
 
-  crvPrice = getUsdRate(CRV_ADDRESS)
-  cvxPrice = getUsdRate(CVX_ADDRESS)
-  if (FOREX_ORACLES.has(pool.lpToken.toHexString())) {
-    exchangeRate = getForexUsdRate(pool.lpToken)
-    if (exchangeRate != BIG_DECIMAL_ZERO) {
-      cvxPrice = getUsdRate(CVX_ADDRESS).div(exchangeRate)
-      crvPrice = getUsdRate(CRV_ADDRESS).div(exchangeRate)
-    }
-  }
+  const crvPrice = getUsdRate(CRV_ADDRESS)
+  const cvxPrice = getUsdRate(CVX_ADDRESS)
   log.warning('CRV {} Price {} Asset type {}', [pool.name, crvPrice.toString(), pool.assetType.toString()])
 
   let crvApr = BIG_DECIMAL_ZERO
