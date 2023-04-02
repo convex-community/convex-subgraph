@@ -2,14 +2,17 @@ import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import {
   ADDRESS_ZERO,
   BIG_DECIMAL_1E18,
+  BIG_DECIMAL_1E6,
   BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
   BIG_INT_ZERO,
   CRV_FRAX_ADDRESS,
   CTOKENS,
   FRAXBP_ADDRESS,
+  RKP3R_ADDRESS,
   SUSHI_FACTORY_ADDRESS,
   THREE_CRV_ADDRESS,
+  TRIPOOL_ADDRESS,
   UNI_FACTORY_ADDRESS,
   UNI_V3_FACTORY_ADDRESS,
   UNI_V3_QUOTER,
@@ -27,6 +30,7 @@ import { exponentToBigDecimal, exponentToBigInt } from './maths'
 import { FactoryV3 } from 'convex/generated/Booster/FactoryV3'
 import { Quoter } from 'convex/generated/Booster/Quoter'
 import { CurvePool } from 'convex/generated/Booster/CurvePool'
+import { RedeemableKeep3r } from 'convex/generated/Booster/RedeemableKeep3r'
 
 export function getEthRate(token: Address): BigDecimal {
   let eth = BIG_DECIMAL_ONE
@@ -154,17 +158,42 @@ export function getYTokenExchangeRate(token: Address): BigDecimal {
   return exchangeRate.toBigDecimal().div(BIG_DECIMAL_1E18)
 }
 
+export function get3CrvVirtualPrice(): BigDecimal {
+  const poolContract = CurvePool.bind(TRIPOOL_ADDRESS)
+  const virtualPriceResult = poolContract.try_get_virtual_price()
+  let vPrice = BIG_DECIMAL_ONE
+  if (virtualPriceResult.reverted) {
+    log.warning('Unable to fetch virtual price for TriPool', [])
+  } else {
+    vPrice = virtualPriceResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
+  }
+  return vPrice
+}
+
+function getRKp3rPrice(): BigDecimal {
+  const RKp3rContract = RedeemableKeep3r.bind(RKP3R_ADDRESS)
+  const discount = RKp3rContract.discount()
+  const priceResult = RKp3rContract.try_price()
+  if (priceResult.reverted) {
+    return BIG_DECIMAL_ZERO
+  }
+  return priceResult.value.times(discount).div(BigInt.fromI32(100)).toBigDecimal().div(BIG_DECIMAL_1E6)
+}
+
 export function getUsdRate(token: Address): BigDecimal {
   const usdt = BIG_DECIMAL_ONE
-
-  if (token == CRV_FRAX_ADDRESS) {
+  if (token == RKP3R_ADDRESS) {
+    return getRKp3rPrice()
+  } else if (token == CRV_FRAX_ADDRESS) {
     return getFraxBpVirtualPrice()
-  } else if (token != USDT_ADDRESS && token != THREE_CRV_ADDRESS) {
-    return getTokenAValueInTokenB(token, USDT_ADDRESS)
+  } else if (token == THREE_CRV_ADDRESS) {
+    return get3CrvVirtualPrice()
   } else if (CTOKENS.includes(token.toHexString())) {
     return getCTokenExchangeRate(token)
   } else if (YTOKENS.includes(token.toHexString())) {
     return getYTokenExchangeRate(token)
+  } else if (token != USDT_ADDRESS) {
+    return getTokenAValueInTokenB(token, USDT_ADDRESS)
   }
   return usdt
 }

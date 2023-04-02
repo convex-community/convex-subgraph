@@ -48,6 +48,8 @@ dataSources:
           file: ../../abis/ExtraRewardStashV30.json
         - name: ExtraRewardStashV32
           file: ../../abis/ExtraRewardStashV32.json
+        - name: ExtraRewardStashV33
+          file: ../../abis/ExtraRewardStashV33.json
         - name: ExtraRewardStashV2
           file: ../../abis/ExtraRewardStashV2.json
         - name: ExtraRewardStashV1
@@ -92,6 +94,8 @@ dataSources:
       abis:
         - name: Votium
           file: ./abis/Votium.json
+        - name: CurvePool
+          file: ../../abis/CurvePool.json
         - name: YToken
           file: ../../abis/YToken.json
         - name: CToken
@@ -133,6 +137,8 @@ dataSources:
           file: ./abis/FeeDeposit.json
         - name: FeeRegistry
           file: ./abis/FeeRegistry.json
+        - name: CurvePool
+          file: ../../abis/CurvePool.json
         - name: YToken
           file: ../../abis/YToken.json
         - name: CToken
@@ -153,6 +159,49 @@ dataSources:
         - event: RewardsDistributed(indexed address,uint256)
           handler: handleRewardsDistributed
       file: ./src/mapping-fxs-deposits.ts
+  - kind: ethereum/contract
+    name: ThreeCrvRewards
+    network: mainnet
+    source:
+      address: "0x7091dbb7fcbA54569eF1387Ac89Eb2a5C9F6d2EA"
+      abi: VirtualBalanceRewardPool
+      startBlock: 12451054
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - DailyRevenueSnapshot
+        - Platform
+      abis:
+        - name: FeeDeposit
+          file: ./abis/FeeDeposit.json
+        - name: FeeRegistry
+          file: ./abis/FeeRegistry.json
+        - name: VirtualBalanceRewardPool
+          file: ../../abis/VirtualBalanceRewardPool.json
+        - name: CurvePool
+          file: ../../abis/CurvePool.json
+        - name: YToken
+          file: ../../abis/YToken.json
+        - name: CToken
+          file: ../../abis/CToken.json
+        - name: ERC20
+          file: ../../abis/ERC20.json
+        - name: Factory
+          file: ../../abis/UniswapV2Factory.json
+        - name: Pair
+          file: ../../abis/UniswapV2Pair.json
+        - name: FactoryV3
+          file: ../../abis/UniswapV3Factory.json
+        - name: Quoter
+          file: ../../abis/UniswapV3Quoter.json
+        - name: ChainlinkAggregator
+          file: ../../abis/CLAggregator.json
+      eventHandlers:
+        - event: RewardAdded(uint256)
+          handler: handleRewardAdded
+      file: ./src/mapping-3crv.ts
 
 templates:
   - name: PoolCrvRewards
@@ -172,6 +221,8 @@ templates:
           file: ../../abis/BaseRewardPool.json
         - name: Booster
           file: ../../abis/Booster.json
+        - name: CurvePool
+          file: ../../abis/CurvePool.json
         - name: YToken
           file: ../../abis/YToken.json
         - name: CToken

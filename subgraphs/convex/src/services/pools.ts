@@ -5,7 +5,6 @@ import { bytesToAddress } from 'utils'
 import {
   ADDRESS_ZERO,
   BIG_DECIMAL_1E18,
-  BIG_DECIMAL_1E6,
   BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
   BIG_INT_MINUS_ONE,
@@ -13,13 +12,10 @@ import {
   BIG_INT_ZERO,
   CRV_ADDRESS,
   CVX_ADDRESS,
-  FOREX_ORACLES,
-  RKP3R_ADDRESS,
 } from 'const'
-import { getBtcRate, getEthRate, getUsdRate } from 'utils/pricing'
-import { getIntervalFromTimestamp, DAY } from 'utils/time'
+import { getUsdRate } from 'utils/pricing'
 import { CurvePool } from '../../generated/Booster/CurvePool'
-import { getForexUsdRate, getLpTokenVirtualPrice, getTokenValueInLpUnderlyingToken, getV2LpTokenPrice } from './apr'
+import { getLpTokenPriceUSD } from './apr'
 import { getCvxMintAmount } from 'utils/convex'
 import { ExtraRewardStashV2 } from '../../generated/Booster/ExtraRewardStashV2'
 import { ExtraRewardStashV1 } from '../../generated/Booster/ExtraRewardStashV1'
@@ -27,8 +23,8 @@ import { VirtualBalanceRewardPool } from '../../generated/Booster/VirtualBalance
 import { ExtraRewardStashV32 } from '../../generated/Booster/ExtraRewardStashV32'
 import { ExtraRewardStashV30 } from '../../generated/Booster/ExtraRewardStashV30'
 import { ERC20 } from '../../generated/Booster/ERC20'
-import { RedeemableKeep3r } from '../../generated/Booster/RedeemableKeep3r'
 import { CurvePoolV2 } from '../../generated/Booster/CurvePoolV2'
+import { ExtraRewardStashV33 } from '../../generated/Booster/ExtraRewardStashV33'
 
 export function getPool(pid: string): Pool {
   let pool = Pool.load(pid)
@@ -143,6 +139,33 @@ export function getPoolExtrasV30(pool: Pool): void {
   }
 }
 
+export function getPoolExtrasV33(pool: Pool): void {
+  const stashContract = ExtraRewardStashV33.bind(bytesToAddress(pool.stash))
+  const tokenCountResult = stashContract.try_tokenCount()
+  const tokenCount = tokenCountResult.reverted ? BigInt.fromI32(pool.extras.length) : tokenCountResult.value
+  // we only add new rewards if tokenCount is different from what we already know
+  for (let i = pool.extras.length; i < tokenCount.toI32(); i++) {
+    const tokenListResult = stashContract.try_tokenList(BigInt.fromI32(i))
+    if (tokenListResult.reverted) {
+      log.warning('Failed to get token list from {}', [pool.stash.toHexString()])
+      continue
+    }
+    const tokenInfoResult = stashContract.try_tokenInfo(tokenListResult.value)
+    if (tokenInfoResult.reverted) {
+      log.warning('Failed to get token info for {}', [tokenListResult.value.toHexString()])
+      continue
+    }
+    const rewardToken = tokenInfoResult.value.value0
+    const rewardContract = tokenInfoResult.value.value1
+    if (rewardToken != ADDRESS_ZERO || rewardContract != ADDRESS_ZERO) {
+      const extras = pool.extras
+      extras.push(createNewExtraReward(pool.poolid, rewardContract, rewardToken))
+      pool.extras = extras
+      pool.save()
+    }
+  }
+}
+
 export function getPoolExtrasV3(pool: Pool): void {
   const stashContract = ExtraRewardStashV32.bind(bytesToAddress(pool.stash))
 
@@ -161,18 +184,26 @@ export function getPoolExtrasV3(pool: Pool): void {
         minorVersion = 1
       } else if (suffix == '.2') {
         minorVersion = 2
+      } else if (suffix == '.3') {
+        minorVersion = 3
       }
       pool.stashMinorVersion = BigInt.fromI32(minorVersion)
       pool.save()
     }
   }
 
+  // we need separate functions even though it's repetitive
+  // since we can't reassign stashContract to a different type
   if (pool.stashMinorVersion == BIG_INT_ZERO) {
     getPoolExtrasV30(pool)
     return
   }
+  if (pool.stashMinorVersion == BigInt.fromI32(3)) {
+    getPoolExtrasV33(pool)
+    return
+  }
 
-  // v3.1 and above share the same ABI
+  // v3.1 and v3.2 share the same ABI
   const tokenCountResult = stashContract.try_tokenCount()
   const tokenCount = tokenCountResult.reverted ? BigInt.fromI32(pool.extras.length) : tokenCountResult.value
   if (tokenCountResult.reverted) {
@@ -200,32 +231,6 @@ export function getPoolExtrasV3(pool: Pool): void {
   }
 }
 
-function getRKp3rPrice(): BigDecimal {
-  const RKp3rContract = RedeemableKeep3r.bind(RKP3R_ADDRESS)
-  const discount = RKp3rContract.discount()
-  const priceResult = RKp3rContract.try_price()
-  if (priceResult.reverted) {
-    return BIG_DECIMAL_ZERO
-  }
-  return priceResult.value.times(discount).div(BigInt.fromI32(100)).toBigDecimal().div(BIG_DECIMAL_1E6)
-}
-
-export function getTokenPriceForAssetType(token: Address, pool: Pool): BigDecimal {
-  if (token == RKP3R_ADDRESS) {
-    return getRKp3rPrice()
-  }
-  if (pool.assetType == 1) {
-    // ETH
-    return getEthRate(token)
-  } else if (pool.assetType == 2) {
-    // BTC
-    return getBtcRate(token)
-  } else {
-    // Other
-    return getUsdRate(token)
-  }
-}
-
 export function getLpTokenSupply(lpToken: Bytes): BigInt {
   const lpTokenAddress = bytesToAddress(lpToken)
   const lpTokenSupplyResult = ERC20.bind(lpTokenAddress).try_totalSupply()
@@ -248,26 +253,18 @@ export function getXcpProfitResult(pool: Pool): Array<BigDecimal> {
 }
 
 export function getPoolApr(pool: Pool, timestamp: BigInt): Array<BigDecimal> {
-  const vPrice = pool.isV2 ? getV2LpTokenPrice(pool) : getLpTokenVirtualPrice(pool)
+  const vPrice = getLpTokenPriceUSD(pool)
   const rewardContract = BaseRewardPool.bind(bytesToAddress(pool.crvRewardsPool))
   const finishPeriodResult = rewardContract.try_periodFinish()
   const finishPeriod = finishPeriodResult.reverted ? timestamp.plus(BIG_INT_ONE) : finishPeriodResult.value
   const supplyResult = rewardContract.try_totalSupply()
   const supply = supplyResult.reverted ? BIG_DECIMAL_ZERO : supplyResult.value.toBigDecimal().div(BIG_DECIMAL_1E18)
   const virtualSupply = supply.times(vPrice)
-  let cvxPrice: BigDecimal, crvPrice: BigDecimal
-  let exchangeRate = BIG_DECIMAL_ONE
+  const exchangeRate = BIG_DECIMAL_ONE
 
-  if (FOREX_ORACLES.has(pool.lpToken.toHexString())) {
-    exchangeRate = getForexUsdRate(pool.lpToken)
-    cvxPrice = exchangeRate != BIG_DECIMAL_ZERO ? getUsdRate(CVX_ADDRESS).div(exchangeRate) : getUsdRate(CVX_ADDRESS)
-    crvPrice = exchangeRate != BIG_DECIMAL_ZERO ? getUsdRate(CRV_ADDRESS).div(exchangeRate) : getUsdRate(CRV_ADDRESS)
-    log.debug('Forex CRV {} Price {}', [pool.name, crvPrice.toString()])
-  } else {
-    cvxPrice = getTokenPriceForAssetType(CVX_ADDRESS, pool)
-    crvPrice = getTokenPriceForAssetType(CRV_ADDRESS, pool)
-    log.debug('CRV {} Price {} Asset type {}', [pool.name, crvPrice.toString(), pool.assetType.toString()])
-  }
+  const crvPrice = getUsdRate(CRV_ADDRESS)
+  const cvxPrice = getUsdRate(CVX_ADDRESS)
+  log.warning('CRV {} Price {} Asset type {}', [pool.name, crvPrice.toString(), pool.assetType.toString()])
 
   let crvApr = BIG_DECIMAL_ZERO
   let cvxApr = BIG_DECIMAL_ZERO
@@ -318,7 +315,7 @@ export function getPoolApr(pool: Pool, timestamp: BigInt): Array<BigDecimal> {
         rewardRate.toString(),
         virtualSupply.toString(),
       ])
-      const rewardTokenPrice = getTokenPriceForAssetType(rewardTokenAddress, pool).div(exchangeRate)
+      const rewardTokenPrice = getUsdRate(rewardTokenAddress).div(exchangeRate)
       extraRewardsApr = extraRewardsApr.plus(rewardTokenPrice.times(perYear))
       log.debug('Extra rewards APR for token {}: {}', [rewardTokenAddress.toHexString(), rewardTokenPrice.toString()])
     }
