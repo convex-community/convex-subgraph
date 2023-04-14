@@ -146,6 +146,9 @@ type DailyRevenueSnapshot @entity {
   """ Total Daily revenue from FXS in USD """
   totalFxsRevenue: BigDecimal!
 
+  """ Revenue from POL and votemarket bribes in USD """
+  otherRevenue: BigDecimal!
+
   """ crv USD price """
   crvPrice: BigDecimal!
   """ cvx USD price """
@@ -291,4 +294,6 @@ type Platform @entity {
   totalFxsRevenue: BigDecimal!
   """ Cumulative revenue accrued from Votium bribes """
   totalBribeRevenue: BigDecimal!
+  """ Cumulative revenue from POL and Votemarket """
+  totalOtherRevenue: BigDecimal!
 }
