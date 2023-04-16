@@ -202,6 +202,123 @@ dataSources:
         - event: RewardAdded(uint256)
           handler: handleRewardAdded
       file: ./src/mapping-3crv.ts
+  - kind: ethereum/contract
+    name: CvxCrvPol
+    network: mainnet
+    source:
+      address: "0xa25B17D7deEE59f9e326e45cC3C0C1B158E74316"
+      abi: TreasurySwap
+      startBlock: 17004046
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - DailyRevenueSnapshot
+        - Platform
+      abis:
+        - name: TreasurySwap
+          file: ./abis/TreasurySwap.json
+        - name: CurvePool
+          file: ../../abis/CurvePool.json
+        - name: YToken
+          file: ../../abis/YToken.json
+        - name: CToken
+          file: ../../abis/CToken.json
+        - name: ERC20
+          file: ../../abis/ERC20.json
+        - name: Factory
+          file: ../../abis/UniswapV2Factory.json
+        - name: Pair
+          file: ../../abis/UniswapV2Pair.json
+        - name: FactoryV3
+          file: ../../abis/UniswapV3Factory.json
+        - name: Quoter
+          file: ../../abis/UniswapV3Quoter.json
+        - name: ChainlinkAggregator
+          file: ../../abis/CLAggregator.json
+      eventHandlers:
+        - event: ClaimedReward(indexed address,uint256)
+          handler: handleRewardClaimed
+      file: ./src/mapping-treasury.ts
+  - kind: ethereum/contract
+    name: CvxFpisPol
+    network: mainnet
+    source:
+      address: "0x858847c21B075e45727fcB0B544BD843CD750361"
+      abi: TreasuryManager
+      startBlock: 16938064
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - DailyRevenueSnapshot
+        - Platform
+      abis:
+        - name: TreasuryManager
+          file: ./abis/TreasuryManager.json
+        - name: CurvePool
+          file: ../../abis/CurvePool.json
+        - name: YToken
+          file: ../../abis/YToken.json
+        - name: CToken
+          file: ../../abis/CToken.json
+        - name: ERC20
+          file: ../../abis/ERC20.json
+        - name: Factory
+          file: ../../abis/UniswapV2Factory.json
+        - name: Pair
+          file: ../../abis/UniswapV2Pair.json
+        - name: FactoryV3
+          file: ../../abis/UniswapV3Factory.json
+        - name: Quoter
+          file: ../../abis/UniswapV3Quoter.json
+        - name: ChainlinkAggregator
+          file: ../../abis/CLAggregator.json
+      eventHandlers:
+        - event: ClaimedReward(indexed address,uint256)
+          handler: handleRewardClaimed
+      file: ./src/mapping-treasury.ts
+  - kind: ethereum/contract
+    name: VoteMarketRewards
+    network: mainnet
+    source:
+      address: "0x0000000be1d98523b5469aff51a1e7b4891c6225"
+      abi: VoteMarket
+      startBlock: 16741334
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - DailyRevenueSnapshot
+        - Platform
+      abis:
+        - name: VoteMarket
+          file: ./abis/VoteMarket.json
+        - name: CurvePool
+          file: ../../abis/CurvePool.json
+        - name: YToken
+          file: ../../abis/YToken.json
+        - name: CToken
+          file: ../../abis/CToken.json
+        - name: ERC20
+          file: ../../abis/ERC20.json
+        - name: Factory
+          file: ../../abis/UniswapV2Factory.json
+        - name: Pair
+          file: ../../abis/UniswapV2Pair.json
+        - name: FactoryV3
+          file: ../../abis/UniswapV3Factory.json
+        - name: Quoter
+          file: ../../abis/UniswapV3Quoter.json
+        - name: ChainlinkAggregator
+          file: ../../abis/CLAggregator.json
+      eventHandlers:
+        - event: Claimed(indexed address,address,indexed uint256,uint256,uint256,uint256)
+          handler: handleVoteMarketRewardClaimed
+      file: ./src/mapping-treasury.ts
 
 templates:
   - name: PoolCrvRewards
