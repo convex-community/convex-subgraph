@@ -36,16 +36,18 @@ export function getDailyPoolSnapshot(pool: Pool, timestamp: BigInt, block: BigIn
     snapshot.lpTokenBalance = pool.lpTokenBalance
     snapshot.tvl = pool.tvl
     snapshot.curveTvlRatio = pool.curveTvlRatio
+    let baseApr = BigDecimal.zero()
     if (pool.isV2) {
       const xcpProfits = getXcpProfitResult(pool)
       snapshot.xcpProfit = xcpProfits[0]
       snapshot.xcpProfitA = xcpProfits[1]
-      snapshot.baseApr = getV2PoolBaseApr(pool, snapshot.xcpProfit, snapshot.xcpProfitA, timestamp)
+      baseApr = getV2PoolBaseApr(pool, snapshot.xcpProfit, snapshot.xcpProfitA, timestamp)
     } else {
-      snapshot.baseApr = getPoolBaseApr(pool, snapshot.lpTokenVirtualPrice, timestamp)
+      baseApr = getPoolBaseApr(pool, snapshot.lpTokenVirtualPrice, timestamp)
     }
     // annualize Apr
-    snapshot.baseApr = bigDecimalExponential(snapshot.baseApr, BigDecimal.fromString('365')).minus(BIG_DECIMAL_ONE)
+    const annualizedApr = bigDecimalExponential(baseApr, BigDecimal.fromString('365'))
+    snapshot.baseApr = annualizedApr
     snapshot.block = block
     snapshot.save()
   }
