@@ -43,6 +43,7 @@ export function handleRewardsDistributed(event: RewardsDistributed): void {
   revenueSnapshot.fxsRevenueToLpProvidersAmount = fxsRevenueToLpProviders
   revenueSnapshot.fxsRevenueToCvxFxsStakersAmount = fxsRevenueToCvxFxsStakers
   revenueSnapshot.totalFxsRevenue = totalFxsRevenue
+  revenueSnapshot.fxsPrice = tokenPrice
 
   platform.totalFxsRevenueToPlatform = platform.totalFxsRevenueToPlatform.plus(fxsRevenueToPlatform)
   platform.totalFxsRevenue = platform.totalFxsRevenue.plus(totalFxsRevenue)

@@ -158,6 +158,7 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
   pool.tvl = pool.lpTokenBalance.toBigDecimal().div(BIG_DECIMAL_1E18).times(snapshot.lpTokenUSDPrice)
 
   pool.baseApr = snapshot.baseApr
+  pool.rawBaseApr = snapshot.rawBaseApr
   snapshot.tvl = pool.tvl
   snapshot.withdrawalCount = snapshot.withdrawalCount.plus(BIG_INT_ONE)
   snapshot.withdrawalVolume = snapshot.withdrawalVolume.plus(event.params.amount)
@@ -193,6 +194,7 @@ export function handleDeposited(event: DepositedEvent): void {
   pool.tvl = pool.lpTokenBalance.toBigDecimal().div(BIG_DECIMAL_1E18).times(snapshot.lpTokenUSDPrice)
 
   pool.baseApr = snapshot.baseApr
+  pool.rawBaseApr = snapshot.rawBaseApr
   snapshot.tvl = pool.tvl
   snapshot.depositCount = snapshot.depositCount.plus(BIG_INT_ONE)
   snapshot.depositVolume = snapshot.depositVolume.plus(event.params.amount)

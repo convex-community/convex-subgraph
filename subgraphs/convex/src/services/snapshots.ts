@@ -48,6 +48,7 @@ export function getDailyPoolSnapshot(pool: Pool, timestamp: BigInt, block: BigIn
     // annualize Apr
     const annualizedApr = bigDecimalExponential(baseApr, BigDecimal.fromString('365'))
     snapshot.baseApr = annualizedApr
+    snapshot.rawBaseApr = baseApr
     snapshot.block = block
     snapshot.save()
   }

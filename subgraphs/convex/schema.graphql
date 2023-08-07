@@ -1,3 +1,4 @@
+
 type Pool @entity {
   """ Entity ID """
   id: ID!
@@ -45,6 +46,8 @@ type Pool @entity {
   extraRewardsApr: BigDecimal!
   """ Pool's base APR (from Curve) """
   baseApr: BigDecimal!
+  """ Pool's base APR (non-annualized) """
+  rawBaseApr: BigDecimal!
   """ Deposits """
   deposits: [Deposit!] @derivedFrom(field: "poolid")
   """ Withdrawals """
@@ -106,6 +109,8 @@ type DailyPoolSnapshot @entity {
   extraRewardsApr: BigDecimal!
   """ Pool's base APR (from Curve) """
   baseApr: BigDecimal!
+  """ Pool's base APR (non-annualized) """
+  rawBaseApr: BigDecimal!
   """ Snapshot timestamp """
   timestamp: BigInt!
   """ Snapshot block """
