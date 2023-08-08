@@ -5,6 +5,12 @@ import { getDailyRevenueSnapshot } from './services/revenue'
 import { FeeDeposit, RewardsDistributed } from '../generated/FeeDeposit/FeeDeposit'
 import { FeeRegistry } from '../generated/FeeDeposit/FeeRegistry'
 import { BIG_DECIMAL_1E18, BIG_DECIMAL_ONE, DENOMINATOR, FEE_REGISTRY_ADDRESS } from 'const'
+import { SetDepositAddressCall } from '../generated/FeeRegistry/FeeRegistry'
+import { FeeDepositTemplate } from '../generated/templates'
+
+export function handleSetDepositAddress(call: SetDepositAddressCall): void {
+  FeeDepositTemplate.create(call.inputs._deposit)
+}
 
 export function handleRewardsDistributed(event: RewardsDistributed): void {
   const registry = FeeRegistry.bind(FEE_REGISTRY_ADDRESS)
