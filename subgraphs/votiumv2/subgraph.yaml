@@ -1,0 +1,43 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: VotiumV2
+    network: mainnet
+    source:
+      address: "0x8650f3b9a096b29135dc997ca437a37ba83528d7"
+      abi: VotiumV2
+      startBlock: 17862211
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - AllowExclusions
+        - AllowlistRequirement
+        - IncreasedIncentive
+        - ModifiedTeam
+        - NewIncentive
+        - OwnershipTransferred
+        - TokenAllow
+        - UpdatedDistributor
+        - UpdatedFee
+        - WithdrawUnprocessed
+      abis:
+        - name: VotiumV2
+          file: ./abis/VotiumV2.json
+      eventHandlers:
+        - event: IncreasedIncentive(address,uint256,uint256,uint256,address,uint256)
+          handler: handleIncreasedIncentive
+        - event: NewIncentive(address,uint256,uint256,address,uint256,bool)
+          handler: handleNewIncentive
+        - event: TokenAllow(address,bool)
+          handler: handleTokenAllow
+        - event: UpdatedDistributor(address)
+          handler: handleUpdatedDistributor
+        - event: UpdatedFee(uint256)
+          handler: handleUpdatedFee
+        - event: WithdrawUnprocessed(uint256,address,uint256,uint256)
+          handler: handleWithdrawUnprocessed
+      file: ./src/mapping.ts
