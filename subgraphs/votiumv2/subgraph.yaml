@@ -6,7 +6,7 @@ dataSources:
     name: VotiumV2
     network: mainnet
     source:
-      address: "0x85e99425ad47f5534684888f9726fabdb11969f2"
+      address: "0x5d4a389685f5aae383422b42e5ce7663c023f370"
       abi: VotiumV2
       startBlock: 17862211
     mapping:
@@ -24,12 +24,12 @@ dataSources:
         - name: VotiumV2
           file: ./abis/VotiumV2.json
       eventHandlers:
-        - event: IncreasedIncentive(uint256,address,uint256,uint256,uint256,address,uint256)
+        - event: IncreasedIncentive(uint256,address,uint256,uint256,indexed uint256,indexed address,uint256)
           handler: handleIncreasedIncentive
-        - event: NewIncentive(uint256,indexed address,uint256,indexed uint256,indexed address,uint256,address[],bool)
+        - event: NewIncentive(uint256,address,uint256,indexed uint256,indexed address,uint256,address[],address,bool)
           handler: handleNewIncentive
         - event: UpdatedFee(uint256)
           handler: handleUpdatedFee
-        - event: WithdrawUnprocessed(uint256,address,uint256,uint256)
+        - event: WithdrawUnprocessed(uint256,uint256,address,uint256)
           handler: handleWithdrawUnprocessed
       file: ./src/mapping.ts
