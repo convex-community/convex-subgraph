@@ -44,6 +44,7 @@ type NewIncentive @entity(immutable: true) {
   round: BigInt! # uint256
   gauge: Bytes! # address
   maxPerVote: BigInt! # uint256
+  depositor: Bytes! # address
   recycled: Boolean! # bool
   incentive: Incentive!
   blockNumber: BigInt!

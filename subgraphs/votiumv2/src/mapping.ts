@@ -77,6 +77,7 @@ export function handleNewIncentive(event: NewIncentiveEvent): void {
   newIncentive.index = event.params._index
   newIncentive.token = event.params._token
   newIncentive.amount = event.params._amount
+  newIncentive.depositor = event.params._depositor
   newIncentive.round = event.params._round
   newIncentive.gauge = event.params._gauge
   newIncentive.maxPerVote = event.params._maxPerVote
@@ -113,7 +114,7 @@ export function handleWithdrawUnprocessed(event: WithdrawUnprocessedEvent): void
   const withdrawal = new WithdrawUnprocessed(event.transaction.hash.toHexString() + event.logIndex.toString())
   withdrawal.round = event.params._round
   withdrawal.gauge = event.params._gauge
-  withdrawal.index = event.params._incentive
+  withdrawal.index = event.params._index
   withdrawal.amount = event.params._amount
 
   withdrawal.blockNumber = event.block.number
@@ -123,7 +124,7 @@ export function handleWithdrawUnprocessed(event: WithdrawUnprocessedEvent): void
   const incentive = getIncentive(
     event.params._gauge.toHexString(),
     event.params._round.toString(),
-    event.params._incentive.toString(),
+    event.params._index.toString(),
     event.block.timestamp
   )
   incentive.amount = incentive.amount.minus(withdrawal.amount)

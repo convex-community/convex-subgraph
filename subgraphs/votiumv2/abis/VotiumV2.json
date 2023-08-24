@@ -1,11 +1,31 @@
 [
   {
     "inputs": [
-      { "internalType": "address", "name": "_approved", "type": "address" },
-      { "internalType": "address", "name": "_approved2", "type": "address" },
-      { "internalType": "address", "name": "_feeAddress", "type": "address" },
-      { "internalType": "address", "name": "_distributor", "type": "address" },
-      { "internalType": "address", "name": "_initialOwner", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "_approved",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_approved2",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_feeAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_distributor",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_initialOwner",
+        "type": "address"
+      }
     ],
     "stateMutability": "nonpayable",
     "type": "constructor"
@@ -64,13 +84,13 @@
         "type": "uint256"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "uint256",
         "name": "_round",
         "type": "uint256"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "_gauge",
         "type": "address"
@@ -114,7 +134,7 @@
         "type": "uint256"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "address",
         "name": "_token",
         "type": "address"
@@ -148,6 +168,12 @@
         "internalType": "address[]",
         "name": "_excluded",
         "type": "address[]"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_depositor",
+        "type": "address"
       },
       {
         "indexed": false,
@@ -229,20 +255,20 @@
       {
         "indexed": false,
         "internalType": "uint256",
+        "name": "_index",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
         "name": "_round",
         "type": "uint256"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "_gauge",
         "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "_incentive",
-        "type": "uint256"
       },
       {
         "indexed": false,
@@ -257,28 +283,54 @@
   {
     "inputs": [],
     "name": "DENOMINATOR",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "activeRound",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "allowExclusions",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_token", "type": "address" },
-      { "internalType": "bool", "name": "_allow", "type": "bool" }
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "_allow",
+        "type": "bool"
+      }
     ],
     "name": "allowToken",
     "outputs": [],
@@ -287,8 +339,16 @@
   },
   {
     "inputs": [
-      { "internalType": "address[]", "name": "_tokens", "type": "address[]" },
-      { "internalType": "bool", "name": "_allow", "type": "bool" }
+      {
+        "internalType": "address[]",
+        "name": "_tokens",
+        "type": "address[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "_allow",
+        "type": "bool"
+      }
     ],
     "name": "allowTokens",
     "outputs": [],
@@ -296,27 +356,69 @@
     "type": "function"
   },
   {
-    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
     "name": "approvedTeam",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "currentEpoch",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_token", "type": "address" },
-      { "internalType": "uint256", "name": "_amount", "type": "uint256" },
-      { "internalType": "uint256", "name": "_round", "type": "uint256" },
-      { "internalType": "address", "name": "_gauge", "type": "address" },
-      { "internalType": "uint256", "name": "_maxPerVote", "type": "uint256" },
-      { "internalType": "address[]", "name": "_excluded", "type": "address[]" }
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_round",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_gauge",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_maxPerVote",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_excluded",
+        "type": "address[]"
+      }
     ],
     "name": "depositIncentive",
     "outputs": [],
@@ -325,9 +427,21 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_token", "type": "address" },
-      { "internalType": "uint256", "name": "_amount", "type": "uint256" },
-      { "internalType": "address", "name": "_gauge", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_gauge",
+        "type": "address"
+      }
     ],
     "name": "depositIncentiveSimple",
     "outputs": [],
@@ -336,12 +450,36 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_token", "type": "address" },
-      { "internalType": "uint256", "name": "_amount", "type": "uint256" },
-      { "internalType": "uint256", "name": "_round", "type": "uint256" },
-      { "internalType": "address[]", "name": "_gauges", "type": "address[]" },
-      { "internalType": "uint256", "name": "_maxPerVote", "type": "uint256" },
-      { "internalType": "address[]", "name": "_excluded", "type": "address[]" }
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_round",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_gauges",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_maxPerVote",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_excluded",
+        "type": "address[]"
+      }
     ],
     "name": "depositSplitGauges",
     "outputs": [],
@@ -350,12 +488,36 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_token", "type": "address" },
-      { "internalType": "uint256", "name": "_amount", "type": "uint256" },
-      { "internalType": "uint256", "name": "_numRounds", "type": "uint256" },
-      { "internalType": "address[]", "name": "_gauges", "type": "address[]" },
-      { "internalType": "uint256", "name": "_maxPerVote", "type": "uint256" },
-      { "internalType": "address[]", "name": "_excluded", "type": "address[]" }
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_numRounds",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_gauges",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_maxPerVote",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_excluded",
+        "type": "address[]"
+      }
     ],
     "name": "depositSplitGaugesRounds",
     "outputs": [],
@@ -364,12 +526,36 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_token", "type": "address" },
-      { "internalType": "uint256", "name": "_amount", "type": "uint256" },
-      { "internalType": "uint256", "name": "_numRounds", "type": "uint256" },
-      { "internalType": "address", "name": "_gauge", "type": "address" },
-      { "internalType": "uint256", "name": "_maxPerVote", "type": "uint256" },
-      { "internalType": "address[]", "name": "_excluded", "type": "address[]" }
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_numRounds",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_gauge",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_maxPerVote",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_excluded",
+        "type": "address[]"
+      }
     ],
     "name": "depositSplitRounds",
     "outputs": [],
@@ -378,12 +564,36 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_token", "type": "address" },
-      { "internalType": "uint256", "name": "_round", "type": "uint256" },
-      { "internalType": "address[]", "name": "_gauges", "type": "address[]" },
-      { "internalType": "uint256[]", "name": "_amounts", "type": "uint256[]" },
-      { "internalType": "uint256", "name": "_maxPerVote", "type": "uint256" },
-      { "internalType": "address[]", "name": "_excluded", "type": "address[]" }
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_round",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_gauges",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "_amounts",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_maxPerVote",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_excluded",
+        "type": "address[]"
+      }
     ],
     "name": "depositUnevenSplitGauges",
     "outputs": [],
@@ -392,12 +602,36 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_token", "type": "address" },
-      { "internalType": "uint256", "name": "_numRounds", "type": "uint256" },
-      { "internalType": "address[]", "name": "_gauges", "type": "address[]" },
-      { "internalType": "uint256[]", "name": "_amounts", "type": "uint256[]" },
-      { "internalType": "uint256", "name": "_maxPerVote", "type": "uint256" },
-      { "internalType": "address[]", "name": "_excluded", "type": "address[]" }
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_numRounds",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_gauges",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "_amounts",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_maxPerVote",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_excluded",
+        "type": "address[]"
+      }
     ],
     "name": "depositUnevenSplitGaugesRounds",
     "outputs": [],
@@ -406,9 +640,21 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_token", "type": "address" },
-      { "internalType": "address[]", "name": "_gauges", "type": "address[]" },
-      { "internalType": "uint256[]", "name": "_amounts", "type": "uint256[]" }
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_gauges",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "_amounts",
+        "type": "uint256[]"
+      }
     ],
     "name": "depositUnevenSplitGaugesSimple",
     "outputs": [],
@@ -418,15 +664,38 @@
   {
     "inputs": [],
     "name": "distributor",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "_round", "type": "uint256" },
-      { "internalType": "address[]", "name": "_gauges", "type": "address[]" },
-      { "internalType": "uint256[]", "name": "_totals", "type": "uint256[]" }
+      {
+        "internalType": "uint256",
+        "name": "_round",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_gauges",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "_totals",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "_finalize",
+        "type": "bool"
+      }
     ],
     "name": "endRound",
     "outputs": [],
@@ -435,14 +704,34 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_to", "type": "address" },
-      { "internalType": "uint256", "name": "_value", "type": "uint256" },
-      { "internalType": "bytes", "name": "_data", "type": "bytes" }
+      {
+        "internalType": "address",
+        "name": "_to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_value",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_data",
+        "type": "bytes"
+      }
     ],
     "name": "execute",
     "outputs": [
-      { "internalType": "bool", "name": "", "type": "bool" },
-      { "internalType": "bytes", "name": "", "type": "bytes" }
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      },
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
     ],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -450,84 +739,164 @@
   {
     "inputs": [],
     "name": "feeAddress",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "_round", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "_round",
+        "type": "uint256"
+      }
     ],
     "name": "gaugesLength",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" },
-      { "internalType": "address", "name": "", "type": "address" }
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
     ],
     "name": "inRoundGauges",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "address", "name": "", "type": "address" }
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
     ],
-    "name": "inUserGauges",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "name": "inUserRounds",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" },
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
     ],
     "name": "incentives",
     "outputs": [
-      { "internalType": "address", "name": "token", "type": "address" },
-      { "internalType": "uint256", "name": "amount", "type": "uint256" },
-      { "internalType": "uint256", "name": "maxPerVote", "type": "uint256" },
-      { "internalType": "uint256", "name": "distributed", "type": "uint256" },
-      { "internalType": "uint256", "name": "recycled", "type": "uint256" },
-      { "internalType": "address", "name": "depositor", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxPerVote",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "distributed",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "recycled",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "depositor",
+        "type": "address"
+      }
     ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "_round", "type": "uint256" },
-      { "internalType": "address", "name": "_gauge", "type": "address" }
+      {
+        "internalType": "uint256",
+        "name": "_round",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_gauge",
+        "type": "address"
+      }
     ],
     "name": "incentivesLength",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "_round", "type": "uint256" },
-      { "internalType": "address", "name": "_gauge", "type": "address" },
-      { "internalType": "uint256", "name": "_incentive", "type": "uint256" },
-      { "internalType": "uint256", "name": "_increase", "type": "uint256" },
-      { "internalType": "uint256", "name": "_maxPerVote", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "_round",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_gauge",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_incentive",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_increase",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_maxPerVote",
+        "type": "uint256"
+      }
     ],
     "name": "increaseIncentive",
     "outputs": [],
@@ -535,16 +904,53 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_round",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_gauge",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "_incentives",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "invalidateIncentives",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "lastRoundProcessed",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_member", "type": "address" },
-      { "internalType": "bool", "name": "_approval", "type": "bool" }
+      {
+        "internalType": "address",
+        "name": "_member",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "_approval",
+        "type": "bool"
+      }
     ],
     "name": "modifyTeam",
     "outputs": [],
@@ -554,22 +960,46 @@
   {
     "inputs": [],
     "name": "owner",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "platformFee",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "_round", "type": "uint256" },
-      { "internalType": "address", "name": "_gauge", "type": "address" },
-      { "internalType": "uint256", "name": "_incentive", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "_round",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_gauge",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_incentive",
+        "type": "uint256"
+      }
     ],
     "name": "recycleUnprocessed",
     "outputs": [],
@@ -586,23 +1016,47 @@
   {
     "inputs": [],
     "name": "requireAllowlist",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
     ],
     "name": "roundGauges",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "bool", "name": "_allowExclusions", "type": "bool" }
+      {
+        "internalType": "bool",
+        "name": "_allowExclusions",
+        "type": "bool"
+      }
     ],
     "name": "setAllowExclusions",
     "outputs": [],
@@ -611,7 +1065,11 @@
   },
   {
     "inputs": [
-      { "internalType": "bool", "name": "_requireAllowlist", "type": "bool" }
+      {
+        "internalType": "bool",
+        "name": "_requireAllowlist",
+        "type": "bool"
+      }
     ],
     "name": "setAllowlistRequired",
     "outputs": [],
@@ -619,29 +1077,31 @@
     "type": "function"
   },
   {
-    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
-    "name": "toTransfer",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "name": "toTransferList",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
     "name": "tokenAllowed",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "newOwner", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
     ],
     "name": "transferOwnership",
     "outputs": [],
@@ -650,7 +1110,11 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_distributor", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "_distributor",
+        "type": "address"
+      }
     ],
     "name": "updateDistributor",
     "outputs": [],
@@ -659,7 +1123,11 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_feeAddress", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "_feeAddress",
+        "type": "address"
+      }
     ],
     "name": "updateFeeAddress",
     "outputs": [],
@@ -668,7 +1136,11 @@
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "_feeAmount", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "_feeAmount",
+        "type": "uint256"
+      }
     ],
     "name": "updateFeeAmount",
     "outputs": [],
@@ -677,77 +1149,36 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" },
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "name": "userDeposits",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "_user", "type": "address" },
-      { "internalType": "uint256", "name": "_round", "type": "uint256" },
-      { "internalType": "address", "name": "_gauge", "type": "address" }
-    ],
-    "name": "userDepositsLength",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "name": "userGauges",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "_user", "type": "address" }
-    ],
-    "name": "userGaugesLength",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "name": "userRounds",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "_user", "type": "address" }
-    ],
-    "name": "userRoundsLength",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "uint256", "name": "_round", "type": "uint256" },
-      { "internalType": "address", "name": "_gauge", "type": "address" },
-      { "internalType": "uint256", "name": "_incentive", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "_round",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_gauge",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_incentive",
+        "type": "uint256"
+      }
     ],
     "name": "viewIncentive",
     "outputs": [
       {
         "components": [
-          { "internalType": "address", "name": "token", "type": "address" },
-          { "internalType": "uint256", "name": "amount", "type": "uint256" },
+          {
+            "internalType": "address",
+            "name": "token",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          },
           {
             "internalType": "uint256",
             "name": "maxPerVote",
@@ -758,8 +1189,16 @@
             "name": "distributed",
             "type": "uint256"
           },
-          { "internalType": "uint256", "name": "recycled", "type": "uint256" },
-          { "internalType": "address", "name": "depositor", "type": "address" },
+          {
+            "internalType": "uint256",
+            "name": "recycled",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "depositor",
+            "type": "address"
+          },
           {
             "internalType": "address[]",
             "name": "excluded",
@@ -775,27 +1214,65 @@
     "type": "function"
   },
   {
-    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
     "name": "virtualBalance",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" },
-      { "internalType": "address", "name": "", "type": "address" }
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
     ],
     "name": "votesReceived",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "_round", "type": "uint256" },
-      { "internalType": "address", "name": "_gauge", "type": "address" },
-      { "internalType": "uint256", "name": "_incentive", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "_round",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_gauge",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_incentive",
+        "type": "uint256"
+      }
     ],
     "name": "withdrawUnprocessed",
     "outputs": [],
