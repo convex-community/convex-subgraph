@@ -96,6 +96,7 @@ export const CURVE_REGISTRY_V2 = Address.fromString('0x4AacF35761d06Aa7142B93266
 export const CURVE_FACTORY_V1 = Address.fromString('0x0959158b6040d32d04c301a72cbfd6b39e21c9ae')
 export const CURVE_FACTORY_V1_2 = Address.fromString('0xb9fc157394af804a3578134a6585c0dc9cc990d4')
 export const CURVE_FACTORY_V2 = Address.fromString('0xf18056bbd320e96a48e3fbf8bc061322531aac99')
+export const CURVE_TRICRYPTO_FACTORY = Address.fromString('0x0c0e5f2ff0ff18a3be9b835635039256dc4b4963')
 
 export const TRIPOOL_ADDRESS = Address.fromString('0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7')
 export const TRICRYPTO_LP_ADDRESS = Address.fromString('0xca3d75ac011bf5ad07a98d02f18225f9bd9a6bdf')
