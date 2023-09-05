@@ -23,6 +23,7 @@ import {
   CURVE_REGISTRY_V2,
   V2_SWAPS,
   TRICRYPTO_LP_ADDRESSES,
+  CURVE_TRICRYPTO_FACTORY,
 } from 'const'
 import { CurveRegistry } from '../generated/Booster/CurveRegistry'
 import { ERC20 } from '../generated/Booster/ERC20'
@@ -34,6 +35,7 @@ import { CurveToken } from '../generated/Booster/CurveToken'
 import { getUser } from './services/user'
 import { getDailyPoolSnapshot, takePoolSnapshots } from './services/snapshots'
 import { inferAssetType } from './services/utils'
+import { CurveTriCryptoFactoryPool } from '../generated/Booster/CurveTriCryptoFactoryPool'
 
 export function handleAddPool(call: AddPoolCall): void {
   const platform = getPlatform()
@@ -83,14 +85,20 @@ export function handleAddPool(call: AddPoolCall): void {
       swap = Address.fromString(V2_SWAPS.get(lpToken.toHexString()))
       pool.isV2 = true
     } else {
-      // if still nothing try to get the minter from the LP Token
-      const lpTokenContract = CurveToken.bind(lpToken)
-      swapResult = lpTokenContract.try_minter()
-      if (!(swapResult.reverted || swapResult.value == ADDRESS_ZERO)) {
-        swap = swapResult.value
+      const triCryptoPool = CurveTriCryptoFactoryPool.bind(lpToken)
+      const factoryResult = triCryptoPool.try_factory()
+      if (!factoryResult.reverted && factoryResult.value == CURVE_TRICRYPTO_FACTORY) {
         pool.isV2 = true
       } else {
-        log.warning('Could not find pool for lp token {}', [lpToken.toHexString()])
+        // if still nothing try to get the minter from the LP Token
+        const lpTokenContract = CurveToken.bind(lpToken)
+        swapResult = lpTokenContract.try_minter()
+        if (!(swapResult.reverted || swapResult.value == ADDRESS_ZERO)) {
+          swap = swapResult.value
+          pool.isV2 = true
+        } else {
+          log.warning('Could not find pool for lp token {}', [lpToken.toHexString()])
+        }
       }
     }
   }
