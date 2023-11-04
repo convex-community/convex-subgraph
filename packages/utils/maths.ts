@@ -9,6 +9,14 @@ export function exponentToBigDecimal(decimals: BigInt): BigDecimal {
   return bd
 }
 
+export function toDecimal(value: BigInt, decimals: i32): BigDecimal {
+  let res = value.toBigDecimal()
+  for (let i = 0; i < decimals; i++) {
+    res = res.div(BigDecimal.fromString('10'))
+  }
+  return res
+}
+
 export function exponentToBigInt(decimals: BigInt): BigInt {
   let bd = BigInt.fromString('1')
   for (let i = BIG_INT_ZERO; i.lt(decimals as BigInt); i = i.plus(BIG_INT_ONE)) {
