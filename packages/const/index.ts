@@ -246,3 +246,10 @@ export const YTOKENS = [
   '0xe6354ed5bc4b393a5aad09f21c46e101e692d447',
   '0x04bc0ab673d88ae9dbc9da2380cb6b79c4bca9ae',
 ]
+
+export const TRICRYPTONG_POOL = Address.fromString('0x7f86bf177dd4f3494b841a37e810a34dd56c829b')
+export const PRISMA_ETH_POOL = Address.fromString('0x322135dd9cbae8afa84727d9ae1434b5b3eba44b')
+export const CVX_ETH_POOL = Address.fromString('0xb576491f1e6e5e62f1d8f26062ee822b40b0e0d4')
+export const PRISMA_TOKEN_ADDRESS = Address.fromString('0xdA47862a83dac0c112BA89c6abC2159b95afd71C')
+export const CVX_PRISMA_TOKEN_ADDRESS = Address.fromString('0x34635280737b5BFe6c7DC2FC3065D60d66e78185')
+export const CVX_PRISMA_STAKING_ADDRESS = Address.fromString('0x0c73f1cFd5C9dFc150C8707Aa47Acbd14F0BE108')

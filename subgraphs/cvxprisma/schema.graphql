@@ -1,0 +1,158 @@
+type RewardRedirected @entity {
+  id: ID!
+  """ User redirecting """
+  user: User!
+  """ User redirected to """
+  to: User!
+
+  """ Block number """
+  blockNumber: BigInt!
+  """ Block timestamp """
+  blockTimestamp: BigInt!
+  """ Hash of the transaction """
+  transactionHash: Bytes!
+}
+
+type StakingContract @entity {
+  """ Address of the contract """
+  id: ID!
+  """ Amount of staked tokens """
+  tokenBalance: BigDecimal!
+  """ TVL of staked tokens """
+  tvl: BigDecimal!
+  """ List of all reward tokens """
+  rewardTokens: [Token!]!
+  """ Number of deposits """
+  depositCount: Int!
+  """ Number of withdrawals """
+  withdrawCount: Int!
+  """ Number of rewards claimed """
+  payoutCount: Int!
+  """ Number of snapshots taken """
+  snapshotCount: Int!
+}
+
+
+type Stake @entity {
+  id: ID!
+  index: Int!
+  """ User who initiated the stake tx """
+  from: User!
+  """ User who the stake is for """
+  user: User! # address
+  """ Amount staked """
+  amount: BigDecimal!
+  """ USD denominated Amount staked """
+  amountUsd: BigDecimal!
+
+  """ Block number """
+  blockNumber: BigInt!
+  """ Block timestamp """
+  blockTimestamp: BigInt!
+  """ Hash of the transaction """
+  transactionHash: Bytes!
+}
+
+type Withdrawal @entity {
+  id: ID!
+  index: Int!
+  """ User who withdrew """
+  user: User! # address
+  """ Amount withdrawn """
+  amount: BigDecimal!
+  """ USD denominated Amount staked """
+  amountUsd: BigDecimal!
+
+  """ Block number """
+  blockNumber: BigInt!
+  """ Block timestamp """
+  blockTimestamp: BigInt!
+  """ Hash of the transaction """
+  transactionHash: Bytes!
+}
+
+type User @entity {
+  id: ID!
+  """ Address where rewards are redirected to """
+  rewardRedirect: User!
+  """ Amount of tokens staked """
+  stakeSize: BigDecimal!
+  """ All historical redirects """
+  redirects: [RewardRedirected!] @derivedFrom(field: "user")
+  """ All user withdrawals """
+  withdrawals: [Withdrawal!] @derivedFrom(field: "user")
+  """ All user deposits """
+  stakes: [Stake!] @derivedFrom(field: "user")
+  """ All reward received """
+  rewardsPaid: [RewardPaid!] @derivedFrom(field: "user")
+}
+
+type RewardPaid @entity {
+  id: ID!
+  index: Int!
+  """ Address where rewards are redirected to or 0 """
+  user: User!
+  """ Token reward was paid in """
+  token: Token!
+  """ Amount of token received """
+  amount: BigDecimal!
+  """ USD denominated amount of token received """
+  amountUsd: BigDecimal!
+
+  """ Block number """
+  blockNumber: BigInt!
+  """ Block timestamp """
+  blockTimestamp: BigInt!
+  """ Hash of the transaction """
+  transactionHash: Bytes!
+}
+
+type Token @entity {
+  id: ID!
+  """ Token address was paid in """
+  address: Bytes!
+  """ Token symbol """
+  symbol: String!
+  """ Token decimals """
+  decimals: Int!
+}
+
+type TokenPrice @entity {
+  """ Address of the token and truncated timestamp """
+  id: ID!
+  """ Token address """
+  token: Token!
+  """ Price in USD """
+  price: BigDecimal!
+  """ Timestamp """
+  timestamp: BigInt!
+}
+
+type RewardApr @entity {
+  """ Address of the token and truncated timestamp """
+  id: ID!
+  """ Token address """
+  token: Token!
+  """ reward APR """
+  apr: BigDecimal!
+  """ Associated snapshot """
+  snapshot: HourlySnapshot!
+}
+
+
+type HourlySnapshot @entity {
+  id: ID!
+  index: Int!
+  """ Amount of cvxPrisma tokens staked """
+  tokenBalance: BigDecimal!
+  """ Total cvxPrisma supply """
+  totalSupply: BigDecimal!
+  """ cvxPrisma TVL """
+  tvl: BigDecimal!
+  """ Total APR """
+  totalApr: BigDecimal!
+  """ All of the APRs from the reward tokens """
+  rewardApr: [RewardApr!]! @derivedFrom(field: "snapshot")
+  """ Snapshot timestamp """
+  timestamp: BigInt!
+}
