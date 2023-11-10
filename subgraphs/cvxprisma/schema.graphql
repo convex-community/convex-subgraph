@@ -44,6 +44,8 @@ type Stake @entity {
   amount: BigDecimal!
   """ USD denominated Amount staked """
   amountUsd: BigDecimal!
+  """ Total amount staked by the staking user """
+  userStakeSize: BigDecimal!
 
   """ Block number """
   blockNumber: BigInt!
@@ -62,6 +64,8 @@ type Withdrawal @entity {
   amount: BigDecimal!
   """ USD denominated Amount staked """
   amountUsd: BigDecimal!
+  """ Total amount staked by the staking user """
+  userStakeSize: BigDecimal!
 
   """ Block number """
   blockNumber: BigInt!

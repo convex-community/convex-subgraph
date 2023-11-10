@@ -66,7 +66,8 @@ export function handleStaked(event: Staked): void {
   stake.index = contract.depositCount
   contract.depositCount += 1
   const user = getUser(event.params._user)
-  user.stakeSize = user.stakeSize.minus(amount)
+  user.stakeSize = user.stakeSize.plus(amount)
+  stake.userStakeSize = user.stakeSize
   stake.user = user.id
   stake.amount = amount
   stake.amountUsd = amount.times(cvxPrismaPrice.price)
@@ -91,6 +92,7 @@ export function handleWithdrawn(event: Withdrawn): void {
   contract.withdrawCount += 1
   const user = getUser(event.params._user)
   user.stakeSize = user.stakeSize.minus(amount)
+  withdrawal.userStakeSize = user.stakeSize
   withdrawal.user = user.id
   withdrawal.amount = amount
   withdrawal.amountUsd = amount.times(cvxPrismaPrice.price)
