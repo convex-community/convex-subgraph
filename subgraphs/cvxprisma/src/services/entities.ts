@@ -1,11 +1,11 @@
 import { Address, BigDecimal } from '@graphprotocol/graph-ts'
-import { StakingContract, User } from '../../generated/schema'
+import { StakingBalance, StakingContract, User } from '../../generated/schema'
 import { CVX_PRISMA_STAKING_ADDRESS } from 'const'
 
-export function getStakingContract(): StakingContract {
-  let contract = StakingContract.load(CVX_PRISMA_STAKING_ADDRESS.toHexString())
+export function getStakingContract(contractAddress: Address): StakingContract {
+  let contract = StakingContract.load(contractAddress.toHexString())
   if (!contract) {
-    contract = new StakingContract(CVX_PRISMA_STAKING_ADDRESS.toHexString())
+    contract = new StakingContract(contractAddress.toHexString())
     contract.tokenBalance = BigDecimal.zero()
     contract.rewardTokens = []
     contract.depositCount = 0
@@ -22,8 +22,19 @@ export function getUser(address: Address): User {
   if (!user) {
     user = new User(address.toHexString())
     user.rewardRedirect = address.toHexString()
-    user.stakeSize = BigDecimal.zero()
     user.save()
   }
   return user
+}
+
+export function getStakingBalance(user: User, contract: StakingContract): StakingBalance {
+  let balance = StakingBalance.load(user.id + contract.id)
+  if (!balance) {
+    balance = new StakingBalance(user.id + contract.id)
+    balance.user = user.id
+    balance.stakingContract = contract.id
+    balance.stakeSize = BigDecimal.zero()
+    balance.save()
+  }
+  return balance
 }

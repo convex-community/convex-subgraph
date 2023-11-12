@@ -20,6 +20,8 @@ type StakingContract @entity {
   tokenBalance: BigDecimal!
   """ TVL of staked tokens """
   tvl: BigDecimal!
+  """ Peg of wrapper to underlying """
+  peg: BigDecimal!
   """ List of all reward tokens """
   rewardTokens: [Token!]!
   """ Number of deposits """
@@ -36,6 +38,8 @@ type StakingContract @entity {
 type Stake @entity {
   id: ID!
   index: Int!
+  """ Contract the entity relates to """
+  stakingContract: StakingContract!
   """ User who initiated the stake tx """
   from: User!
   """ User who the stake is for """
@@ -58,6 +62,8 @@ type Stake @entity {
 type Withdrawal @entity {
   id: ID!
   index: Int!
+  """ Contract the entity relates to """
+  stakingContract: StakingContract!
   """ User who withdrew """
   user: User! # address
   """ Amount withdrawn """
@@ -77,10 +83,10 @@ type Withdrawal @entity {
 
 type User @entity {
   id: ID!
-  """ Address where rewards are redirected to """
+  """ Address where rewards are redirected to (for cvxPrisma only) """
   rewardRedirect: User!
   """ Amount of tokens staked """
-  stakeSize: BigDecimal!
+  stakes: [StakingBalance!]! @derivedFrom(field: "user")
   """ All historical redirects """
   redirects: [RewardRedirected!] @derivedFrom(field: "user")
   """ All user withdrawals """
@@ -91,9 +97,22 @@ type User @entity {
   rewardsPaid: [RewardPaid!] @derivedFrom(field: "user")
 }
 
+type StakingBalance @entity {
+  """ Entity ID - user + staking contract """
+  id: ID!
+  """ User whose balance we track """
+  user: User!
+  """ Contract the entity relates to """
+  stakingContract: StakingContract!
+  """ Amount of tokens staked """
+  stakeSize: BigDecimal!
+}
+
 type RewardPaid @entity {
   id: ID!
   index: Int!
+  """ Contract the entity relates to """
+  stakingContract: StakingContract!
   """ Address where rewards are redirected to or 0 """
   user: User!
   """ Token reward was paid in """
@@ -135,6 +154,8 @@ type TokenPrice @entity {
 type RewardApr @entity {
   """ Address of the token and truncated timestamp """
   id: ID!
+  """ Contract the entity relates to """
+  stakingContract: StakingContract!
   """ Token address """
   token: Token!
   """ reward APR """
@@ -147,11 +168,15 @@ type RewardApr @entity {
 type HourlySnapshot @entity {
   id: ID!
   index: Int!
-  """ Amount of cvxPrisma tokens staked """
+  """ Contract the entity relates to """
+  stakingContract: StakingContract!
+  """ Amount of wrapper tokens staked """
   tokenBalance: BigDecimal!
-  """ Total cvxPrisma supply """
+  """ Total wrapper token supply """
   totalSupply: BigDecimal!
-  """ cvxPrisma TVL """
+  """ Peg of wrapper to underlying """
+  peg: BigDecimal!
+  """ Prisma wrapper staking contract TVL """
   tvl: BigDecimal!
   """ Total APR """
   totalApr: BigDecimal!
