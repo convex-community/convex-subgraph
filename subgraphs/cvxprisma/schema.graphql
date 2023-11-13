@@ -32,6 +32,8 @@ type StakingContract @entity {
   payoutCount: Int!
   """ Number of snapshots taken """
   snapshotCount: Int!
+  """ Number of snapshots taken """
+  snapshots: [HourlySnapshot!]!  @derivedFrom(field: "stakingContract")
 }
 
 
@@ -86,7 +88,7 @@ type User @entity {
   """ Address where rewards are redirected to (for cvxPrisma only) """
   rewardRedirect: User!
   """ Amount of tokens staked """
-  stakes: [StakingBalance!]! @derivedFrom(field: "user")
+  stakingBalances: [StakingBalance!]! @derivedFrom(field: "user")
   """ All historical redirects """
   redirects: [RewardRedirected!] @derivedFrom(field: "user")
   """ All user withdrawals """

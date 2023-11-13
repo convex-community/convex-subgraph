@@ -257,3 +257,4 @@ export const YPRISMA_TOKEN_ADDRESS = Address.fromString('0xe3668873D944E4A949DA0
 export const YPRISMA_STAKING_ADDRESS = Address.fromString('0x774a55C3Eeb79929fD445Ae97191228Ab39c4d0f')
 export const CVXPRISMA_PRISMA_CURVE_POOL = Address.fromString('0x3b21c2868b6028cfb38ff86127ef22e68d16d53b')
 export const YPRISMA_PRISMA_CURVE_POOL = Address.fromString('0x69833361991ed76f9e8dbbcdf9ea1520febfb4a7')
+export const WSTETH_TOKEN_ADDRESS = Address.fromString('0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0')

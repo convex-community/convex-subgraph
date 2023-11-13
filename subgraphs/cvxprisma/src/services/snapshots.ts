@@ -17,11 +17,11 @@ import { yPrismaStaking } from '../../generated/yPrismaStaking/yPrismaStaking'
 
 export function takeCvxPrismaSnapshot(timestamp: BigInt): void {
   const hourlyTimestamp = getIntervalFromTimestamp(timestamp, HOUR)
-  let snapshot = HourlySnapshot.load(timestamp.toString())
+  let snapshot = HourlySnapshot.load(CVX_PRISMA_STAKING_ADDRESS.toHexString() + timestamp.toString())
   if (snapshot) {
     return
   }
-  snapshot = new HourlySnapshot(hourlyTimestamp.toString())
+  snapshot = new HourlySnapshot(CVX_PRISMA_STAKING_ADDRESS.toHexString() + hourlyTimestamp.toString())
   snapshot.timestamp = hourlyTimestamp
   const staking = getStakingContract(CVX_PRISMA_STAKING_ADDRESS)
 
@@ -65,11 +65,11 @@ export function takeCvxPrismaSnapshot(timestamp: BigInt): void {
 
 export function takeYPrismaSnapshot(timestamp: BigInt): void {
   const hourlyTimestamp = getIntervalFromTimestamp(timestamp, HOUR)
-  let snapshot = HourlySnapshot.load(timestamp.toString())
+  let snapshot = HourlySnapshot.load(YPRISMA_STAKING_ADDRESS.toHexString() + timestamp.toString())
   if (snapshot) {
     return
   }
-  snapshot = new HourlySnapshot(hourlyTimestamp.toString())
+  snapshot = new HourlySnapshot(YPRISMA_STAKING_ADDRESS.toHexString() + hourlyTimestamp.toString())
   snapshot.timestamp = hourlyTimestamp
   const staking = getStakingContract(YPRISMA_STAKING_ADDRESS)
 
@@ -87,6 +87,7 @@ export function takeYPrismaSnapshot(timestamp: BigInt): void {
     const tokenAddress = Address.fromString(staking.rewardTokens[i])
     const rewardRateResponse = stakingContract.try_rewardRate()
     const periodFinishResponse = stakingContract.try_periodFinish()
+    const rewardDurationResponse = stakingContract.try_rewardsDuration()
     const rewardApr = new RewardApr(staking.id + tokenAddress.toHexString() + hourlyTimestamp.toString())
     rewardApr.stakingContract = staking.id
     rewardApr.token = tokenAddress.toHexString()
@@ -94,6 +95,7 @@ export function takeYPrismaSnapshot(timestamp: BigInt): void {
     if (
       periodFinishResponse.reverted ||
       rewardRateResponse.reverted ||
+      rewardDurationResponse.reverted ||
       staking.tvl == BigDecimal.zero() ||
       periodFinishResponse.value < hourlyTimestamp
     ) {

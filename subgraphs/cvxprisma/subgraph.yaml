@@ -26,6 +26,8 @@ dataSources:
       abis:
         - name: cvxPrismaStaking
           file: ./abis/cvxPrismaStaking.json
+        - name: yPrismaStaking
+          file: ./abis/yPrismaStaking.json
         - name: ERC20
           file: ../../abis/ERC20.json
         - name: Factory
@@ -77,6 +79,8 @@ dataSources:
       abis:
         - name: yPrismaStaking
           file: ./abis/yPrismaStaking.json
+        - name: cvxPrismaStaking
+          file: ./abis/cvxPrismaStaking.json
         - name: ERC20
           file: ../../abis/ERC20.json
         - name: Factory
@@ -100,6 +104,6 @@ dataSources:
           handler: handleStakedFor
         - event: Withdrawn(indexed address,uint256)
           handler: handleWithdrawnYPrisma
-        - event: RewardAdded(indexed address,indexed address)
+        - event: RewardAdded(uint256)
           handler: handleRewardAddedYPrisma
       file: ./src/cvx-prisma-staking.ts

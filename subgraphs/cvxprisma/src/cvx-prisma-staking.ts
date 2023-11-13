@@ -20,7 +20,13 @@ import {
   User,
 } from '../generated/schema'
 import { getStakingBalance, getStakingContract, getUser } from './services/entities'
-import { BIG_DECIMAL_1E18, CVX_PRISMA_TOKEN_ADDRESS, PRISMA_TOKEN_ADDRESS, YPRISMA_TOKEN_ADDRESS } from 'const'
+import {
+  BIG_DECIMAL_1E18,
+  CVX_PRISMA_TOKEN_ADDRESS,
+  PRISMA_TOKEN_ADDRESS,
+  WSTETH_TOKEN_ADDRESS,
+  YPRISMA_TOKEN_ADDRESS,
+} from 'const'
 import { toDecimal } from 'utils/maths'
 import { getOrCreateToken, getTokenPrice } from './services/tokens'
 import { takeSnapshot } from './services/snapshots'
@@ -88,7 +94,9 @@ export function handleStakedGeneric(
   contract.tvl = contract.tokenBalance.times(wrappedPrismaPrice.price)
   const prismaPrice = getTokenPrice(PRISMA_TOKEN_ADDRESS, hourlyTimestamp)
   contract.peg =
-    wrappedPrismaPrice != BigDecimal.zero() ? prismaPrice.div(wrappedPrismaPrice) : BigDecimal.fromString('1')
+    prismaPrice.price != BigDecimal.zero()
+      ? wrappedPrismaPrice.price.div(prismaPrice.price)
+      : BigDecimal.fromString('1')
   stake.index = contract.depositCount
   contract.depositCount += 1
   const user = getUser(userAddress)
@@ -136,7 +144,9 @@ export function handleWithdrawnGeneric(
   contract.tvl = contract.tokenBalance.times(wrappedPrismaPrice.price)
   const prismaPrice = getTokenPrice(PRISMA_TOKEN_ADDRESS, hourlyTimestamp)
   contract.peg =
-    wrappedPrismaPrice != BigDecimal.zero() ? prismaPrice.div(wrappedPrismaPrice) : BigDecimal.fromString('1')
+    prismaPrice.price != BigDecimal.zero()
+      ? wrappedPrismaPrice.price.div(prismaPrice.price)
+      : BigDecimal.fromString('1')
 
   withdrawal.index = contract.withdrawCount
   contract.withdrawCount += 1
@@ -170,9 +180,11 @@ export function handleRewardAddedGeneric(event: ethereum.Event, rewardToken: Add
   const contract = getStakingContract(event.address)
   const rewardTokens = contract.rewardTokens
   const token = getOrCreateToken(rewardToken)
-  rewardTokens.push(token.id)
-  contract.rewardTokens = rewardTokens
-  contract.save()
+  if (rewardTokens.indexOf(token.id) < 0) {
+    rewardTokens.push(token.id)
+    contract.rewardTokens = rewardTokens
+    contract.save()
+  }
   takeSnapshot(event.block.timestamp)
 }
 
@@ -181,5 +193,5 @@ export function handleRewardAddedCvxPrisma(event: RewardAdded1): void {
 }
 
 export function handleRewardAddedYPrisma(event: RewardAddedYPrisma): void {
-  handleRewardAddedGeneric(event, YPRISMA_TOKEN_ADDRESS)
+  handleRewardAddedGeneric(event, WSTETH_TOKEN_ADDRESS)
 }
