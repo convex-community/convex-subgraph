@@ -18,11 +18,67 @@ dataSources:
         - HourlySnapshot
         - TokenPrice
         - StakingContract
+        - StakingBalance
         - RewardPaid
         - RewardRedirected
         - Stake
         - Withdrawal
       abis:
+        - name: cvxPrismaStaking
+          file: ./abis/cvxPrismaStaking.json
+        - name: yPrismaStaking
+          file: ./abis/yPrismaStaking.json
+        - name: ERC20
+          file: ../../abis/ERC20.json
+        - name: Factory
+          file: ../../abis/UniswapV2Factory.json
+        - name: Pair
+          file: ../../abis/UniswapV2Pair.json
+        - name: FactoryV3
+          file: ../../abis/UniswapV3Factory.json
+        - name: Quoter
+          file: ../../abis/UniswapV3Quoter.json
+        - name: TriCryptoNg
+          file: ./abis/TriCryptoNg.json
+        - name: CurvePoolV2
+          file: ../../abis/CurvePoolV2.json
+      eventHandlers:
+        - event: RewardPaid(indexed address,indexed address,uint256)
+          handler: handleRewardPaidCvxPrisma
+        - event: RewardRedirected(indexed address,address)
+          handler: handleRewardRedirected
+        - event: Staked(indexed address,uint256)
+          handler: handleStakedCvxPrisma
+        - event: Withdrawn(indexed address,uint256)
+          handler: handleWithdrawnCvxPrisma
+        - event: RewardAdded(indexed address,indexed address)
+          handler: handleRewardAddedCvxPrisma
+      file: ./src/cvx-prisma-staking.ts
+
+  - kind: ethereum
+    name: yPrismaStaking
+    network: mainnet
+    source:
+      address: "0x774a55C3Eeb79929fD445Ae97191228Ab39c4d0f"
+      abi: yPrismaStaking
+      startBlock: 18527487
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - RewardApr
+        - HourlySnapshot
+        - TokenPrice
+        - StakingContract
+        - StakingBalance
+        - RewardPaid
+        - RewardRedirected
+        - Stake
+        - Withdrawal
+      abis:
+        - name: yPrismaStaking
+          file: ./abis/yPrismaStaking.json
         - name: cvxPrismaStaking
           file: ./abis/cvxPrismaStaking.json
         - name: ERC20
@@ -40,14 +96,14 @@ dataSources:
         - name: CurvePoolV2
           file: ../../abis/CurvePoolV2.json
       eventHandlers:
-        - event: RewardPaid(indexed address,indexed address,uint256)
-          handler: handleRewardPaid
-        - event: RewardRedirected(indexed address,address)
-          handler: handleRewardRedirected
+        - event: RewardPaid(indexed address,uint256)
+          handler: handleRewardPaidYPrisma
         - event: Staked(indexed address,uint256)
-          handler: handleStaked
+          handler: handleStakedYPrisma
+        - event: StakedFor(indexed address,uint256)
+          handler: handleStakedFor
         - event: Withdrawn(indexed address,uint256)
-          handler: handleWithdrawn
-        - event: RewardAdded(indexed address,indexed address)
-          handler: handleRewardAdded
+          handler: handleWithdrawnYPrisma
+        - event: RewardAdded(uint256)
+          handler: handleRewardAddedYPrisma
       file: ./src/cvx-prisma-staking.ts

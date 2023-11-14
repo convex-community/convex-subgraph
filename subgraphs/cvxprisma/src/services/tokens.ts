@@ -8,9 +8,12 @@ import {
   CVX_ADDRESS,
   CVX_ETH_POOL,
   CVX_PRISMA_TOKEN_ADDRESS,
+  CVXPRISMA_PRISMA_CURVE_POOL,
   PRISMA_ETH_POOL,
   PRISMA_TOKEN_ADDRESS,
   TRICRYPTONG_POOL,
+  YPRISMA_PRISMA_CURVE_POOL,
+  YPRISMA_TOKEN_ADDRESS,
 } from 'const'
 import { toDecimal } from 'utils/maths'
 import { getIntervalFromTimestamp, HOUR } from 'utils/time'
@@ -59,6 +62,18 @@ export function getCvxPriceInEth(): BigDecimal {
   return priceResult.reverted ? BigDecimal.zero() : toDecimal(priceResult.value, 18)
 }
 
+export function getCvxPrismaPeg(): BigDecimal {
+  const pool = CurvePoolV2.bind(CVXPRISMA_PRISMA_CURVE_POOL)
+  const priceResult = pool.try_price_oracle()
+  return priceResult.reverted ? BigDecimal.fromString('1') : toDecimal(priceResult.value, 18)
+}
+
+export function getYPrismaPeg(): BigDecimal {
+  const pool = CurvePoolV2.bind(YPRISMA_PRISMA_CURVE_POOL)
+  const priceResult = pool.try_price_oracle()
+  return priceResult.reverted ? BigDecimal.fromString('1') : toDecimal(priceResult.value, 18)
+}
+
 export function getCvxPrismaPriceInEth(): BigDecimal {
   return getPrismaPriceInEth()
 }
@@ -81,7 +96,13 @@ export function getTokenPrice(token: Address, timestamp: BigInt): TokenPrice {
   } else if (token == CVX_PRISMA_TOKEN_ADDRESS) {
     const ethTokenPrice = getTokenPrice(Address.fromString(ETH_TOKEN_ADDRESS), timestamp)
     const cvxPrismaEthPrice = getPrismaPriceInEth()
-    tokenPrice.price = cvxPrismaEthPrice.times(ethTokenPrice.price)
+    const peg = getCvxPrismaPeg()
+    tokenPrice.price = cvxPrismaEthPrice.times(ethTokenPrice.price).times(peg)
+  } else if (token == YPRISMA_TOKEN_ADDRESS) {
+    const ethTokenPrice = getTokenPrice(Address.fromString(ETH_TOKEN_ADDRESS), timestamp)
+    const cvxPrismaEthPrice = getPrismaPriceInEth()
+    const peg = getYPrismaPeg()
+    tokenPrice.price = cvxPrismaEthPrice.times(ethTokenPrice.price).times(peg)
   } else if (token == CVX_ADDRESS) {
     const ethTokenPrice = getTokenPrice(Address.fromString(ETH_TOKEN_ADDRESS), timestamp)
     const cvxEthPrice = getCvxPriceInEth()

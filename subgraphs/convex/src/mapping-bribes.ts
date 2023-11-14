@@ -4,8 +4,6 @@ import { getDecimals, getUsdRate } from 'utils/pricing'
 import { exponentToBigDecimal } from 'utils/maths'
 import { getIntervalFromTimestamp, DAY } from 'utils/time'
 import { getDailyRevenueSnapshot } from './services/revenue'
-import { DailyRevenueSnapshot } from '../generated/schema'
-import { BigDecimal } from '@graphprotocol/graph-ts'
 
 export function handleUpdatedFee(event: UpdatedFee): void {
   const platform = getPlatform()
