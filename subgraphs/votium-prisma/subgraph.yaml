@@ -1,0 +1,35 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: VotiumVlCVXPrisma
+    network: mainnet
+    source:
+      address: "0xff67dac47e2ad39e8eb51988ae3e82381982a91a"
+      abi: VotiumVlCVXPrisma
+      startBlock: 18568098
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - IncreasedIncentive
+        - NewIncentive
+        - Incentive
+        - Round
+        - UpdatedFee
+        - WithdrawUnprocessed
+      abis:
+        - name: VotiumVlCVXPrisma
+          file: ./abis/VotiumVlCVXPrisma.json
+      eventHandlers:
+        - event: IncreasedIncentive(uint256,address,uint256,uint256,indexed uint256,indexed uint256,uint256)
+          handler: handleIncreasedIncentive
+        - event: NewIncentive(uint256,address,uint256,indexed uint256,indexed uint256,uint256,address[],indexed address,bool)
+          handler: handleNewIncentive
+        - event: UpdatedFee(uint256)
+          handler: handleUpdatedFee
+        - event: WithdrawUnprocessed(uint256,indexed uint256,indexed uint256,uint256)
+          handler: handleWithdrawUnprocessed
+      file: ./src/mapping.ts
