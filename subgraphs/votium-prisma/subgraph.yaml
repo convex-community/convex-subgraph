@@ -6,9 +6,9 @@ dataSources:
     name: VotiumVlCVXPrisma
     network: mainnet
     source:
-      address: "0xff67dac47e2ad39e8eb51988ae3e82381982a91a"
+      address: "0xB5F6322163F71d0733767cc0eA219422De51b5C9"
       abi: VotiumVlCVXPrisma
-      startBlock: 18568098
+      startBlock: 18897821
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
