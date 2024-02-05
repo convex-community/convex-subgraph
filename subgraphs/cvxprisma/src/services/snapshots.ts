@@ -6,10 +6,10 @@ import { getTokenPrice } from './tokens'
 import { toDecimal } from 'utils/maths'
 import {
   CVX_PRISMA_STAKING_ADDRESS,
-  CVX_PRISMA_TOKEN_ADDRESS,
+  CVX_PRISMA_TOKEN_ADDRESS, NEW_YPRISMA_STAKING_ADDRESS,
   SECONDS_PER_YEAR,
   YPRISMA_STAKING_ADDRESS,
-  YPRISMA_TOKEN_ADDRESS,
+  YPRISMA_TOKEN_ADDRESS
 } from 'const'
 import { cvxPrismaStaking } from '../../generated/cvxPrismaStaking/cvxPrismaStaking'
 import { ERC20 } from '../../generated/cvxPrismaStaking/ERC20'
@@ -63,21 +63,21 @@ export function takeCvxPrismaSnapshot(timestamp: BigInt): void {
   snapshot.save()
 }
 
-export function takeYPrismaSnapshot(timestamp: BigInt): void {
+export function _takeYPrismaSnapshot(timestamp: BigInt, yPrismaStakingContract: Address): void {
   const hourlyTimestamp = getIntervalFromTimestamp(timestamp, HOUR)
-  let snapshot = HourlySnapshot.load(YPRISMA_STAKING_ADDRESS.toHexString() + timestamp.toString())
+  let snapshot = HourlySnapshot.load(yPrismaStakingContract.toHexString() + timestamp.toString())
   if (snapshot) {
     return
   }
-  snapshot = new HourlySnapshot(YPRISMA_STAKING_ADDRESS.toHexString() + hourlyTimestamp.toString())
+  snapshot = new HourlySnapshot(yPrismaStakingContract.toHexString() + hourlyTimestamp.toString())
   snapshot.timestamp = hourlyTimestamp
-  const staking = getStakingContract(YPRISMA_STAKING_ADDRESS)
+  const staking = getStakingContract(yPrismaStakingContract)
 
   snapshot.index = staking.snapshotCount
   snapshot.stakingContract = staking.id
   staking.snapshotCount += 1
   staking.save()
-  const stakingContract = yPrismaStaking.bind(YPRISMA_STAKING_ADDRESS)
+  const stakingContract = yPrismaStaking.bind(yPrismaStakingContract)
 
   snapshot.tokenBalance = staking.tokenBalance
   snapshot.tvl = staking.tvl
@@ -114,6 +114,11 @@ export function takeYPrismaSnapshot(timestamp: BigInt): void {
   const totalSupply = yPrismaContract.try_totalSupply()
   snapshot.totalSupply = totalSupply.reverted ? BigDecimal.zero() : toDecimal(totalSupply.value, 18)
   snapshot.save()
+}
+
+export function takeYPrismaSnapshot(timestamp: BigInt): void {
+  _takeYPrismaSnapshot(timestamp, YPRISMA_STAKING_ADDRESS)
+  _takeYPrismaSnapshot(timestamp, NEW_YPRISMA_STAKING_ADDRESS)
 }
 
 export function takeSnapshot(timestamp: BigInt): void {
