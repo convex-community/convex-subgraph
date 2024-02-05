@@ -7,6 +7,8 @@ export function getStakingContract(contractAddress: Address): StakingContract {
   if (!contract) {
     contract = new StakingContract(contractAddress.toHexString())
     contract.tokenBalance = BigDecimal.zero()
+    contract.tvl = BigDecimal.zero()
+    contract.peg = BigDecimal.zero()
     contract.rewardTokens = []
     contract.depositCount = 0
     contract.withdrawCount = 0

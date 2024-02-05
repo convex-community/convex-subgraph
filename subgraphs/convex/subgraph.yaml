@@ -12,7 +12,7 @@ dataSources:
       startBlock: 12450992
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -90,7 +90,7 @@ dataSources:
       startBlock: 13209937
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - DailyRevenueSnapshot
@@ -132,7 +132,7 @@ dataSources:
       startBlock: 17862211
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - DailyRevenueSnapshot
@@ -177,7 +177,7 @@ dataSources:
       startBlock: 14670857
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - DailyRevenueSnapshot
@@ -220,7 +220,7 @@ dataSources:
       startBlock: 12451054
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - DailyRevenueSnapshot
@@ -265,7 +265,7 @@ dataSources:
       startBlock: 17004046
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - DailyRevenueSnapshot
@@ -306,7 +306,7 @@ dataSources:
       startBlock: 16938064
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - DailyRevenueSnapshot
@@ -347,7 +347,7 @@ dataSources:
       startBlock: 16741334
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - DailyRevenueSnapshot
@@ -388,7 +388,7 @@ templates:
       abi: BaseRewardPool
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -429,7 +429,7 @@ templates:
       abi: FeeDeposit
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - DailyRevenueSnapshot
