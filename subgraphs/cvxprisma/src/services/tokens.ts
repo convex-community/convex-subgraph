@@ -8,12 +8,12 @@ import {
   CVX_ADDRESS,
   CVX_ETH_POOL,
   CVX_PRISMA_TOKEN_ADDRESS,
-  CVXPRISMA_PRISMA_CURVE_POOL,
+  CVXPRISMA_PRISMA_CURVE_POOL, MKUSD_TOKEN_ADDRESS,
   PRISMA_ETH_POOL,
   PRISMA_TOKEN_ADDRESS,
   TRICRYPTONG_POOL,
   YPRISMA_PRISMA_CURVE_POOL,
-  YPRISMA_TOKEN_ADDRESS,
+  YPRISMA_TOKEN_ADDRESS
 } from 'const'
 import { toDecimal } from 'utils/maths'
 import { getIntervalFromTimestamp, HOUR } from 'utils/time'
@@ -107,7 +107,11 @@ export function getTokenPrice(token: Address, timestamp: BigInt): TokenPrice {
     const ethTokenPrice = getTokenPrice(Address.fromString(ETH_TOKEN_ADDRESS), timestamp)
     const cvxEthPrice = getCvxPriceInEth()
     tokenPrice.price = cvxEthPrice.times(ethTokenPrice.price)
-  } else {
+  }
+  else if (token == MKUSD_TOKEN_ADDRESS) {
+    tokenPrice.price = BigDecimal.fromString('1')
+  }
+  else {
     tokenPrice.price = getUsdRate(token)
   }
   tokenPrice.save()

@@ -6,13 +6,6 @@ import {
   Withdrawn,
 } from '../generated/cvxPrismaStaking/cvxPrismaStaking'
 import {
-  RewardPaid as RewardPaidYPrisma,
-  RewardAdded as RewardAddedYPrisma,
-  Withdrawn as WithdrawnYPrisma,
-  Staked as StakedYPrisma,
-  StakedFor,
-} from '../generated/yPrismaStaking/yPrismaStaking'
-import {
   Withdrawal,
   Stake,
   RewardRedirected as RewardRedirectedEntity,
@@ -24,8 +17,6 @@ import {
   BIG_DECIMAL_1E18,
   CVX_PRISMA_TOKEN_ADDRESS,
   PRISMA_TOKEN_ADDRESS,
-  WSTETH_TOKEN_ADDRESS,
-  YPRISMA_TOKEN_ADDRESS,
 } from 'const'
 import { toDecimal } from 'utils/maths'
 import { getOrCreateToken, getTokenPrice } from './services/tokens'
@@ -42,6 +33,7 @@ export function handleRewardGeneric(event: ethereum.Event, reward: BigInt, user:
   rewardPaid.token = token.id
   const amount = toDecimal(reward, token.decimals)
   const tokenPrice = getTokenPrice(rewardToken, event.block.timestamp)
+  rewardPaid.amount = amount
   rewardPaid.amountUsd = amount.times(tokenPrice.price)
   rewardPaid.stakingContract = contract.id
   rewardPaid.index = contract.payoutCount
@@ -57,10 +49,6 @@ export function handleRewardGeneric(event: ethereum.Event, reward: BigInt, user:
 
 export function handleRewardPaidCvxPrisma(event: RewardPaid): void {
   handleRewardGeneric(event, event.params._reward, getUser(event.params._user), event.params._rewardsToken)
-}
-
-export function handleRewardPaidYPrisma(event: RewardPaidYPrisma): void {
-  handleRewardGeneric(event, event.params.reward, getUser(event.params.user), YPRISMA_TOKEN_ADDRESS)
 }
 
 export function handleRewardRedirected(event: RewardRedirected): void {
@@ -83,6 +71,7 @@ export function handleStakedGeneric(
   event: ethereum.Event,
   stakedAmount: BigInt,
   userAddress: Address,
+  recipientAddress: Address,
   wrapperToken: Address
 ): void {
   const contract = getStakingContract(event.address)
@@ -100,12 +89,14 @@ export function handleStakedGeneric(
   stake.index = contract.depositCount
   contract.depositCount += 1
   const user = getUser(userAddress)
+  const from = getUser(recipientAddress)
   const balance = getStakingBalance(user, contract)
   balance.stakeSize = balance.stakeSize.plus(amount)
   balance.save()
   stake.userStakeSize = balance.stakeSize
   stake.stakingContract = contract.id
   stake.user = user.id
+  stake.from = from.id
   stake.amount = amount
   stake.amountUsd = amount.times(wrappedPrismaPrice.price)
   stake.blockTimestamp = event.block.timestamp
@@ -118,15 +109,7 @@ export function handleStakedGeneric(
 }
 
 export function handleStakedCvxPrisma(event: Staked): void {
-  handleStakedGeneric(event, event.params._amount, event.params._user, CVX_PRISMA_TOKEN_ADDRESS)
-}
-
-export function handleStakedYPrisma(event: StakedYPrisma): void {
-  handleStakedGeneric(event, event.params.amount, event.params.user, YPRISMA_TOKEN_ADDRESS)
-}
-
-export function handleStakedFor(event: StakedFor): void {
-  handleStakedGeneric(event, event.params.amount, event.params.user, YPRISMA_TOKEN_ADDRESS)
+  handleStakedGeneric(event, event.params._amount, event.params._user, event.params._user, CVX_PRISMA_TOKEN_ADDRESS)
 }
 
 export function handleWithdrawnGeneric(
@@ -172,10 +155,6 @@ export function handleWithdrawnCvxPrisma(event: Withdrawn): void {
   handleWithdrawnGeneric(event, event.params._amount, event.params._user, CVX_PRISMA_TOKEN_ADDRESS)
 }
 
-export function handleWithdrawnYPrisma(event: WithdrawnYPrisma): void {
-  handleWithdrawnGeneric(event, event.params.amount, event.params.user, YPRISMA_TOKEN_ADDRESS)
-}
-
 export function handleRewardAddedGeneric(event: ethereum.Event, rewardToken: Address): void {
   const contract = getStakingContract(event.address)
   const rewardTokens = contract.rewardTokens
@@ -190,8 +169,4 @@ export function handleRewardAddedGeneric(event: ethereum.Event, rewardToken: Add
 
 export function handleRewardAddedCvxPrisma(event: RewardAdded1): void {
   handleRewardAddedGeneric(event, event.params._reward)
-}
-
-export function handleRewardAddedYPrisma(event: RewardAddedYPrisma): void {
-  handleRewardAddedGeneric(event, WSTETH_TOKEN_ADDRESS)
 }
