@@ -1,0 +1,74 @@
+type Round @entity {
+  id: ID!
+  initiatedAt: BigInt!
+  bribeCount: BigInt!
+  incentives: [Incentive!]! @derivedFrom(field: "round")
+}
+
+type Incentive @entity {
+  id: ID!
+  token: Bytes!
+  round: Round!
+  gauge: Bytes!
+  index: BigInt!
+  amount: BigInt!
+  maxPerVote: BigInt!
+  createdAt: BigInt!
+  updatedAt: BigInt
+  originalIncentive: NewIncentive! @derivedFrom(field: "incentive")
+  withdrawals: [WithdrawUnprocessed!] @derivedFrom(field: "incentive")
+  increases: [IncreasedIncentive!] @derivedFrom(field: "incentive")
+}
+
+
+type IncreasedIncentive @entity(immutable: true) {
+  id: ID!
+  index: BigInt!
+  token: Bytes! # address
+  total: BigInt! # uint256
+  increase: BigInt! # uint256
+  round: BigInt! # uint256
+  gauge: Bytes! # address
+  incentive: Incentive!
+  maxPerVote: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type NewIncentive @entity(immutable: true) {
+  id: ID!
+  index: BigInt!
+  token: Bytes! # address
+  amount: BigInt! # uint256
+  round: BigInt! # uint256
+  gauge: Bytes! # address
+  maxPerVote: BigInt! # uint256
+  depositor: Bytes! # address
+  recycled: Boolean! # bool
+  incentive: Incentive!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+
+type WithdrawUnprocessed @entity(immutable: true) {
+  id: ID!
+  index: BigInt!
+  round: BigInt! # uint256
+  gauge: Bytes! # address
+  amount: BigInt! # uint256
+  incentive: Incentive!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type UpdatedFee @entity(immutable: true) {
+  id: ID!
+  amount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
