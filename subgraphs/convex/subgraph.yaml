@@ -67,7 +67,12 @@ dataSources:
           file: ../../abis/CToken.json
         - name: CurveTriCryptoFactoryPool
           file: ../../abis/CurveTriCryptoFactoryPool.json
-
+        - name: OneWayLendingFactory
+          file: ../../abis/OneWayLendingFactory.json
+        - name: LendingVault
+          file: ../../abis/LendingVault.json
+        - name: Llamma
+          file: ../../abis/Llamma.json
       eventHandlers:
         - event: Deposited(indexed address,indexed uint256,uint256)
           handler: handleDeposited
@@ -117,6 +122,12 @@ dataSources:
           file: ../../abis/CLAggregator.json
         - name: CurveTriCryptoFactoryPool
           file: ../../abis/CurveTriCryptoFactoryPool.json
+        - name: OneWayLendingFactory
+          file: ../../abis/OneWayLendingFactory.json
+        - name: LendingVault
+          file: ../../abis/LendingVault.json
+        - name: Llamma
+          file: ../../abis/Llamma.json
       eventHandlers:
         - event: Bribed(address,uint256,indexed bytes32,uint256)
           handler: handleBribed
@@ -160,6 +171,12 @@ dataSources:
           file: ../../abis/CLAggregator.json
         - name: CurveTriCryptoFactoryPool
           file: ../../abis/CurveTriCryptoFactoryPool.json
+        - name: OneWayLendingFactory
+          file: ../../abis/OneWayLendingFactory.json
+        - name: LendingVault
+          file: ../../abis/LendingVault.json
+        - name: Llamma
+          file: ../../abis/Llamma.json
       eventHandlers:
         - event: IncreasedIncentive(uint256,address,uint256,uint256,indexed uint256,indexed address,uint256)
           handler: handleIncreasedIncentive
@@ -207,6 +224,12 @@ dataSources:
           file: ../../abis/CLAggregator.json
         - name: CurveTriCryptoFactoryPool
           file: ../../abis/CurveTriCryptoFactoryPool.json
+        - name: OneWayLendingFactory
+          file: ../../abis/OneWayLendingFactory.json
+        - name: LendingVault
+          file: ../../abis/LendingVault.json
+        - name: Llamma
+          file: ../../abis/Llamma.json
       callHandlers:
         - function: setDepositAddress(address)
           handler: handleSetDepositAddress
@@ -252,6 +275,12 @@ dataSources:
           file: ../../abis/CLAggregator.json
         - name: CurveTriCryptoFactoryPool
           file: ../../abis/CurveTriCryptoFactoryPool.json
+        - name: OneWayLendingFactory
+          file: ../../abis/OneWayLendingFactory.json
+        - name: LendingVault
+          file: ../../abis/LendingVault.json
+        - name: Llamma
+          file: ../../abis/Llamma.json
       eventHandlers:
         - event: RewardAdded(uint256)
           handler: handleRewardAdded
@@ -293,6 +322,12 @@ dataSources:
           file: ../../abis/CLAggregator.json
         - name: CurveTriCryptoFactoryPool
           file: ../../abis/CurveTriCryptoFactoryPool.json
+        - name: OneWayLendingFactory
+          file: ../../abis/OneWayLendingFactory.json
+        - name: LendingVault
+          file: ../../abis/LendingVault.json
+        - name: Llamma
+          file: ../../abis/Llamma.json
       eventHandlers:
         - event: ClaimedReward(indexed address,uint256)
           handler: handleRewardClaimed
@@ -334,6 +369,12 @@ dataSources:
           file: ../../abis/CLAggregator.json
         - name: CurveTriCryptoFactoryPool
           file: ../../abis/CurveTriCryptoFactoryPool.json
+        - name: OneWayLendingFactory
+          file: ../../abis/OneWayLendingFactory.json
+        - name: LendingVault
+          file: ../../abis/LendingVault.json
+        - name: Llamma
+          file: ../../abis/Llamma.json
       eventHandlers:
         - event: ClaimedReward(indexed address,uint256)
           handler: handleRewardClaimed
@@ -375,6 +416,12 @@ dataSources:
           file: ../../abis/CLAggregator.json
         - name: CurveTriCryptoFactoryPool
           file: ../../abis/CurveTriCryptoFactoryPool.json
+        - name: OneWayLendingFactory
+          file: ../../abis/OneWayLendingFactory.json
+        - name: LendingVault
+          file: ../../abis/LendingVault.json
+        - name: Llamma
+          file: ../../abis/Llamma.json
       eventHandlers:
         - event: Claimed(indexed address,address,indexed uint256,uint256,uint256,uint256)
           handler: handleVoteMarketRewardClaimed
@@ -418,6 +465,12 @@ templates:
           file: ../../abis/CLAggregator.json
         - name: CurveTriCryptoFactoryPool
           file: ../../abis/CurveTriCryptoFactoryPool.json
+        - name: OneWayLendingFactory
+          file: ../../abis/OneWayLendingFactory.json
+        - name: LendingVault
+          file: ../../abis/LendingVault.json
+        - name: Llamma
+          file: ../../abis/Llamma.json
       callHandlers:
         - function: queueNewRewards(uint256)
           handler: handleNewRewardsQueued
@@ -459,6 +512,12 @@ templates:
           file: ../../abis/CLAggregator.json
         - name: CurveTriCryptoFactoryPool
           file: ../../abis/CurveTriCryptoFactoryPool.json
+        - name: OneWayLendingFactory
+          file: ../../abis/OneWayLendingFactory.json
+        - name: LendingVault
+          file: ../../abis/LendingVault.json
+        - name: Llamma
+          file: ../../abis/Llamma.json
       eventHandlers:
         - event: RewardsDistributed(indexed address,uint256)
           handler: handleRewardsDistributed

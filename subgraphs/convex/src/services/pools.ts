@@ -252,8 +252,7 @@ export function getXcpProfitResult(pool: Pool): Array<BigDecimal> {
   return [xcpProfit, xcpProfitA]
 }
 
-export function getPoolApr(pool: Pool, timestamp: BigInt): Array<BigDecimal> {
-  const vPrice = getLpTokenPriceUSD(pool)
+export function getPoolApr(pool: Pool, timestamp: BigInt, vPrice: BigDecimal): Array<BigDecimal> {
   const rewardContract = BaseRewardPool.bind(bytesToAddress(pool.crvRewardsPool))
   const finishPeriodResult = rewardContract.try_periodFinish()
   const finishPeriod = finishPeriodResult.reverted ? timestamp.plus(BIG_INT_ONE) : finishPeriodResult.value

@@ -30,6 +30,8 @@ type Pool @entity {
   active: Boolean!
   """ Whether the pool is v2 """
   isV2: Boolean!
+  """ Whether the pool is a Llamma Lending pool """
+  isLending: Boolean!
   """ Pool creation date """
   creationDate: BigInt!
   """ Pool creation block """

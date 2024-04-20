@@ -20,16 +20,18 @@ import {
   EURS_ADDRESS,
   CURVE_ONLY_TOKENS,
   BIG_DECIMAL_TWO,
-  BIG_INT_ZERO,
+  BIG_INT_ZERO, SECONDS_PER_YEAR, CRVUSD_ADDRESS,
 } from 'const'
 
 import { ERC20 } from '../../generated/Booster/ERC20'
 import { getTokenAValueInTokenB, getUsdRate } from 'utils/pricing'
 import { ChainlinkAggregator } from '../../generated/Booster/ChainlinkAggregator'
 import { DailyPoolSnapshot, Pool } from '../../generated/schema'
-import { exponentToBigDecimal } from 'utils/maths'
+import {bigDecimalExponential, exponentToBigDecimal} from 'utils/maths'
 import { DAY, getIntervalFromTimestamp } from 'utils/time'
 import { CurvePool } from '../../generated/Booster/CurvePool'
+import {LendingVault} from "../../generated/Booster/LendingVault";
+import {Llamma} from "../../generated/Booster/Llamma";
 
 export function getV2LpTokenPrice(pool: Pool): BigDecimal {
   const lpToken = bytesToAddress(pool.lpToken)
@@ -192,11 +194,57 @@ export function getPoolBaseApr(pool: Pool, currentVirtualPrice: BigDecimal, time
   return rate
 }
 
+export function getLendingApr(pool: Pool): BigDecimal {
+  const vault = LendingVault.bind(Address.fromBytes(pool.lpToken))
+  const apr = vault.try_lend_apr()
+  if (apr.reverted) {
+    return BIG_DECIMAL_ZERO
+  }
+  return (apr.value.toBigDecimal().div(BIG_DECIMAL_1E18).div(BigDecimal.fromString('365')))
+}
+
+export function getLendingTokenPrice(pool: Pool): BigDecimal {
+  const amm = Llamma.bind(Address.fromBytes(pool.swap))
+  const vault = LendingVault.bind(Address.fromBytes(pool.lpToken))
+  const oracleRes = amm.try_price_oracle()
+  const totalSupply = vault.try_totalSupply()
+  if (oracleRes.reverted || totalSupply.reverted) {
+    return BigDecimal.zero()
+  }
+  if (totalSupply.value == BIG_INT_ZERO) {
+    return BigDecimal.zero()
+  }
+
+  const priceOracle = oracleRes.value.toBigDecimal().div(BIG_DECIMAL_1E18)
+  const ercZero = ERC20.bind(Address.fromBytes(pool.coins[0]))
+  const ercOne = ERC20.bind(Address.fromBytes(pool.coins[1]))
+  let balance0 = BigDecimal.zero()
+  let balance1 = BigDecimal.zero()
+  // coin0 is collateral, coin1 is borrowed
+  if (pool.coins[0] == CRVUSD_ADDRESS) {
+     balance0 = ercZero.balanceOf(Address.fromBytes(pool.swap)).toBigDecimal().div(BIG_DECIMAL_1E18)
+    const decimalOneRes = ercOne.try_decimals()
+    const decimalOne = decimalOneRes.reverted ? BigInt.fromI32(18) : BigInt.fromI32(decimalOneRes.value)
+    balance1 = ercOne.balanceOf(Address.fromBytes(pool.swap)).toBigDecimal().div(exponentToBigDecimal(decimalOne)).div(priceOracle)
+  }
+  else {
+    const decimalZeroRes = ercZero.try_decimals()
+    const decimalZero = decimalZeroRes.reverted ? BigInt.fromI32(18) : BigInt.fromI32(decimalZeroRes.value)
+    balance0 = ercZero.balanceOf(Address.fromBytes(pool.swap)).toBigDecimal().div(exponentToBigDecimal(decimalZero)).times(priceOracle)
+    balance1 = ercOne.balanceOf(Address.fromBytes(pool.swap)).toBigDecimal().div(BIG_DECIMAL_1E18)
+  }
+  const tvl = balance0.plus(balance1)
+  return tvl.div(totalSupply.value.toBigDecimal())
+}
+
 export function getLpTokenPriceUSD(pool: Pool): BigDecimal {
   const lpTokenAddress = bytesToAddress(pool.lpToken)
   const vPrice = getLpTokenVirtualPrice(pool)
   if (pool.isV2) {
     return getV2LpTokenPrice(pool)
+  }
+  if (pool.isLending) {
+    return getLendingTokenPrice(pool)
   }
   if (FOREX_ORACLES.has(pool.lpToken.toHexString())) {
     return vPrice.times(getForexUsdRate(pool.lpToken))

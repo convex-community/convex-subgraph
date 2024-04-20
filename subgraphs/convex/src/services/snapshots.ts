@@ -1,10 +1,9 @@
 import { DailyPoolSnapshot, Pool } from '../../generated/schema'
 import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { getIntervalFromTimestamp, DAY } from 'utils/time'
-import { bigDecimalExponential, pow } from 'utils/maths'
-import { BIG_DECIMAL_ONE } from 'const'
+import { bigDecimalExponential } from 'utils/maths'
 import { getPoolApr, getXcpProfitResult } from './pools'
-import { getLpTokenPriceUSD, getLpTokenVirtualPrice, getPoolBaseApr, getV2PoolBaseApr } from './apr'
+import {getLendingApr, getLpTokenPriceUSD, getLpTokenVirtualPrice, getPoolBaseApr, getV2PoolBaseApr} from './apr'
 import { getPlatform } from './platform'
 
 export function getDailyPoolSnapshot(pool: Pool, timestamp: BigInt, block: BigInt): DailyPoolSnapshot {
@@ -24,7 +23,7 @@ export function getDailyPoolSnapshot(pool: Pool, timestamp: BigInt, block: BigIn
     pool.lpTokenUSDPrice = lpPrice
     snapshot.lpTokenUSDPrice = pool.lpTokenUSDPrice
 
-    const aprs = getPoolApr(pool, timestamp)
+    const aprs = getPoolApr(pool, timestamp, lpPrice)
     snapshot.crvApr = aprs[0]
     snapshot.cvxApr = aprs[1]
     snapshot.extraRewardsApr = aprs[2]
@@ -42,9 +41,12 @@ export function getDailyPoolSnapshot(pool: Pool, timestamp: BigInt, block: BigIn
       snapshot.xcpProfit = xcpProfits[0]
       snapshot.xcpProfitA = xcpProfits[1]
       baseApr = getV2PoolBaseApr(pool, snapshot.xcpProfit, snapshot.xcpProfitA, timestamp)
-    } else {
-      baseApr = getPoolBaseApr(pool, snapshot.lpTokenVirtualPrice, timestamp)
+    } else if (pool.isLending) {
+      baseApr = getLendingApr(pool)
     }
+    else {
+        baseApr = getPoolBaseApr(pool, snapshot.lpTokenVirtualPrice, timestamp)
+      }
     // annualize Apr
     const annualizedApr = bigDecimalExponential(baseApr, BigDecimal.fromString('365'))
     snapshot.baseApr = annualizedApr
