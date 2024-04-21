@@ -166,8 +166,6 @@ type DailyRevenueSnapshot @entity {
   bribeRevenue: BigDecimal!
   """ Snapshot timestamp """
   timestamp: BigInt!
-  """ Extra token rewards """
-  extraTokenRewards: [ExtraTokenReward!]! @derivedFrom(field: "revenueSnapshot")
 }
 
 type FeeRevenue @entity {
@@ -179,19 +177,6 @@ type FeeRevenue @entity {
   amount: BigInt!
   """ Snapshot timestamp """
   timestamp: BigInt!
-}
-
-type ExtraTokenReward @entity {
-  """ Entity ID """
-  id: ID!
-  """ Revenue snapshots """
-  revenueSnapshot: DailyRevenueSnapshot!
-  """ Token address """
-  token: Bytes! #address
-  """ Reward amount """
-  amount: BigInt!
-  """ Reward USD value """
-  value: BigDecimal!
 }
 
 type Deposit @entity {

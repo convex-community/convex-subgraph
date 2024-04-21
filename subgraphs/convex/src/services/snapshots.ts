@@ -6,13 +6,42 @@ import { getPoolApr, getXcpProfitResult } from './pools'
 import {getLendingApr, getLpTokenPriceUSD, getLpTokenVirtualPrice, getPoolBaseApr, getV2PoolBaseApr} from './apr'
 import { getPlatform } from './platform'
 
+export function createNewSnapsot(snapId: string): DailyPoolSnapshot {
+  const snapshot = new DailyPoolSnapshot(snapId)
+  snapshot.id = snapId
+  snapshot.poolid = ''
+  snapshot.poolName = ''
+  snapshot.withdrawalCount = BigInt.zero()
+  snapshot.depositCount = BigInt.zero()
+  snapshot.withdrawalVolume = BigInt.zero()
+  snapshot.depositVolume = BigInt.zero()
+  snapshot.withdrawalValue = BigDecimal.zero()
+  snapshot.depositValue = BigDecimal.zero()
+  snapshot.lpTokenBalance = BigInt.zero()
+  snapshot.lpTokenVirtualPrice = BigDecimal.zero()
+  snapshot.lpTokenUSDPrice = BigDecimal.zero()
+  snapshot.xcpProfit = BigDecimal.zero()
+  snapshot.xcpProfitA = BigDecimal.zero()
+  snapshot.tvl = BigDecimal.zero()
+  snapshot.curveTvlRatio = BigDecimal.zero()
+  snapshot.crvApr = BigDecimal.zero()
+  snapshot.cvxApr = BigDecimal.zero()
+  snapshot.extraRewardsApr = BigDecimal.zero()
+  snapshot.baseApr = BigDecimal.zero()
+  snapshot.rawBaseApr = BigDecimal.zero()
+  snapshot.timestamp = BigInt.zero()
+  snapshot.block = BigInt.zero()
+  snapshot.save()
+  return snapshot
+}
+
 export function getDailyPoolSnapshot(pool: Pool, timestamp: BigInt, block: BigInt): DailyPoolSnapshot {
   const time = getIntervalFromTimestamp(timestamp, DAY)
   const snapId = pool.name + '-' + pool.poolid.toString() + '-' + time.toString()
   let snapshot = DailyPoolSnapshot.load(snapId)
   if (!snapshot) {
     log.info('Taking pool snapshot for pool {} ({}), block: {}', [pool.name, pool.swap.toHexString(), block.toString()])
-    snapshot = new DailyPoolSnapshot(snapId)
+    snapshot = createNewSnapsot(snapId)
     snapshot.poolid = pool.poolid.toString()
     snapshot.poolName = pool.name
     snapshot.timestamp = timestamp

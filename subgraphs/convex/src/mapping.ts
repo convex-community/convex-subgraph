@@ -8,7 +8,7 @@ import {
 } from '../generated/Booster/Booster'
 import { Pool } from '../generated/schema'
 import { Deposit, Withdrawal } from '../generated/schema'
-import { getLpTokenSupply, getPool, getPoolCoins, getPoolExtras } from './services/pools'
+import {createNewPool, getLpTokenSupply, getPool, getPoolCoins, getPoolExtras} from './services/pools'
 import {
   ADDRESS_ZERO,
   CONVEX_PLATFORM_ID,
@@ -52,7 +52,8 @@ export function handleAddPool(call: AddPoolCall): void {
   platform.poolCount = platform.poolCount.plus(BIG_INT_ONE)
 
   const poolInfo = booster.try_poolInfo(pid)
-  const pool = new Pool(pid.toString())
+  const pool = createNewPool(pid)
+  pool.lpToken = ADDRESS_ZERO
   let stash = ADDRESS_ZERO
   if (!poolInfo.reverted) {
     pool.token = poolInfo.value.value1
@@ -66,9 +67,7 @@ export function handleAddPool(call: AddPoolCall): void {
     pool.stash = stash
   }
   const lpToken = call.inputs._lptoken
-  pool.poolid = pid
   pool.lpToken = lpToken
-  pool.platform = CONVEX_PLATFORM_ID
   pool.isLending = false
 
   let swapResult = curveRegistry.try_get_pool_from_lp_token(call.inputs._lptoken)
@@ -144,6 +143,14 @@ export function handleAddPool(call: AddPoolCall): void {
     if (!coin2.reverted) {
       coins.push(coin2.value)
     }
+
+    const ercToken1 = ERC20.bind(coin1.value)
+    const ercToken2 = ERC20.bind(coin2.value)
+    const name1 = ercToken1.try_name()
+    const name2 = ercToken2.try_name()
+    if (!name1.reverted && !name2.reverted) {
+      pool.name = pool.name + ' ' + name1.value + '/' + name2.value
+    }
   }
   else {
     getPoolCoins(pool)
@@ -181,7 +188,7 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
   withdrawal.save()
 
   const pool = getPool(withdrawal.poolid)
-  if (pool.lpToken == Bytes.empty()) {
+  if (pool.lpToken == Bytes.empty() || Address.fromBytes(pool.lpToken) == Address.zero()) {
     return
   }
   pool.lpTokenBalance = pool.lpTokenBalance.minus(withdrawal.amount)

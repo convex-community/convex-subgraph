@@ -6,7 +6,7 @@ import {
   BIG_DECIMAL_ONE,
   BIG_DECIMAL_ZERO,
   BIG_INT_ZERO,
-  CRV_FRAX_ADDRESS,
+  CRV_FRAX_ADDRESS, CRVUSD_ADDRESS,
   CTOKENS,
   FRAXBP_ADDRESS,
   RKP3R_ADDRESS,
@@ -186,6 +186,8 @@ export function getUsdRate(token: Address): BigDecimal {
     return getRKp3rPrice()
   } else if (token == CRV_FRAX_ADDRESS) {
     return getFraxBpVirtualPrice()
+  } else if (token == CRVUSD_ADDRESS) {
+    return BIG_DECIMAL_ONE
   } else if (token == THREE_CRV_ADDRESS) {
     return get3CrvVirtualPrice()
   } else if (CTOKENS.includes(token.toHexString())) {

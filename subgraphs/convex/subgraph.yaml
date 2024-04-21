@@ -522,3 +522,9 @@ templates:
         - event: RewardsDistributed(indexed address,uint256)
           handler: handleRewardsDistributed
       file: ./src/mapping-fxs-deposits.ts
+
+features:
+  - grafting # feature name
+graft:
+  base: QmaNpN1fqLVoLdzScZ7Bx9PM1JYFbXLd9igLpcP7tZX2Rk # subgraph ID of base subgraph
+  block: 16180100 # block number
