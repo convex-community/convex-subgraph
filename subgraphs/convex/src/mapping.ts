@@ -143,6 +143,7 @@ export function handleAddPool(call: AddPoolCall): void {
     if (!coin2.reverted) {
       coins.push(coin2.value)
     }
+    pool.coins = coins
 
     const ercToken1 = ERC20.bind(coin1.value)
     const ercToken2 = ERC20.bind(coin2.value)

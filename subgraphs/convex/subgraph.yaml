@@ -526,5 +526,5 @@ templates:
 features:
   - grafting # feature name
 graft:
-  base: QmaNpN1fqLVoLdzScZ7Bx9PM1JYFbXLd9igLpcP7tZX2Rk # subgraph ID of base subgraph
-  block: 16180100 # block number
+  base: QmYuADZTfa91zt8GSUGpmt8vA2uniBPSJAwsd8JHYQbqK6 # subgraph ID of base subgraph
+  block: 19560000 # block number
