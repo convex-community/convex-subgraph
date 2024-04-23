@@ -8,7 +8,7 @@ import {
 } from '../generated/Booster/Booster'
 import { Pool } from '../generated/schema'
 import { Deposit, Withdrawal } from '../generated/schema'
-import { getLpTokenSupply, getPool, getPoolCoins, getPoolExtras } from './services/pools'
+import {createNewPool, getLpTokenSupply, getPool, getPoolCoins, getPoolExtras} from './services/pools'
 import {
   ADDRESS_ZERO,
   CONVEX_PLATFORM_ID,
@@ -23,7 +23,7 @@ import {
   CURVE_REGISTRY_V2,
   V2_SWAPS,
   TRICRYPTO_LP_ADDRESSES,
-  CURVE_TRICRYPTO_FACTORY,
+  CURVE_TRICRYPTO_FACTORY, ONE_WAY_LENDING_FACTORY,
 } from 'const'
 import { CurveRegistry } from '../generated/Booster/CurveRegistry'
 import { ERC20 } from '../generated/Booster/ERC20'
@@ -36,6 +36,8 @@ import { getUser } from './services/user'
 import { getDailyPoolSnapshot, takePoolSnapshots } from './services/snapshots'
 import { inferAssetType } from './services/utils'
 import { CurveTriCryptoFactoryPool } from '../generated/Booster/CurveTriCryptoFactoryPool'
+import {OneWayLendingFactory} from "../generated/Booster/OneWayLendingFactory";
+import {LendingVault} from "../generated/Booster/LendingVault";
 
 export function handleAddPool(call: AddPoolCall): void {
   const platform = getPlatform()
@@ -50,7 +52,8 @@ export function handleAddPool(call: AddPoolCall): void {
   platform.poolCount = platform.poolCount.plus(BIG_INT_ONE)
 
   const poolInfo = booster.try_poolInfo(pid)
-  const pool = new Pool(pid.toString())
+  const pool = createNewPool(pid)
+  pool.lpToken = ADDRESS_ZERO
   let stash = ADDRESS_ZERO
   if (!poolInfo.reverted) {
     pool.token = poolInfo.value.value1
@@ -64,9 +67,8 @@ export function handleAddPool(call: AddPoolCall): void {
     pool.stash = stash
   }
   const lpToken = call.inputs._lptoken
-  pool.poolid = pid
   pool.lpToken = lpToken
-  pool.platform = CONVEX_PLATFORM_ID
+  pool.isLending = false
 
   let swapResult = curveRegistry.try_get_pool_from_lp_token(call.inputs._lptoken)
 
@@ -97,7 +99,19 @@ export function handleAddPool(call: AddPoolCall): void {
           swap = swapResult.value
           pool.isV2 = true
         } else {
-          log.warning('Could not find pool for lp token {}', [lpToken.toHexString()])
+          // If everything has failed we might be dealing with a lending market
+          const lendingFactory = OneWayLendingFactory.bind(ONE_WAY_LENDING_FACTORY)
+          const lendingRes = lendingFactory.try_vaults_index(lpToken)
+          if (!lendingRes.reverted) {
+            pool.isLending = true
+            const amm = lendingFactory.try_amms(lendingRes.value)
+            if (!amm.reverted) {
+              swap = amm.value
+            }
+          }
+          else {
+            log.warning('Could not find pool for lp token {}', [lpToken.toHexString()])
+          }
         }
       }
     }
@@ -106,6 +120,7 @@ export function handleAddPool(call: AddPoolCall): void {
   if (TRICRYPTO_LP_ADDRESSES.includes(lpToken)) {
     pool.isV2 = true
   }
+
 
   pool.swap = swap
 
@@ -117,7 +132,30 @@ export function handleAddPool(call: AddPoolCall): void {
   }
   pool.name = name
 
-  getPoolCoins(pool)
+  if (pool.isLending) {
+    const vault = LendingVault.bind(lpToken)
+    const coin1 = vault.try_collateral_token()
+    const coin2 = vault.try_borrowed_token()
+    const coins = pool.coins
+    if (!coin1.reverted) {
+      coins.push(coin1.value)
+    }
+    if (!coin2.reverted) {
+      coins.push(coin2.value)
+    }
+    pool.coins = coins
+
+    const ercToken1 = ERC20.bind(coin1.value)
+    const ercToken2 = ERC20.bind(coin2.value)
+    const name1 = ercToken1.try_symbol()
+    const name2 = ercToken2.try_symbol()
+    if (!name1.reverted && !name2.reverted) {
+      pool.name = pool.name + ' ' + name1.value + '/' + name2.value
+    }
+  }
+  else {
+    getPoolCoins(pool)
+  }
   log.info('New pool added {} at block {}', [pool.name, call.block.number.toString()])
 
   pool.assetType = pool.isV2 ? 4 : inferAssetType(swap.toHexString(), pool.name)
@@ -151,7 +189,7 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
   withdrawal.save()
 
   const pool = getPool(withdrawal.poolid)
-  if (pool.lpToken == Bytes.empty()) {
+  if (pool.lpToken == Bytes.empty() || Address.fromBytes(pool.lpToken) == Address.zero()) {
     return
   }
   pool.lpTokenBalance = pool.lpTokenBalance.minus(withdrawal.amount)

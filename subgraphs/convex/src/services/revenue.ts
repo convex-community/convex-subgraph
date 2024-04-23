@@ -25,6 +25,28 @@ export function getDailyRevenueSnapshot(day: BigInt): DailyRevenueSnapshot {
 
   if (!revenueSnapshot) {
     revenueSnapshot = new DailyRevenueSnapshot(day.toString())
+    revenueSnapshot.platform = CONVEX_PLATFORM_ID
+    revenueSnapshot.crvRevenueToLpProvidersAmount = BigDecimal.zero()
+    revenueSnapshot.cvxRevenueToLpProvidersAmount = BigDecimal.zero()
+    revenueSnapshot.crvRevenueToCvxCrvStakersAmount = BigDecimal.zero()
+    revenueSnapshot.cvxRevenueToCvxCrvStakersAmount = BigDecimal.zero()
+    revenueSnapshot.threeCrvRevenueToCvxCrvStakersAmount = BigDecimal.zero()
+    revenueSnapshot.crvRevenueToCvxStakersAmount = BigDecimal.zero()
+    revenueSnapshot.crvRevenueToCallersAmount = BigDecimal.zero()
+    revenueSnapshot.crvRevenueToPlatformAmount = BigDecimal.zero()
+    revenueSnapshot.totalCrvRevenue = BigDecimal.zero()
+    revenueSnapshot.fxsRevenueToCvxStakersAmount = BigDecimal.zero()
+    revenueSnapshot.fxsRevenueToCvxFxsStakersAmount = BigDecimal.zero()
+    revenueSnapshot.fxsRevenueToLpProvidersAmount = BigDecimal.zero()
+    revenueSnapshot.fxsRevenueToCallersAmount = BigDecimal.zero()
+    revenueSnapshot.fxsRevenueToPlatformAmount = BigDecimal.zero()
+    revenueSnapshot.totalFxsRevenue = BigDecimal.zero()
+    revenueSnapshot.otherRevenue = BigDecimal.zero()
+    revenueSnapshot.crvPrice = BigDecimal.zero()
+    revenueSnapshot.cvxPrice = BigDecimal.zero()
+    revenueSnapshot.fxsPrice = BigDecimal.zero()
+    revenueSnapshot.bribeRevenue = BigDecimal.zero()
+    revenueSnapshot.timestamp = BigInt.zero()
     revenueSnapshot.save()
   }
   return revenueSnapshot

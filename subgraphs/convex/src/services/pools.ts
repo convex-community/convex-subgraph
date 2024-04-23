@@ -9,13 +9,12 @@ import {
   BIG_DECIMAL_ZERO,
   BIG_INT_MINUS_ONE,
   BIG_INT_ONE,
-  BIG_INT_ZERO,
+  BIG_INT_ZERO, CONVEX_PLATFORM_ID,
   CRV_ADDRESS,
   CVX_ADDRESS,
 } from 'const'
 import { getUsdRate } from 'utils/pricing'
 import { CurvePool } from '../../generated/Booster/CurvePool'
-import { getLpTokenPriceUSD } from './apr'
 import { getCvxMintAmount } from 'utils/convex'
 import { ExtraRewardStashV2 } from '../../generated/Booster/ExtraRewardStashV2'
 import { ExtraRewardStashV1 } from '../../generated/Booster/ExtraRewardStashV1'
@@ -29,8 +28,42 @@ import { ExtraRewardStashV33 } from '../../generated/Booster/ExtraRewardStashV33
 export function getPool(pid: string): Pool {
   let pool = Pool.load(pid)
   if (!pool) {
-    pool = new Pool(pid)
+    pool = createNewPool(BigInt.fromString(pid))
   }
+  return pool
+}
+
+export function createNewPool(pid: BigInt): Pool {
+  const pool = new Pool(pid.toString())
+  pool.poolid = pid
+  pool.platform = CONVEX_PLATFORM_ID
+  pool.name = ''
+  pool.lpToken = Address.zero()
+  pool.lpTokenBalance = BigInt.zero()
+  pool.lpTokenUSDPrice = BigDecimal.zero()
+  pool.token = Address.zero()
+  pool.gauge = Address.zero()
+  pool.crvRewardsPool = Address.zero()
+  pool.swap = Address.zero()
+  pool.stash = Address.zero()
+  pool.stashVersion = BigInt.zero()
+  pool.stashMinorVersion = BigInt.zero()
+  pool.active = true
+  pool.isV2 = false
+  pool.isLending = false
+  pool.creationBlock = BigInt.zero()
+  pool.creationDate = BigInt.zero()
+  pool.tvl = BigDecimal.zero()
+  pool.crvApr = BigDecimal.zero()
+  pool.curveTvlRatio = BigDecimal.zero()
+  pool.cvxApr = BigDecimal.zero()
+  pool.extraRewardsApr = BigDecimal.zero()
+  pool.baseApr = BigDecimal.zero()
+  pool.rawBaseApr = BigDecimal.zero()
+  pool.assetType = 0
+  pool.coins = []
+  pool.extras = []
+  pool.save()
   return pool
 }
 
@@ -235,7 +268,7 @@ export function getLpTokenSupply(lpToken: Bytes): BigInt {
   const lpTokenAddress = bytesToAddress(lpToken)
   const lpTokenSupplyResult = ERC20.bind(lpTokenAddress).try_totalSupply()
   let totalSupply = BIG_INT_ZERO
-  if (!lpTokenSupplyResult) {
+  if (lpTokenSupplyResult.reverted) {
     log.warning('Failed to fetch total supply for LP Token {}', [lpTokenAddress.toHexString()])
   } else {
     totalSupply = lpTokenSupplyResult.value
@@ -252,8 +285,7 @@ export function getXcpProfitResult(pool: Pool): Array<BigDecimal> {
   return [xcpProfit, xcpProfitA]
 }
 
-export function getPoolApr(pool: Pool, timestamp: BigInt): Array<BigDecimal> {
-  const vPrice = getLpTokenPriceUSD(pool)
+export function getPoolApr(pool: Pool, timestamp: BigInt, vPrice: BigDecimal): Array<BigDecimal> {
   const rewardContract = BaseRewardPool.bind(bytesToAddress(pool.crvRewardsPool))
   const finishPeriodResult = rewardContract.try_periodFinish()
   const finishPeriod = finishPeriodResult.reverted ? timestamp.plus(BIG_INT_ONE) : finishPeriodResult.value

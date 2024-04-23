@@ -20,16 +20,18 @@ import {
   EURS_ADDRESS,
   CURVE_ONLY_TOKENS,
   BIG_DECIMAL_TWO,
-  BIG_INT_ZERO,
+  BIG_INT_ZERO, SECONDS_PER_YEAR, CRVUSD_ADDRESS,
 } from 'const'
 
 import { ERC20 } from '../../generated/Booster/ERC20'
 import { getTokenAValueInTokenB, getUsdRate } from 'utils/pricing'
 import { ChainlinkAggregator } from '../../generated/Booster/ChainlinkAggregator'
 import { DailyPoolSnapshot, Pool } from '../../generated/schema'
-import { exponentToBigDecimal } from 'utils/maths'
+import {bigDecimalExponential, exponentToBigDecimal} from 'utils/maths'
 import { DAY, getIntervalFromTimestamp } from 'utils/time'
 import { CurvePool } from '../../generated/Booster/CurvePool'
+import {LendingVault} from "../../generated/Booster/LendingVault";
+import {Llamma} from "../../generated/Booster/Llamma";
 
 export function getV2LpTokenPrice(pool: Pool): BigDecimal {
   const lpToken = bytesToAddress(pool.lpToken)
@@ -192,11 +194,32 @@ export function getPoolBaseApr(pool: Pool, currentVirtualPrice: BigDecimal, time
   return rate
 }
 
+export function getLendingApr(pool: Pool): BigDecimal {
+  const vault = LendingVault.bind(Address.fromBytes(pool.lpToken))
+  const apr = vault.try_lend_apr()
+  if (apr.reverted) {
+    return BIG_DECIMAL_ZERO
+  }
+  return (apr.value.toBigDecimal().div(BIG_DECIMAL_1E18).div(BigDecimal.fromString('365')))
+}
+
+export function getLendingTokenPrice(pool: Pool): BigDecimal {
+  const vault = LendingVault.bind(Address.fromBytes(pool.lpToken))
+  const pricePerShare = vault.try_pricePerShare()
+  if (pricePerShare.reverted) {
+    return BigDecimal.zero()
+  }
+  return pricePerShare.value.toBigDecimal().div(BIG_DECIMAL_1E18)
+}
+
 export function getLpTokenPriceUSD(pool: Pool): BigDecimal {
   const lpTokenAddress = bytesToAddress(pool.lpToken)
   const vPrice = getLpTokenVirtualPrice(pool)
   if (pool.isV2) {
     return getV2LpTokenPrice(pool)
+  }
+  if (pool.isLending) {
+    return getLendingTokenPrice(pool)
   }
   if (FOREX_ORACLES.has(pool.lpToken.toHexString())) {
     return vPrice.times(getForexUsdRate(pool.lpToken))
