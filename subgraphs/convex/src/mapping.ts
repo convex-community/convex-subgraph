@@ -147,8 +147,8 @@ export function handleAddPool(call: AddPoolCall): void {
 
     const ercToken1 = ERC20.bind(coin1.value)
     const ercToken2 = ERC20.bind(coin2.value)
-    const name1 = ercToken1.try_name()
-    const name2 = ercToken2.try_name()
+    const name1 = ercToken1.try_symbol()
+    const name2 = ercToken2.try_symbol()
     if (!name1.reverted && !name2.reverted) {
       pool.name = pool.name + ' ' + name1.value + '/' + name2.value
     }

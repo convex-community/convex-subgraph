@@ -204,37 +204,12 @@ export function getLendingApr(pool: Pool): BigDecimal {
 }
 
 export function getLendingTokenPrice(pool: Pool): BigDecimal {
-  const amm = Llamma.bind(Address.fromBytes(pool.swap))
   const vault = LendingVault.bind(Address.fromBytes(pool.lpToken))
-  const oracleRes = amm.try_price_oracle()
-  const totalSupply = vault.try_totalSupply()
-  if (oracleRes.reverted || totalSupply.reverted) {
+  const pricePerShare = vault.try_pricePerShare()
+  if (pricePerShare.reverted) {
     return BigDecimal.zero()
   }
-  if (totalSupply.value == BIG_INT_ZERO) {
-    return BigDecimal.zero()
-  }
-
-  const priceOracle = oracleRes.value.toBigDecimal().div(BIG_DECIMAL_1E18)
-  const ercZero = ERC20.bind(Address.fromBytes(pool.coins[0]))
-  const ercOne = ERC20.bind(Address.fromBytes(pool.coins[1]))
-  let balance0 = BigDecimal.zero()
-  let balance1 = BigDecimal.zero()
-  // coin0 is collateral, coin1 is borrowed
-  if (pool.coins[0] == CRVUSD_ADDRESS) {
-     balance0 = ercZero.balanceOf(Address.fromBytes(pool.swap)).toBigDecimal().div(BIG_DECIMAL_1E18)
-    const decimalOneRes = ercOne.try_decimals()
-    const decimalOne = decimalOneRes.reverted ? BigInt.fromI32(18) : BigInt.fromI32(decimalOneRes.value)
-    balance1 = ercOne.balanceOf(Address.fromBytes(pool.swap)).toBigDecimal().div(exponentToBigDecimal(decimalOne)).div(priceOracle)
-  }
-  else {
-    const decimalZeroRes = ercZero.try_decimals()
-    const decimalZero = decimalZeroRes.reverted ? BigInt.fromI32(18) : BigInt.fromI32(decimalZeroRes.value)
-    balance0 = ercZero.balanceOf(Address.fromBytes(pool.swap)).toBigDecimal().div(exponentToBigDecimal(decimalZero)).times(priceOracle)
-    balance1 = ercOne.balanceOf(Address.fromBytes(pool.swap)).toBigDecimal().div(BIG_DECIMAL_1E18)
-  }
-  const tvl = balance0.plus(balance1)
-  return tvl.div(totalSupply.value.toBigDecimal())
+  return pricePerShare.value.toBigDecimal().div(BIG_DECIMAL_1E18)
 }
 
 export function getLpTokenPriceUSD(pool: Pool): BigDecimal {
