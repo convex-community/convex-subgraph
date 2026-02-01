@@ -43,6 +43,7 @@ export function handleIncreasedIncentive(event: IncreasedIncentiveEvent): void {
     event.block.timestamp
   )
 
+  increase.index = event.params._index
   increase.token = event.params._token
   increase.total = event.params._total
   increase.increase = event.params._increase
